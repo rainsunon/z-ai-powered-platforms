@@ -1,0 +1,101 @@
+# Data Engineering Configuration
+# Configuration for ETL pipelines, embeddings, and vector indexing
+
+# AWS Configuration
+aws:
+  region: us-east-1
+  profile: default
+
+# RDS Configuration
+rds:
+  host: localhost
+  port: 5432
+  database: healthcare_plans
+  username: postgres
+  password: postgres
+  schema: public
+
+# OpenSearch Configuration
+opensearch:
+  endpoint: http://localhost:9200
+  username: admin
+  password: admin
+  index: healthcare_plans
+  index_mapping:
+    settings:
+      number_of_shards: 3
+      number_of_replicas: 1
+    mappings:
+      properties:
+        plan_id:
+          type: keyword
+        summary:
+          type: text
+        embedding:
+          type: knn_vector
+          dimension: 1536
+          method:
+            name: hnsw
+            engine: faiss
+            space_type: cosinesimil
+            parameters:
+              ef_construction: 256
+              m: 16
+        metadata:
+          type: object
+          properties:
+            plan_id:
+              type: keyword
+            plan_code:
+              type: keyword
+            year:
+              type: integer
+            state:
+              type: keyword
+            is_national:
+              type: boolean
+            metal_tier:
+              type: keyword
+            cost_tier:
+              type: keyword
+            monthly_premium:
+              type: float
+            annual_deductible:
+              type: float
+            out_of_pocket_max:
+              type: float
+            focus_areas:
+              type: keyword
+            age_groups:
+              type: keyword
+            insurer:
+              type: keyword
+            status:
+              type: keyword
+
+# AWS Bedrock Configuration
+bedrock:
+  region: us-east-1
+  embedding:
+    model_id: amazon.titan-embed-text-v2:0
+    rate_limit: 50  # requests per second
+  llm:
+    model_id: anthropic.claude-3-5-sonnet-20241022-v2:0
+    max_tokens: 1024
+    temperature: 0.7
+
+# Pipeline Configuration
+pipeline:
+  batch_size: 100
+  max_retries: 3
+  retry_delay: 5  # seconds
+
+# Summarization Configuration
+summarization:
+  template_dir: src/summarization
+  default_template: plan_summary.jinja2
+
+# Logging Configuration
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'

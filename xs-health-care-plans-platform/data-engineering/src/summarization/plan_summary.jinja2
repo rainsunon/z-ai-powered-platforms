@@ -1,0 +1,14 @@
+{# Jinja2 template for generating plan summaries #}
+The {{ metal_tier }} {{ year }} plan ({{ plan_code }}) is available in {{ state }}{% if is_national %} and nationally{% endif %}.
+
+Monthly premium is ${{ monthly_premium|round(2) }}. Annual deductible is ${{ annual_deductible|round(2) }}. Out-of-pocket maximum is ${{ out_of_pocket_max|round(2) }}.
+
+{% if focus_areas %}This plan focuses on {{ focus_areas|join(', ') }}.{% endif %}
+
+{% if inclusions %}Coverage includes {{ inclusions[:5]|join(', ') }}{% if inclusions|length > 5 %} and {{ inclusions|length - 5 }} more benefits{% endif %}.{% endif %}
+
+{% if exclusions %}Exclusions: {{ exclusions[:3]|join(', ') }}{% if exclusions|length > 3 %} and {{ exclusions|length - 3 }} more{% endif %}.{% endif %}
+
+{% if age_groups %}This plan is suitable for age groups: {{ age_groups|join(', ') }}.{% endif %}
+
+{% if providers %}Network includes {{ providers|length }} providers across {{ provider_states|length }} states.{% endif %}
