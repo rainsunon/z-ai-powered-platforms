@@ -3,9 +3,9 @@ import Payment from "../models/Payment.js";
 import axios from "axios";
 
 const stripe = new Stripe(
-  "sk_test_51RGHn3Gf4vgtIBBsdu66zgdbyogGymcG6UlsS17Dfcs5nZnp3GJjHubyhxdNQsOAfGMeRbqTSMCRwgAMuSktb50b00bFVF1Q6v",
+  process.env.STRIPE_SECRET_KEY,
   {
-    apiVersion: "2023-08-16",
+    apiVersion: "2028-03-08",
   }
 );
 
