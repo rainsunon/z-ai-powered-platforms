@@ -1,0 +1,43 @@
+package com.xrs.userservice.security.userprinciple;
+
+import com.xrs.userservice.exception.wrapper.EmailOrUsernameNotFoundException;
+import com.xrs.userservice.model.entity.User;
+import com.xrs.userservice.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+
+@RequiredArgsConstructor
+@Service
+public class UserDetailService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    @Transactional
+    public UserDetails loadUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EmailOrUsernameNotFoundException("Email or Username does not exist, please try again: " + username));
+
+        return UserPrinciple.build(user);
+    }
+
+    @Transactional
+    public UserDetails loadUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EmailOrUsernameNotFoundException("Email or Username does not exist, please try again: " + email));
+
+        return UserPrinciple.build(user);
+    }
+
+    @Transactional
+    public UserDetails loadUserByPhone(String phone) {
+        User user = userRepository.findByEmail(phone)
+                .orElseThrow(() -> new EmailOrUsernameNotFoundException("User not found, phone and password: " + phone));
+
+        return UserPrinciple.build(user);
+    }
+}

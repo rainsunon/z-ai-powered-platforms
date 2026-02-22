@@ -1,0 +1,32 @@
+# Argo CD PostSync: create stats topic after Sync (Kafka) succeeds.
+# sync-wave "1": runs before clickhouse-init (wave 2) so topic exists when CK Kafka engine is created
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-create-stats-topic
+  namespace: shortlink
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  backoffLimit: 10
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: create-topic
+          image: confluentinc/cp-kafka:7.5.0
+          command:
+            - kafka-topics
+            - --bootstrap-server
+            - kafka.shortlink.svc.cluster.local:9092
+            - --create
+            - --if-not-exists
+            - --topic
+            - shortlink-stats-events
+            - --partitions
+            - "20"
+            - --replication-factor
+            - "1"

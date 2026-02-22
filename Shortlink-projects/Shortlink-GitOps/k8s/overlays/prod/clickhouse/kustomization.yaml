@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: shortlink
+
+resources:
+  - ../../../base/clickhouse/
+  - clickhouse-prod-extra.yaml
+
+# Prod environment: larger resources, optimized for production
+patches:
+  - path: clickhouse-prod-patch.yaml
+    target:
+      kind: StatefulSet
+      name: clickhouse

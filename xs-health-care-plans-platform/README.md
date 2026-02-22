@@ -102,7 +102,7 @@ healthcare-plans-ai-platform/
 
 ### Prerequisites
 
-- Java 17+
+- Java 21+
 - Node.js 18+
 - Python 3.11+
 - Docker & Docker Compose
@@ -166,7 +166,7 @@ AI Response:
 | Layer | Technologies |
 |-------|--------------|
 | **Frontend** | React, TypeScript, Tailwind CSS, Vite |
-| **Backend** | Spring Boot 3, Java 17, Spring Security, Spring Data JPA |
+| **Backend** | Spring Boot 3, Java 21, Spring Security, Spring Data JPA |
 | **AI/ML** | AWS Bedrock (Claude, Titan Embeddings), LangChain |
 | **Data Engineering** | Python, PySpark, Pandas |
 | **Vector Database** | Amazon OpenSearch Serverless |

@@ -1,0 +1,87 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.10'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' // For creating fat JARs
+}
+
+group = 'com'
+version = '1.0.0'
+//java {
+//    toolchain {
+//        languageVersion.set(JavaLanguageVersion.of(21))
+//    }
+//}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // Spring Boot Core
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
+    // AWS SDK BOM
+    implementation platform('software.amazon.awssdk:bom:2.30.13')
+
+    // AWS SDK
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'software.amazon.awssdk:kms'
+    implementation 'software.amazon.awssdk:rds'
+    implementation 'software.amazon.awssdk:ssm'
+    implementation 'software.amazon.awssdk:secretsmanager'
+    implementation 'software.amazon.awssdk:sts'
+    implementation 'software.amazon.awssdk:auth'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+
+    // Swagger/OpenAPI
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
+    // Database
+    implementation 'org.postgresql:postgresql'
+    implementation 'org.flywaydb:flyway-core:11.3.0'
+    implementation 'org.flywaydb:flyway-database-postgresql:11.3.0'
+
+    // Lombok (reduces boilerplate code)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Docker Support
+    implementation 'org.springframework.boot:spring-boot-docker-compose'
+
+    // Monitoring & Logging
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // API for creating and validating JWTs
+    implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
+    // JJWT implementation
+    implementation 'io.jsonwebtoken:jjwt-impl:0.13.0'
+    // JJWT Jackson support
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.13.0'
+
+    // Jackson for JSON Serialization/Deserialization
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Task to create a fat JAR for deployment
+tasks.register('fatJar', Jar) {
+    archiveClassifier.set('all')
+    from sourceSets.main.output
+    with jar
+}

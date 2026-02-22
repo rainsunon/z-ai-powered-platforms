@@ -1,0 +1,191 @@
+.loginPage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 15%;
+  z-index: 999;
+  font-size: 40px;
+  color: #fff;
+  font-weight: bolder;
+}
+
+.loginBox {
+  border: 2px solid #0984e3;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 20px;
+  padding: 0 40px 0 40px;
+  width: 700px;
+  max-width: 90vw;
+  position: absolute;
+  z-index: 999;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  animation: hideIndex 0.5s;
+}
+
+@media (max-width: 768px) {
+  .loginBox {
+    width: 95vw;
+    padding: 0 20px 0 20px;
+    max-width: 95vw;
+  }
+  
+  .title {
+    font-size: 28px;
+    top: 10%;
+  }
+  
+  .move {
+    width: 35%;
+    font-size: 14px;
+  }
+  
+  .btnGroup {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .btnGroup > div:last-child {
+    width: 100%;
+  }
+  
+  .btnGroup > div:last-child button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .loginBox {
+    width: 100vw;
+    max-width: 100vw;
+    border-radius: 0;
+    padding: 0 15px 0 15px;
+  }
+  
+  .title {
+    font-size: 24px;
+    top: 8%;
+  }
+  
+  .move {
+    width: 30%;
+    font-size: 12px;
+  }
+  
+  .loginBox h2 {
+    font-size: 24px;
+    padding: 15px;
+  }
+}
+
+.loginBox h2 {
+  font-size: 30px;
+  font-family: PingFangSC-Semibold, PingFang SC;
+  font-weight: 600;
+  color: #3a3f63;
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+}
+
+.btnGroup {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.formContainer {
+  transform: translateY(-80px);
+}
+
+.logon {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.register {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hidden {
+  animation: hidden 1s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes hidden {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.move {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 40%;
+  transition-duration: 0.5s;
+  align-items: center;
+  background: linear-gradient(to right, #1a8fd5, #0984e3);
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes hideIndex {
+  0% {
+    opacity: 0;
+    transform: translate(117px, -50%);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}

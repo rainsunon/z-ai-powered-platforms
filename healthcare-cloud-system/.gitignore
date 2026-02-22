@@ -1,0 +1,84 @@
+# File: .gitignore
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Java/Maven
+target/
+*.jar
+*.war
+*.ear
+*.class
+.mvn/
+mvn.cmd
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials & Secrets
+*.pem
+*.key
+*-key.json
+*.credentials
+.env
+.env.local
+
+# Output files
+aws-outputs.txt
+gcp-outputs.txt
+argocd-credentials.txt
+service-urls.txt
+*-credentials.txt
+
+# Test results
+results.json
+summary.json
+
+# Logs
+*.log
+logs/
+
+k8s/manifests/config/secrets.yaml
+
+key.txt
+
+aws-config.txt
+
+argocd-access.txt
+k8s/manifests/config/secrets-configmap.yaml

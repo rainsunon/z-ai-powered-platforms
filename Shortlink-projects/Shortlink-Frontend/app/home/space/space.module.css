@@ -1,0 +1,367 @@
+.container {
+  display: flex;
+  height: 100%;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+  width: 190px;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.optionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 56px;
+  font-size: 15px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0 10px;
+}
+
+.optionTitle span {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.hoverBox {
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.hoverBox:hover {
+  color: rgba(40, 145, 206, 0.6);
+  background-color: #f7f7f7;
+  box-shadow: 0px 2px 8px 0px rgba(28, 41, 90, 0.1);
+}
+
+/* Add button (+ icon) - make it blue and interactive */
+.addButton {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.addButton:hover {
+  color: #40a9ff;
+  background-color: #e6f7ff;
+  transform: scale(1.1);
+}
+
+.addButton :global(.anticon) {
+  color: inherit;
+}
+
+.sortOptions {
+  height: calc(100% - 106px);
+  margin-bottom: 50px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.itemBox {
+  height: 43px;
+  width: 100%;
+  font-weight: 520;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.selectedItem {
+  color: #1890ff !important;
+  background-color: #e6f7ff !important;
+  font-weight: 600 !important;
+}
+
+.flexBox {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.edit {
+  display: none;
+  color: #8c8c8c;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.itemBox:hover .edit {
+  display: block;
+}
+
+.itemBox:hover .itemLength {
+  display: none !important;
+}
+
+.edit:hover {
+  color: #1890ff;
+}
+
+.itemLength {
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.overText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
+}
+
+.recycleBin {
+  position: absolute;
+  display: flex;
+  bottom: 0;
+  height: 50px;
+  width: 100%;
+}
+
+.recycleBox {
+  flex: 1;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1890ff;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.recycleBox:hover {
+  color: #40a9ff;
+  background-color: #e6f7ff;
+}
+
+.recycleBinText {
+  color: inherit;
+  font-weight: 500;
+}
+
+.recycleBinIcon {
+  color: inherit !important;
+}
+
+.recycleBox.selectedItem {
+  color: #1890ff !important;
+  background-color: #e6f7ff !important;
+}
+
+.recycleBox.selectedItem .recycleBinText,
+.recycleBox.selectedItem .recycleBinIcon {
+  color: #1890ff !important;
+}
+
+.contentBox {
+  flex: 1;
+  padding: 16px;
+  background-color: #eef0f5;
+  position: relative;
+}
+
+.tableBox {
+  background-color: #ffffff;
+  height: 100%;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableContainer {
+  flex: 1;
+  overflow: hidden;
+  /* Fixed height: header (32px) + 10 rows (28px each) = 312px */
+  height: 312px;
+  min-height: 312px;
+  max-height: 312px;
+}
+
+.buttonsBox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.recycleBinBox {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.recycleBinBox span:first-child {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.paginationBlock {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  flex-shrink: 0;
+  height: 32px;
+  min-height: 32px;
+}
+
+.tableLinkBox {
+  display: flex;
+  align-items: center;
+}
+
+.nameDate {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
+.nameDate > span:first-child {
+  font-size: 12px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+  line-height: 1.2;
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1px;
+}
+
+.time span {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.6);
+  line-height: 1.2;
+}
+
+.expiredBadge {
+  border: 1.5px solid rgb(253, 81, 85);
+  border-radius: 8px;
+  line-height: 20px;
+  font-size: 12px;
+  transform: scale(0.9);
+  color: rgb(253, 81, 85);
+  padding: 0 4px;
+  background-color: rgba(250, 210, 211);
+  font-weight: bolder;
+}
+
+.tableUrlBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.tableUrlBox > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 250px;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.tableUrlBox > a {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.timesBox {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.todayBox,
+.totalBox {
+  display: flex;
+  gap: 8px;
+}
+
+.todayBox span:first-child,
+.totalBox span:first-child {
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.todayBox span:last-child {
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.totalBox span:last-child {
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.tableEdit {
+  font-size: 20px;
+  margin-right: 15px;
+  color: #1890ff;
+  cursor: pointer;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.tableEdit:hover {
+  color: #40a9ff;
+  transform: scale(1.1);
+}
+
+/* Reduce table row height for better display density */
+.tableBox :global(.ant-table) {
+  font-size: 12px;
+}
+
+.tableBox :global(.ant-table-thead > tr > th) {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  height: 32px;
+  line-height: 1.2;
+}
+
+.tableBox :global(.ant-table-tbody > tr > td) {
+  padding: 4px 10px;
+  height: 28px;
+  line-height: 1.2;
+}
+
+.tableBox :global(.ant-table-tbody > tr) {
+  height: 28px;
+}
+
+.tableBox :global(.ant-table-tbody > tr:hover > td) {
+  background: #fafafa;
+}
+
+/* Reduce icon size in table */
+.tableBox :global(.anticon) {
+  font-size: 14px;
+}
+
+/* Ensure table container doesn't scroll */
+.tableContainer :global(.ant-table-body) {
+  overflow: hidden !important;
+}

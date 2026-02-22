@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: rate-limiter-vs
+  namespace: food-delivery
+spec:
+  hosts:
+  - rate-limiter-service
+  http:
+  - match:
+    - uri:
+        prefix: "/api/rate-limiter"
+    route:
+    - destination:
+        host: rate-limiter-service
+        port:
+          number: 3000
+        subset: v1
+      weight: 100
+    timeout: 5s
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: 5xx,reset,connect-failure,refused-stream

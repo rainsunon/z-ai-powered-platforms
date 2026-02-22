@@ -1,0 +1,19 @@
+package com.xrs.commonlib.exception;
+
+import com.xrs.commonlib.utils.MessagesUtils;
+import lombok.Setter;
+
+@Setter
+public class Forbidden extends RuntimeException {
+    private String message;
+
+    public Forbidden(String errorCode, Object... var2) {
+        this.message = MessagesUtils.getMessage(errorCode, var2);
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+}

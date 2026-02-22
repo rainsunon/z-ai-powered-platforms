@@ -1,0 +1,52 @@
+eureka:
+  client:
+    eureka-service-url-poll-interval-seconds: 30
+
+spring:
+  cloud:
+    config:
+      override.system-properties: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,metrics,health,info"
+  endpoint:
+    prometheus:
+      access: unrestricted
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+logging:
+  level:
+    root: INFO
+    com.baskaaleksander.nuvine: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.hibernate: WARN
+
+topics:
+  email-verification-topic: email-verification-topic
+  password-reset-topic: password-reset-topic
+  user-registered-topic: user-registered-topic
+  workspace-member-added-topic: workspace-member-added-topic
+  document-uploaded-topic: document-uploaded-topic
+  embedding-request-topic: embedding-request-topic
+  embedding-completed-topic: embedding-completed-topic
+  vector-processing-request-topic: vector-processing-request-topic
+  vector-processing-completed-topic: vector-processing-completed-topic
+  document-ingestion-completed-topic: document-ingestion-completed-topic
+  payment-action-required-topic: payment-action-required-topic
+  log-token-usage-topic: log-token-usage-topic
+  workspace-member-invited-topic: workspace-member-invited-topic
+  update-workspace-member-data-topic: update-workspace-member-data-topic
+
+crypto:
+  notifications:
+    secret: 6YaGkYwZHjU6wjatNb5TFrhPObNCz0LO
+    fingerprint-secret: yowfPKLgdn47OYBPVrntz8TScmPbNr2Q

@@ -1,0 +1,159 @@
+{
+  "info": {
+    "name": "Adaptive Rate Limiter + Bot Defense",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "captchaMockUrl",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "tenantId",
+      "value": "t1"
+    },
+    {
+      "key": "userId",
+      "value": "alice"
+    }
+  ],
+  "item": [
+    {
+      "name": "Public - Ping",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Tenant-Id",
+            "value": "{{tenantId}}"
+          },
+          {
+            "key": "X-User-Id",
+            "value": "{{userId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/public/ping"
+      }
+    },
+    {
+      "name": "Public - Echo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Tenant-Id",
+            "value": "{{tenantId}}"
+          },
+          {
+            "key": "X-User-Id",
+            "value": "{{userId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/public/echo",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"hello\"}"
+        }
+      }
+    },
+    {
+      "name": "Auth - Login (fail)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Tenant-Id",
+            "value": "{{tenantId}}"
+          },
+          {
+            "key": "X-User-Id",
+            "value": "{{userId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\":\"{{userId}}\",\"password\":\"wrong\"}"
+        }
+      }
+    },
+    {
+      "name": "Auth - Login (success)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Tenant-Id",
+            "value": "{{tenantId}}"
+          },
+          {
+            "key": "X-User-Id",
+            "value": "{{userId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\":\"{{userId}}\",\"password\":\"password\"}"
+        }
+      }
+    },
+    {
+      "name": "Admin - List denials",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Tenant-Id",
+            "value": "{{tenantId}}"
+          },
+          {
+            "key": "X-User-Id",
+            "value": "{{userId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/rate-limit-denials?page=0&size=20&sort=createdAt,desc"
+      }
+    },
+    {
+      "name": "Captcha Mock - Trigger (manual)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{captchaMockUrl}}/captcha/trigger",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"manual-1\",\"eventId\":\"evt-1\",\"correlationId\":\"cid-1\",\"tenantId\":\"{{tenantId}}\",\"userId\":\"{{userId}}\",\"ip\":\"127.0.0.1\",\"riskScore\":90,\"action\":\"CAPTCHA\",\"reason\":\"demo\"}"
+        }
+      }
+    },
+    {
+      "name": "Metrics - captcha_trigger_success",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/actuator/metrics/captcha_trigger_success"
+      }
+    }
+  ]
+}

@@ -1,0 +1,279 @@
+
+import React, { useState, useMemo } from 'react';
+import { useDispatch, useSelector } from 'https://esm.sh/react-redux';
+import Layout from '../components/Layout';
+import { GoogleGenAI, Type } from "@google/genai";
+import { RootState, setLoading, setResults, setError, addToHistory } from '../store';
+
+interface LawSearchProps {
+  theme?: string;
+  toggleTheme?: () => void;
+}
+
+const LawSearch: React.FC<LawSearchProps> = ({ theme, toggleTheme }) => {
+  const dispatch = useDispatch();
+  const { results, loading, error, history } = useSelector((state: RootState) => state.lawSearch);
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [jurisdiction, setJurisdiction] = useState<'USA' | 'Canada'>('USA');
+  const [selectedLawId, setSelectedLawId] = useState<string | null>(null);
+
+  const selectedLaw = useMemo(() => {
+    return results.find(l => l.id === selectedLawId) || null;
+  }, [results, selectedLawId]);
+
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+    dispatch(addToHistory(searchQuery));
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Search for primary laws, statutes, or codes in ${jurisdiction} related to "${searchQuery}". 
+                   Return at least 3 relevant results. For each result, provide:
+                   1. Formal title
+                   2. Legal code/citation
+                   3. A 2-sentence summary
+                   4. A "Plain Language" explanation for a non-lawyer
+                   5. 3 tags
+                   6. 2 related court cases (title and citation).`,
+        config: {
+          tools: [{ googleSearch: {} }],
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                title: { type: Type.STRING },
+                code: { type: Type.STRING },
+                summary: { type: Type.STRING },
+                explanation: { type: Type.STRING },
+                tags: { type: Type.ARRAY, items: { type: Type.STRING } },
+                relatedCases: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      title: { type: Type.STRING },
+                      citation: { type: Type.STRING }
+                    },
+                    required: ["title", "citation"]
+                  }
+                }
+              },
+              required: ["title", "code", "summary", "explanation", "tags", "relatedCases"]
+            }
+          }
+        },
+      });
+
+      const parsedResults = JSON.parse(response.text || "[]");
+      
+      // Extract grounding sources
+      const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+      const sources = groundingChunks?.map((chunk: any) => ({
+        uri: chunk.web?.uri,
+        title: chunk.web?.title
+      })).filter((s: any) => s.uri) || [];
+
+      const resultsWithJurisdiction = parsedResults.map((item: any, idx: number) => ({
+        ...item,
+        id: item.id || `law-${idx}-${Date.now()}`,
+        jurisdiction,
+        sources
+      }));
+
+      dispatch(setResults(resultsWithJurisdiction));
+      if (resultsWithJurisdiction.length > 0) {
+        setSelectedLawId(resultsWithJurisdiction[0].id);
+      }
+    } catch (err: any) {
+      console.error("Search failed:", err);
+      dispatch(setError("Failed to retrieve legal data. Please try again."));
+    } finally {
+      dispatch(setLoading(false);
+    }
+  };
+
+  return (
+    <Layout theme={theme} toggleTheme={toggleTheme}>
+      <div className="flex h-[calc(100vh-80px)] overflow-hidden">
+        {/* Left Panel: Search & List */}
+        <div className="w-1/3 flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-colors duration-300">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 space-y-4">
+            <h2 className="text-sm font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Global Law Search</h2>
+            
+            <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+              <button 
+                onClick={() => setJurisdiction('USA')}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${jurisdiction === 'USA' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-400'}`}
+              >
+                USA
+              </button>
+              <button 
+                onClick={() => setJurisdiction('Canada')}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${jurisdiction === 'Canada' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-400'}`}
+              >
+                Canada
+              </button>
+            </div>
+
+            <form onSubmit={handleSearch} className="relative">
+              <span className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+              <input 
+                type="text" 
+                placeholder="Search statutes, codes..." 
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/20 placeholder-slate-400"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button type="submit" hidden></button>
+            </form>
+
+            {history.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {history.slice(0, 3).map((term, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => { setSearchQuery(term); handleSearch(); }}
+                    className="text-[9px] font-black uppercase text-slate-400 hover:text-primary transition-colors"
+                  >
+                    #{term}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center h-full p-10 text-center animate-pulse">
+                <span className="material-icons text-primary text-4xl mb-4 animate-spin">auto_awesome</span>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">AI is researching statutes...</p>
+              </div>
+            ) : results.length > 0 ? (
+              results.map((law) => (
+                <button 
+                  key={law.id}
+                  onClick={() => setSelectedLawId(law.id)}
+                  className={`w-full text-left p-6 border-b border-slate-50 dark:border-slate-800 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50 group ${selectedLawId === law.id ? 'bg-primary/5 border-l-4 border-l-primary' : ''}`}
+                >
+                  <p className="text-[10px] font-black text-primary dark:text-primary-400 uppercase tracking-widest mb-1">{law.code}</p>
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tighter group-hover:text-primary transition-colors">{law.title}</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 line-clamp-2 leading-relaxed">{law.summary}</p>
+                </button>
+              ))
+            ) : (
+              <div className="p-10 text-center text-slate-400">
+                <span className="material-icons text-4xl mb-2">find_in_page</span>
+                <p className="text-[10px] font-black uppercase tracking-widest">Search to discover statutes</p>
+                {error && <p className="text-red-400 text-[9px] mt-2 font-bold uppercase">{error}</p>}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Panel: Detailed View */}
+        <div className="flex-1 bg-slate-50 dark:bg-slate-950 overflow-y-auto custom-scrollbar p-10 transition-colors duration-300">
+          {selectedLaw ? (
+            <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{selectedLaw.jurisdiction === 'USA' ? '🇺🇸' : '🇨🇦'}</span>
+                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{selectedLaw.jurisdiction} Statutory Authority</span>
+                </div>
+                <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight">{selectedLaw.title}</h1>
+                <p className="text-lg font-bold text-slate-500 dark:text-slate-400 italic">{selectedLaw.code}</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-white dark:bg-slate-900 p-8 rounded-[32px] shadow-xl border border-slate-100 dark:border-slate-800 space-y-6">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <span className="material-icons text-sm">description</span> Statutory Summary
+                  </h4>
+                  <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                    {selectedLaw.summary}
+                  </p>
+                </div>
+
+                <div className="bg-primary/5 dark:bg-primary/10 p-8 rounded-[32px] border-2 border-primary/20 dark:border-primary-400/20 space-y-6">
+                  <h4 className="text-[10px] font-black text-primary dark:text-primary-400 uppercase tracking-widest flex items-center gap-2">
+                    <span className="material-icons text-sm text-primary">auto_awesome</span> AI Plain-Language Explain
+                  </h4>
+                  <p className="text-sm text-primary dark:text-primary-300 leading-relaxed font-bold italic">
+                    "{selectedLaw.explanation}"
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-10 rounded-[40px] shadow-xl border border-slate-100 dark:border-slate-800 space-y-8">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Precedent & Related Case Law</h4>
+                <div className="space-y-4">
+                  {selectedLaw.relatedCases.map((c, i) => (
+                    <div key={i} className="group p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-between hover:border-primary transition-all cursor-pointer">
+                      <div>
+                        <p className="text-sm font-black text-slate-900 dark:text-white group-hover:text-primary transition-colors">{c.title}</p>
+                        <p className="text-[10px] text-slate-400 font-bold tracking-widest mt-1 italic">{c.citation}</p>
+                      </div>
+                      <span className="material-icons text-slate-300 group-hover:text-primary transition-colors">chevron_right</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {selectedLaw.sources && selectedLaw.sources.length > 0 && (
+                <div className="bg-slate-100 dark:bg-slate-800/50 p-8 rounded-[32px] space-y-4">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Grounding Sources</h4>
+                  <div className="flex flex-wrap gap-4">
+                    {selectedLaw.sources.map((source, i) => (
+                      <a 
+                        key={i} 
+                        href={source.uri} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] font-black uppercase text-primary hover:scale-105 transition-all shadow-sm"
+                      >
+                        <span className="material-icons text-sm">link</span>
+                        {source.title || "External Reference"}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-4">
+                <button className="flex-1 py-5 bg-primary text-white font-black text-xs uppercase tracking-widest rounded-3xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                  <span className="material-icons text-lg">bookmark_add</span> Save to Case Files
+                </button>
+                <button className="flex-1 py-5 bg-white dark:bg-slate-900 text-slate-500 font-black text-xs uppercase tracking-widest rounded-3xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                  <span className="material-icons text-lg">content_copy</span> Copy Citation
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
+              <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                <span className="material-icons text-6xl">balance</span>
+              </div>
+              <div className="max-w-md">
+                <h2 className="text-2xl font-black text-slate-300 dark:text-slate-700 uppercase tracking-tighter">Global Statute Repository</h2>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-4 leading-relaxed">
+                  Enter a query to research laws, acts, and regulations across North America. LexGrid AI will provide summarized insights and relevant court precedents.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default LawSearch;

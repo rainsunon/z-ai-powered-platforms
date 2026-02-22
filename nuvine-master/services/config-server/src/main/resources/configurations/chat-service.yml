@@ -1,0 +1,43 @@
+spring:
+  cache:
+    type: jcache
+    jcache:
+      provider: org.redisson.jcache.JCachingProvider
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.metrics.push: false
+        spring.json.add.type.headers: true
+        spring.json.trusted.packages: "com.baskaaleksander.nuvine.infrastructure.messaging.dto"
+        spring.json.type.mapping: >
+          logTokenUsageEvent:com.baskaaleksander.nuvine.infrastructure.messaging.dto.LogTokenUsageEvent
+
+server:
+  port: 8110
+
+bucket4j:
+  enabled: true
+  cache-to-use: jcache
+  methods:
+    - name: completion_limit
+      cache-name: chat-service-buckets
+      rate-limit:
+        bandwidths:
+          - capacity: 20
+            time: 1
+            unit: minutes
+          - capacity: 200
+            time: 1
+            unit: hours
+          - capacity: 2000
+            time: 1
+            unit: days

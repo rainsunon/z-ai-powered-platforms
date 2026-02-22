@@ -1,0 +1,265 @@
+
+import React, { useState } from 'react';
+import Layout from '../components/Layout';
+
+interface ActivityProps {
+  theme?: string;
+  toggleTheme?: () => void;
+}
+
+type ActivityType = 'all' | 'chat' | 'meeting' | 'email' | 'notification' | 'payment';
+
+interface ActivityItem {
+  id: string;
+  type: ActivityType;
+  title: string;
+  description: string;
+  timestamp: string;
+  status?: string;
+  statusType?: 'success' | 'warning' | 'info' | 'error';
+  meta?: string;
+}
+
+const Activity: React.FC<ActivityProps> = ({ theme, toggleTheme }) => {
+  const [filter, setFilter] = useState<ActivityType>('all');
+  const [search, setSearch] = useState('');
+
+  const activities: ActivityItem[] = [
+    {
+      id: '1',
+      type: 'chat',
+      title: 'AI Case Analysis Complete',
+      description: 'LexGrid AI successfully extracted 12 key timeline events from "Landlord_Dispute_v2.pdf".',
+      timestamp: 'Today, 10:46 AM',
+      status: 'Extracted',
+      statusType: 'success',
+      meta: 'Case #4492'
+    },
+    {
+      id: '2',
+      type: 'meeting',
+      title: 'Strategy Consultation',
+      description: 'Video session with Marcus Sterling regarding corporate restructuring strategy.',
+      timestamp: 'Today, 09:15 AM',
+      status: 'Completed',
+      statusType: 'info',
+      meta: '45 mins'
+    },
+    {
+      id: '3',
+      type: 'payment',
+      title: 'Subscription Renewal',
+      description: 'Monthly Professional Plan payment processed successfully.',
+      timestamp: 'Yesterday, 04:00 PM',
+      status: 'Paid',
+      statusType: 'success',
+      meta: '$199.00'
+    },
+    {
+      id: '4',
+      type: 'email',
+      title: 'Disclosure Documents Sent',
+      description: 'Legal disclosure packet delivered via encrypted transmission to OmniCorp Legal Counsel.',
+      timestamp: 'Yesterday, 02:30 PM',
+      status: 'Delivered',
+      statusType: 'success',
+      meta: '8 attachments'
+    },
+    {
+      id: '5',
+      type: 'notification',
+      title: 'Urgent: Filing Deadline',
+      description: 'Electronic filing for the Ontario Superior Court must be completed within 48 hours.',
+      timestamp: 'Oct 22, 11:20 AM',
+      status: 'Urgent',
+      statusType: 'warning',
+      meta: 'Matter #102'
+    },
+    {
+      id: '6',
+      type: 'chat',
+      title: 'Statute Search Performed',
+      description: 'AI Query: "Cross-border IP precedents in Delaware Chancery Court 2023".',
+      timestamp: 'Oct 21, 03:45 PM',
+      status: 'Resolved',
+      statusType: 'info',
+      meta: '14 citations found'
+    },
+    {
+      id: '7',
+      type: 'email',
+      title: 'Retainer Agreement Signed',
+      description: 'Electronic signature received from Julian Vance for new representation agreement.',
+      timestamp: 'Oct 20, 09:12 AM',
+      status: 'Executed',
+      statusType: 'success'
+    },
+    {
+      id: '8',
+      type: 'payment',
+      title: 'Invoice Overdue',
+      description: 'Reminder: Invoice #INV-2024-001 for "Consulting Services" is 3 days past due.',
+      timestamp: 'Oct 19, 10:00 AM',
+      status: 'Overdue',
+      statusType: 'error',
+      meta: '$1,200.00'
+    }
+  ];
+
+  const filteredActivities = activities.filter(item => {
+    const matchesFilter = filter === 'all' || item.type === filter;
+    const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase()) || 
+                          item.description.toLowerCase().includes(search.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const getIcon = (type: ActivityType) => {
+    switch (type) {
+      case 'chat': return 'smart_toy';
+      case 'meeting': return 'videocam';
+      case 'email': return 'alternate_email';
+      case 'notification': return 'notifications';
+      case 'payment': return 'payments';
+      default: return 'history';
+    }
+  };
+
+  const getStatusColor = (statusType?: string) => {
+    switch (statusType) {
+      case 'success': return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
+      case 'warning': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+      case 'error': return 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800';
+      case 'info': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800';
+      default: return 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700';
+    }
+  };
+
+  return (
+    <Layout theme={theme} toggleTheme={toggleTheme}>
+      <div className="p-8 max-w-6xl mx-auto space-y-10">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Activity Intelligence</h1>
+            <p className="text-slate-500 dark:text-slate-400 font-medium italic">A complete audit log of your legal workflow across the LexGrid network.</p>
+          </div>
+          <div className="relative w-full md:w-80">
+            <span className="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+            <input 
+              type="text" 
+              placeholder="Filter by keyword..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl pl-12 pr-6 py-3.5 text-sm font-bold text-slate-800 dark:text-white focus:border-primary transition-all outline-none shadow-sm"
+            />
+          </div>
+        </header>
+
+        {/* Categories */}
+        <div className="flex flex-wrap gap-4 border-b border-slate-200 dark:border-slate-800 pb-1">
+          {([
+            { id: 'all', label: 'All History', icon: 'history' },
+            { id: 'chat', label: 'AI Chats', icon: 'smart_toy' },
+            { id: 'meeting', label: 'Meetings', icon: 'videocam' },
+            { id: 'email', label: 'Emails', icon: 'alternate_email' },
+            { id: 'notification', label: 'Alerts', icon: 'notifications' },
+            { id: 'payment', label: 'Payments', icon: 'payments' }
+          ] as const).map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setFilter(cat.id)}
+              className={`flex items-center gap-3 px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all relative whitespace-nowrap ${
+                filter === cat.id 
+                ? 'text-primary' 
+                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+              }`}
+            >
+              <span className="material-icons text-lg">{cat.icon}</span>
+              {cat.label}
+              {filter === cat.id && <div className="absolute bottom-[-4px] left-0 right-0 h-1 bg-primary rounded-full"></div>}
+            </button>
+          ))}
+        </div>
+
+        {/* Timeline List */}
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {filteredActivities.length > 0 ? (
+            filteredActivities.map((item) => (
+              <div 
+                key={item.id} 
+                className="group bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[32px] shadow-xl border border-slate-50 dark:border-slate-800 hover:shadow-2xl transition-all flex flex-col md:flex-row gap-8 items-start md:items-center relative overflow-hidden"
+              >
+                {/* Visual Accent */}
+                <div className={`absolute top-0 left-0 w-2 h-full opacity-40 ${
+                  item.statusType === 'error' ? 'bg-red-500' : 
+                  item.statusType === 'warning' ? 'bg-amber-500' : 
+                  'bg-primary'
+                }`}></div>
+
+                {/* Icon Circle */}
+                <div className="w-16 h-16 rounded-[24px] bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-all flex-shrink-0 shadow-inner">
+                  <span className="material-icons text-3xl">{getIcon(item.type)}</span>
+                </div>
+
+                {/* Content */}
+                <div className="flex-grow space-y-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">{item.title}</h3>
+                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusColor(item.statusType)}`}>
+                      {item.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{item.description}</p>
+                  <div className="flex items-center gap-6 pt-2">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="material-icons text-sm">schedule</span>
+                      {item.timestamp}
+                    </div>
+                    {item.meta && (
+                      <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded">
+                        <span className="material-icons text-sm">label</span>
+                        {item.meta}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 w-full md:w-auto">
+                  <button className="flex-1 md:flex-none p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-primary hover:text-white text-slate-400 transition-all border border-slate-100 dark:border-slate-700">
+                    <span className="material-icons text-xl">open_in_new</span>
+                  </button>
+                  <button className="flex-1 md:flex-none p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition-all border border-slate-100 dark:border-slate-700">
+                    <span className="material-icons text-xl">more_vert</span>
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-24 text-center bg-white dark:bg-slate-900 rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800">
+              <span className="material-icons text-6xl text-slate-200 dark:text-slate-800 mb-6">history_toggle_off</span>
+              <h3 className="text-2xl font-black text-slate-300 dark:text-slate-700 uppercase tracking-tighter">No activity records found</h3>
+              <p className="text-slate-400 dark:text-slate-600 font-bold uppercase tracking-widest text-xs mt-2">Adjust your filters or try a different search term.</p>
+              <button 
+                onClick={() => {setFilter('all'); setSearch('');}}
+                className="mt-8 px-10 py-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 hover:brightness-110 transition-all"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Audit Note */}
+        <footer className="pt-10 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">
+          <p>Sovereign Audit Trail: LX-TRAIL-2024-88A</p>
+          <div className="flex gap-6">
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Ledger Verified</span>
+            <span className="flex items-center gap-1.5"><span className="material-icons text-sm">lock</span> E2E Encrypted</span>
+          </div>
+        </footer>
+      </div>
+    </Layout>
+  );
+};
+
+export default Activity;

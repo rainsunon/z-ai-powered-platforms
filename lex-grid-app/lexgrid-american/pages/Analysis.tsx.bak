@@ -1,0 +1,393 @@
+
+import React, { useState, useRef, useEffect } from 'react';
+import Layout from '../components/Layout';
+
+interface AnalysisProps {
+  theme?: string;
+  toggleTheme?: () => void;
+}
+
+interface UploadedFile {
+  name: string;
+  size: string;
+  time: string;
+}
+
+const Analysis: React.FC<AnalysisProps> = ({ theme, toggleTheme }) => {
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [isDownloadingPDF, setIsDownloadingPDF] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showCaseDetails, setShowCaseDetails] = useState(false);
+  const [extractionProgress, setExtractionProgress] = useState(88);
+  const [files, setFiles] = useState<UploadedFile[]>([
+    { name: 'initial_complaint.pdf', size: '2.4 MB', time: '2m ago' }
+  ]);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (newFiles: FileList | null) => {
+    if (!newFiles) return;
+    const newUploadedFiles: UploadedFile[] = Array.from(newFiles).map(file => ({
+      name: file.name,
+      size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+      time: 'Just now'
+    }));
+    setFiles(prev => [...newUploadedFiles, ...prev]);
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    handleFileUpload(e.dataTransfer.files);
+  };
+
+  const runExtraction = () => {
+    setIsExtracting(true);
+    setExtractionProgress(0);
+    const interval = setInterval(() => {
+      setExtractionProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsExtracting(false);
+          return 100;
+        }
+        return prev + 2;
+      });
+    }, 50);
+  };
+
+  const executePlan = () => {
+    setIsExecuting(true);
+    setTimeout(() => {
+      alert("Plan execution signal sent to legal team and stakeholders.");
+      setIsExecuting(false);
+    }, 1500);
+  };
+
+  const shareAnalysis = () => {
+    setShowShareModal(true);
+  };
+
+  const generatePDF = () => {
+    setIsDownloadingPDF(true);
+    setTimeout(() => {
+      setIsDownloadingPDF(false);
+      alert("Success: Your encrypted LexGrid PDF Report has been generated and saved to downloads.");
+    }, 2000);
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Link copied to clipboard!");
+  };
+
+  return (
+    <Layout theme={theme} toggleTheme={toggleTheme}>
+      <div className="max-w-[1600px] mx-auto p-10 grid grid-cols-12 gap-10 relative">
+        {/* Left: Document Intake */}
+        <aside className="col-span-12 lg:col-span-3 space-y-8">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 shadow-xl shadow-slate-200/50 transition-colors duration-300">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary dark:text-primary-400 mb-6 flex items-center gap-2">
+              <span className="material-icons text-lg">cloud_upload</span> Document Intake
+            </h3>
+            
+            {/* Hidden Input */}
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              multiple 
+              onChange={(e) => handleFileUpload(e.target.files)}
+            />
+
+            <div 
+              onDragOver={onDragOver}
+              onDrop={onDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-primary/20 dark:border-primary/40 rounded-2xl p-10 text-center bg-slate-50 dark:bg-slate-800 hover:bg-slate-100/50 dark:hover:bg-slate-700 transition-all cursor-pointer group"
+            >
+              <span className="material-icons text-primary/40 dark:text-primary-500/40 text-5xl mb-4 group-hover:scale-110 transition-transform">post_add</span>
+              <p className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tighter">Drop PDF/DOCX</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-bold italic tracking-widest uppercase">Click to browse or drag & drop</p>
+            </div>
+
+            <div className="mt-8 space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
+              {files.map((file, idx) => (
+                <div key={idx} className="p-4 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center gap-4 group transition-all animate-in fade-in slide-in-from-left-2">
+                  <span className="material-icons text-red-500 text-2xl">description</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-black truncate text-slate-900 dark:text-white uppercase tracking-tighter">{file.name}</p>
+                    <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold tracking-widest uppercase">{file.size} • Uploaded {file.time}</p>
+                  </div>
+                  <button 
+                    onClick={() => removeFile(idx)}
+                    className="material-icons text-slate-300 dark:text-slate-600 hover:text-red-500 transition-colors text-lg"
+                  >
+                    close
+                  </button>
+                </div>
+              ))}
+              {files.length === 0 && (
+                <p className="text-center text-[10px] text-slate-400 py-4 uppercase font-black tracking-widest">No documents loaded</p>
+              )}
+            </div>
+
+            <button 
+              disabled={isExtracting || files.length === 0}
+              onClick={runExtraction}
+              className={`w-full mt-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3 ${
+                isExtracting || files.length === 0 
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
+                  : 'bg-primary text-white shadow-primary/20 hover:brightness-110'
+              }`}
+            >
+              {isExtracting ? (
+                <span className="material-icons text-lg animate-spin">sync</span>
+              ) : (
+                <span className="material-icons text-lg">psychology</span>
+              )}
+              {isExtracting ? 'Extracting...' : 'Run Deep Extraction'}
+            </button>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 shadow-xl shadow-slate-200/50 transition-colors duration-300">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary dark:text-primary-400 mb-6">Case Overview</h3>
+            <div className="space-y-6">
+              <div>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 uppercase font-black tracking-widest mb-1">Matter Type</p>
+                <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tighter">Wrongful Termination / IP</p>
+              </div>
+              <div>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 uppercase font-black tracking-widest mb-1">Jurisdiction</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-lg">🇺🇸</span>
+                  <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tighter">Delaware, USA</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Right: Analysis Results */}
+        <div className="col-span-12 lg:col-span-9 space-y-8">
+          {/* LIGHTENED AI Processing Engine SECTION */}
+          <div className="bg-slate-100/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-3xl p-10 shadow-xl relative overflow-hidden transition-colors duration-300">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+            <div className="flex items-center justify-between mb-8 relative z-10">
+              <div>
+                <h2 className="text-2xl font-black flex items-center gap-3 text-slate-800 dark:text-white uppercase tracking-tighter">
+                  AI Processing Engine <span className="text-primary dark:text-primary-400 text-[10px] px-3 py-1 bg-primary/10 dark:bg-primary/20 rounded-full border border-primary/20 font-black tracking-[0.2em]">LIVE</span>
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium italic mt-1">Analyzing 4,200 legal precedents and internal risk factors...</p>
+              </div>
+              <p className="text-lg font-black text-primary dark:text-primary-400 tracking-tighter">{extractionProgress}% Complete</p>
+            </div>
+            <div className="w-full h-4 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden relative z-10">
+              <div 
+                className="h-full bg-primary relative transition-all duration-300"
+                style={{ width: `${extractionProgress}%` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              </div>
+            </div>
+            <div className="flex gap-10 mt-8 relative z-10">
+              {[
+                { label: 'Entity Extraction', done: extractionProgress > 30 },
+                { label: 'Precedent Search', done: extractionProgress > 60 },
+                { label: 'Clause Conflict Analysis', done: extractionProgress === 100 }
+              ].map((task, i) => (
+                <div key={i} className="flex items-center gap-2 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                  <span className={`material-icons text-sm ${task.done ? 'text-primary' : (isExtracting ? 'animate-spin' : 'text-slate-300')}`}>
+                    {task.done ? 'check_circle' : 'sync'}
+                  </span> 
+                  {task.label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-24">
+            {/* Probability Circle */}
+            <div className="md:col-span-1 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-10 flex flex-col items-center justify-center text-center shadow-xl shadow-slate-200/50 transition-colors duration-300">
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-10">Success Probability</p>
+              <div className="relative w-40 h-40 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle className="text-slate-100 dark:text-slate-800" cx="80" cy="80" fill="transparent" r="74" stroke="currentColor" strokeWidth="10"></circle>
+                  <circle className="text-primary transition-all duration-1000" cx="80" cy="80" fill="transparent" r="74" stroke="currentColor" strokeDasharray="465" strokeDashoffset="130" strokeLinecap="round" strokeWidth="10"></circle>
+                </svg>
+                <div className="absolute flex flex-col items-center">
+                  <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">72%</span>
+                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-widest mt-1">Moderate High</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-10 leading-relaxed italic font-medium">Model calibrated to Delaware Chancery Court historical data.</p>
+            </div>
+
+            {/* Range Slider */}
+            <div className="md:col-span-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-10 shadow-xl shadow-slate-200/50 transition-colors duration-300">
+              <div className="flex items-center justify-between mb-10">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Predicted Settlement Range</h3>
+                <span className="material-icons text-slate-300 dark:text-slate-600 cursor-help text-lg">info</span>
+              </div>
+              <div className="space-y-12">
+                <div className="flex items-end justify-between px-4">
+                  <div className="text-center">
+                    <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Low</span>
+                    <p className="text-lg font-black text-slate-900 dark:text-white tracking-tighter">$125K</p>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-[10px] font-black text-primary dark:text-primary-400 uppercase tracking-widest bg-primary/10 dark:bg-primary-900/30 px-3 py-1 rounded-full mb-2 inline-block border border-primary/20 dark:border-primary-800">Projected</span>
+                    <p className="text-4xl font-black text-primary dark:text-primary-400 tracking-tighter">$450K - $620K</p>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Ceiling</span>
+                    <p className="text-lg font-black text-slate-900 dark:text-white tracking-tighter">$1.2M</p>
+                  </div>
+                </div>
+                <div className="h-6 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex shadow-inner">
+                  <div className="w-1/4 h-full bg-slate-200 dark:bg-slate-700"></div>
+                  <div className="w-2/4 h-full bg-gradient-to-r from-primary to-emerald-500 shadow-lg relative">
+                     <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
+                  </div>
+                  <div className="w-1/4 h-full bg-slate-200 dark:bg-slate-700"></div>
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="p-5 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl transition-colors duration-300">
+                    <p className="text-[9px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-1">Risk Factor</p>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 font-bold uppercase tracking-tighter">Unclear severance clause in Section 4.2</p>
+                  </div>
+                  <div className="p-5 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl transition-colors duration-300">
+                    <p className="text-[9px] font-black text-primary dark:text-primary-400 uppercase tracking-widest mb-1">Leverage</p>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 font-bold uppercase tracking-tighter">Strong precedent in Smith vs. TechCorp (2022)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Share Modal */}
+        {showShareModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-white dark:bg-slate-900 rounded-[32px] w-full max-w-md p-10 shadow-3xl border border-slate-100 dark:border-slate-800 space-y-8 animate-in zoom-in-95 duration-300">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Share Analysis</h3>
+                <button onClick={() => setShowShareModal(false)} className="material-icons text-slate-400 hover:text-slate-600">close</button>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">Share this secure analysis with your legal team or stakeholders. Links are valid for 24 hours.</p>
+              <div className="space-y-4">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                  <p className="text-[10px] font-black text-slate-900 dark:text-white truncate max-w-[200px]">lexgrid.ai/secure/analysis/3882-xa2...</p>
+                  <button 
+                    onClick={() => copyToClipboard('https://lexgrid.ai/secure/analysis/3882-xa2-991')}
+                    className="px-4 py-2 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-xl"
+                  >
+                    Copy Link
+                  </button>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowShareModal(false)}
+                className="w-full py-4 border-2 border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Sticky Action Bar */}
+        <div className="fixed bottom-10 left-[calc(256px+40px)] right-10 z-50">
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-full py-4 px-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-black/50 flex items-center justify-between transition-colors duration-300">
+            <div className="flex items-center gap-8 border-r border-slate-100 dark:border-slate-800 pr-10 mr-10">
+              <button 
+                onClick={shareAnalysis}
+                className="flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary-400 transition-all group"
+              >
+                <span className="material-icons text-xl group-hover:scale-110">share</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Share Analysis</span>
+              </button>
+              <button 
+                onClick={generatePDF}
+                disabled={isDownloadingPDF}
+                className={`flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary-400 transition-all group ${isDownloadingPDF ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span className={`material-icons text-xl group-hover:scale-110 ${isDownloadingPDF ? 'animate-bounce' : ''}`}>
+                  {isDownloadingPDF ? 'sync' : 'file_download'}
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  {isDownloadingPDF ? 'Generating...' : 'PDF Report'}
+                </span>
+              </button>
+            </div>
+            <div className="flex-1 text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em]">
+              Last updated by LexGrid AI: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} EST
+            </div>
+            <div className="flex items-center gap-4 relative">
+              {/* Document/Detail Icon Button */}
+              <div className="relative">
+                <button 
+                  onMouseEnter={() => setShowCaseDetails(true)}
+                  onMouseLeave={() => setShowCaseDetails(false)}
+                  onClick={() => setShowCaseDetails(!showCaseDetails)}
+                  className="p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-primary group"
+                >
+                  <span className="material-icons">description</span>
+                </button>
+                
+                {/* Popover Detail */}
+                {showCaseDetails && (
+                  <div className="absolute bottom-16 right-0 w-80 bg-white dark:bg-slate-900 rounded-[24px] p-6 shadow-3xl border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-2 z-[60]">
+                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4">Case Metadata</h4>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Reference ID</span>
+                        <span className="text-xs font-black text-slate-900 dark:text-white">LX-2024-8821</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Lead Counsel</span>
+                        <span className="text-xs font-black text-slate-900 dark:text-white">Marcus Sterling</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Status</span>
+                        <span className="text-[9px] font-black bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded uppercase tracking-widest">Active Discovery</span>
+                      </div>
+                      <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <p className="text-[9px] font-medium text-slate-400 leading-relaxed italic">
+                          This case is currently utilizing LexGrid's Delaware Precision Model v4.2. 
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button 
+                disabled={isExecuting}
+                onClick={executePlan}
+                className={`text-[10px] font-black uppercase tracking-widest py-3 px-10 rounded-full transition-all shadow-xl flex items-center gap-2 ${
+                  isExecuting 
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                  : 'bg-primary text-white hover:scale-105 shadow-primary/20'
+                }`}
+              >
+                {isExecuting && <span className="material-icons text-sm animate-spin">sync</span>}
+                {isExecuting ? 'Executing...' : 'Execute Plan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default Analysis;

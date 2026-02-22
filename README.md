@@ -18,7 +18,7 @@ tokenized_invoice_lending_platform/
 
 ## Tech Stack
 
-- **Java 17**, 
+- **Java 21+**, 
 - **Spring Boot 3**
 - **PostgreSQL** (used in all services — no H2)
 - **RabbitMQ** (for asynchronous messaging)

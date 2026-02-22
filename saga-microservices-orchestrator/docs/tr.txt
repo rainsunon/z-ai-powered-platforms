@@ -1,0 +1,1 @@
+For simplicity, we're using OrderEvent for all events. In a real-world scenario, define separate event classes for each microservice.

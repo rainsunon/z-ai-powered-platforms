@@ -1,0 +1,388 @@
+# Global values
+global:
+  imagePullPolicy: IfNotPresent
+  imageRegistry: ecommerce
+  environment: dev
+  namespace: ecommerce
+
+# Common configuration
+common:
+  enabled: true
+
+# Discovery Service
+discovery-service:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ecommerce/discovery-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8761
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  env:
+    - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+      value: "false"
+    - name: EUREKA_CLIENT_FETCH_REGISTRY
+      value: "false"
+    - name: EUREKA_INSTANCE_HOSTNAME
+      value: "discovery-service"
+    - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+      value: "true"
+
+# API Gateway
+api-gateway:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/api-gateway
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer
+    port: 80
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# User Service
+user-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/user-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8082
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# Product Service
+product-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/product-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8083
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# Order Service
+order-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/order-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8084
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Payment Service
+payment-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/payment-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8085
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Inventory Service
+inventory-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/inventory-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8086
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Favourite Service
+favourite-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/favourite-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8087
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Rating Service
+rating-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/rating-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8088
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Promotion Service
+promotion-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/promotion-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8089
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Media Service
+media-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/media-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8090
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Notification Service
+notification-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/notification-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8091
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Search Service
+search-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/search-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8092
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Shipping Service
+shipping-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/shipping-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8093
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Tax Service
+tax-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/tax-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8094
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Analytics Service
+analytics-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/analytics-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8093
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 200m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# AI/ML Service
+ai-ml-service:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ecommerce/ai-ml-service
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8094
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  env:
+    - name: KAFKA_BOOTSTRAP_SERVERS
+      value: "kafka:9092"
+
+# Ingress
+ingress:
+  enabled: true
+  className: nginx
+  host: api.ecommerce.local
+  tls:
+    enabled: true
+    secretName: ecommerce-tls
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"

@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: captcha-mock-provider
+
+server:
+  port: 8082
+
+captcha:
+  mock:
+    delayMs: 50
+    # failEveryN: 5  # uncomment to simulate failures
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+logging:
+  level:
+    root: INFO

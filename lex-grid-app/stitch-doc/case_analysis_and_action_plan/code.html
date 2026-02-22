@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LexGrid | Case Analysis &amp; Action Plan Updated</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#208468",
+                        "brand-blue": "#5BA8FF",
+                        "section-light": "#F0F7FF",
+                        "lex-green": {
+                            "50": "#eefaf6",
+                            "100": "#dcf5ed",
+                            "200": "#b9e9db",
+                            "300": "#87d6c1",
+                            "400": "#4fb99e",
+                            "500": "#208468",
+                            "600": "#1e7a61",
+                            "700": "#1a6452",
+                            "800": "#185043",
+                            "900": "#164339",
+                            "950": "#0b2621",
+                        }
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --brand-bg: #5BA8FF;
+            --lex-green: #208468;
+            --section-bg: #F0F7FF;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--brand-bg);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(32, 132, 104, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(32, 132, 104, 0.3);
+            border-radius: 10px;
+        }
+        .glass-panel {
+            @apply bg-[var(--section-bg)] backdrop-blur-md border border-white/40 shadow-xl;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen font-display">
+<nav class="border-b border-black/5 bg-white/90 backdrop-blur-md sticky top-0 z-50">
+<div class="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-[var(--lex-green)] rounded-lg flex items-center justify-center">
+<span class="material-icons text-white text-xl">gavel</span>
+</div>
+<span class="text-xl font-bold tracking-tight text-slate-900">LexGrid<span class="text-[var(--lex-green)] text-xs ml-1 uppercase">AI</span></span>
+</div>
+<div class="hidden md:flex items-center gap-1 text-sm text-slate-500">
+<span>Cases</span>
+<span class="material-icons text-xs">chevron_right</span>
+<span class="text-slate-900 font-medium">Case Analysis #LX-9402</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex bg-slate-200/50 p-1 rounded-lg">
+<button class="px-3 py-1 text-xs font-semibold rounded bg-white shadow-sm text-slate-900">USA</button>
+<button class="px-3 py-1 text-xs font-semibold rounded text-slate-500 hover:text-slate-700">Canada</button>
+</div>
+<button class="w-10 h-10 rounded-full bg-slate-100/50 flex items-center justify-center border border-black/5">
+<span class="material-icons text-lg text-slate-600">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--lex-green)] to-emerald-700 flex items-center justify-center text-white font-bold">
+                    JD
+                </div>
+</div>
+</div>
+</nav>
+<main class="max-w-[1600px] mx-auto p-6 grid grid-cols-12 gap-6">
+<aside class="col-span-12 lg:col-span-3 space-y-6">
+<div class="glass-panel rounded-xl p-5">
+<h3 class="text-sm font-bold uppercase tracking-wider text-[var(--lex-green)] mb-4 flex items-center gap-2">
+<span class="material-icons text-sm">cloud_upload</span> Document Intake
+                </h3>
+<div class="border-2 border-dashed border-[var(--lex-green)]/30 rounded-xl p-8 text-center bg-white/50 hover:bg-white/80 transition-colors cursor-pointer group">
+<span class="material-icons text-[var(--lex-green)] text-4xl mb-2 group-hover:scale-110 transition-transform">post_add</span>
+<p class="text-sm font-medium text-slate-700">Drop PDF or DOCX here</p>
+<p class="text-xs text-slate-500 mt-1 italic">Secure HIPAA/PIPEDA compliant</p>
+</div>
+<div class="mt-6 space-y-3">
+<div class="p-3 bg-white/60 border border-black/5 rounded-lg flex items-center gap-3">
+<span class="material-icons text-red-500">description</span>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-bold truncate text-slate-800">initial_complaint.pdf</p>
+<p class="text-[10px] text-slate-500">2.4 MB • Uploaded 2m ago</p>
+</div>
+<span class="material-icons text-sm text-slate-400 hover:text-[var(--lex-green)] cursor-pointer">close</span>
+</div>
+<div class="p-3 bg-white/60 border border-black/5 rounded-lg flex items-center gap-3">
+<span class="material-icons text-blue-500">description</span>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-bold truncate text-slate-800">employment_contract_v2.docx</p>
+<p class="text-[10px] text-slate-500">1.1 MB • Uploaded 1m ago</p>
+</div>
+<span class="material-icons text-sm text-slate-400 hover:text-[var(--lex-green)] cursor-pointer">close</span>
+</div>
+</div>
+<button class="w-full mt-6 py-3 bg-[var(--lex-green)] text-white rounded-lg font-bold text-sm shadow-lg shadow-[var(--lex-green)]/20 hover:brightness-110 transition-all flex items-center justify-center gap-2">
+<span class="material-icons text-sm">psychology</span> Re-analyze Assets
+                </button>
+</div>
+<div class="glass-panel rounded-xl p-5">
+<h3 class="text-sm font-bold uppercase tracking-wider text-[var(--lex-green)] mb-4">Case Overview</h3>
+<div class="space-y-4">
+<div>
+<p class="text-[10px] text-slate-500 uppercase font-bold">Client</p>
+<p class="text-sm font-semibold text-slate-800">AeroTech Solutions Inc.</p>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 uppercase font-bold">Matter Type</p>
+<p class="text-sm font-semibold text-slate-800">Wrongful Termination / Breach of IP</p>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 uppercase font-bold">Jurisdiction</p>
+<div class="flex items-center gap-2 mt-1">
+<img alt="US Flag" class="w-5 h-5 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcqAc1rU1tOqZdR_EvHmHI1ZDDpvJRGRN9m-9aIblw0wujUuV7hIttgcAFr4YrsKv1M19oYByw6yN18iijOFzPlXo96eS5Z1QVzxLj5B2-jArq2iFPwqmGyUZM-sR-d6xi_8igatqB2Jsg8zTk8epdC_hD7uxbdwXu-fn2w_WMroMjkfBN6L9SEz-p4HpRecFGxjHKzluBBk9RXiA3eQ-oy6ir-rMKzbiP6rsYqtOYRU7zahdpptQUNnCdoWniwk9vOtjeWQnYwK0"/>
+<p class="text-sm text-slate-800">Delaware, USA (Chancery Court)</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<div class="col-span-12 lg:col-span-9 space-y-6">
+<div class="glass-panel rounded-xl p-6">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h2 class="text-lg font-bold flex items-center gap-2 text-slate-900">
+                            AI Processing Engine <span class="text-[var(--lex-green)] text-xs px-2 py-0.5 bg-[var(--lex-green)]/10 rounded-full border border-[var(--lex-green)]/20 font-bold">LIVE</span>
+</h2>
+<p class="text-sm text-slate-600">Analyzing legal precedents and risk factors...</p>
+</div>
+<p class="text-sm font-bold text-[var(--lex-green)]">88% Complete</p>
+</div>
+<div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+<div class="h-full bg-[var(--lex-green)] w-[88%] relative transition-all duration-500">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+</div>
+</div>
+<div class="flex gap-6 mt-4">
+<div class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+<span class="material-icons text-sm text-[var(--lex-green)]">check_circle</span> Entity Extraction
+                    </div>
+<div class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+<span class="material-icons text-sm text-[var(--lex-green)]">check_circle</span> Precedent Search
+                    </div>
+<div class="flex items-center gap-2 text-[11px] font-bold text-[var(--lex-green)]">
+<span class="material-icons text-sm animate-spin">sync</span> Clause Conflict Analysis
+                    </div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-1 glass-panel rounded-xl p-6 flex flex-col items-center justify-center text-center">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Success Probability</p>
+<div class="relative w-32 h-32 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-slate-200" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-[var(--lex-green)]" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-dasharray="364.4" stroke-dashoffset="102" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-3xl font-extrabold text-slate-900">72%</span>
+<span class="text-[10px] text-emerald-600 font-bold uppercase">Moderate High</span>
+</div>
+</div>
+<p class="text-[11px] text-slate-500 mt-4 leading-relaxed italic">Based on 4,200 similar filings in Delaware Chancery Court.</p>
+</div>
+<div class="md:col-span-2 glass-panel rounded-xl p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500">Predicted Settlement Range</h3>
+<span class="material-icons text-slate-400 cursor-help text-lg">info</span>
+</div>
+<div class="space-y-6">
+<div class="flex items-end justify-between px-2">
+<div class="text-center">
+<span class="text-[10px] font-bold text-slate-500">LOW</span>
+<p class="text-sm font-bold text-slate-800">$125K</p>
+</div>
+<div class="text-center">
+<span class="text-[10px] font-bold text-[var(--lex-green)]">PROJECTED</span>
+<p class="text-xl font-black text-[var(--lex-green)]">$450K - $620K</p>
+</div>
+<div class="text-center">
+<span class="text-[10px] font-bold text-slate-500">CEILING</span>
+<p class="text-sm font-bold text-slate-800">$1.2M</p>
+</div>
+</div>
+<div class="h-4 w-full bg-slate-200 rounded-full overflow-hidden flex">
+<div class="w-1/4 h-full bg-slate-300"></div>
+<div class="w-2/4 h-full bg-gradient-to-r from-[var(--lex-green)] to-emerald-500 shadow-[0_0_15px_rgba(32,132,104,0.4)]"></div>
+<div class="w-1/4 h-full bg-slate-300"></div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="p-3 bg-red-50 border border-red-100 rounded-lg">
+<p class="text-[10px] font-bold text-red-600">RISK FACTOR</p>
+<p class="text-xs text-slate-700">Unclear severance clause in Section 4.2</p>
+</div>
+<div class="p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
+<p class="text-[10px] font-bold text-[var(--lex-green)]">LEVERAGE</p>
+<p class="text-xs text-slate-700">Strong precedent in Smith vs. TechCorp (2022)</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="glass-panel rounded-xl p-6">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-6 flex items-center justify-between">
+                        Generated Action Plan
+                        <button class="text-[10px] text-[var(--lex-green)] font-bold underline decoration-2 underline-offset-4">Export to Calendar</button>
+</h3>
+<div class="relative space-y-6 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+<div class="relative pl-8 group">
+<div class="absolute left-0 top-1 w-[24px] h-[24px] bg-[var(--lex-green)] rounded-full border-4 border-[var(--section-bg)] flex items-center justify-center z-10">
+<span class="material-icons text-[12px] text-white">check</span>
+</div>
+<div class="bg-white/60 border border-[var(--lex-green)]/20 p-4 rounded-lg">
+<h4 class="text-sm font-bold text-[var(--lex-green)]">Initial Filing Preparation</h4>
+<p class="text-xs text-slate-600 mt-1 leading-relaxed">Refine the wrongful termination claim focusing on Delaware Labour Code § 11.2.</p>
+<div class="mt-2 flex gap-2">
+<span class="px-2 py-0.5 bg-[var(--lex-green)] text-white text-[9px] font-black rounded uppercase tracking-wider">High Priority</span>
+<span class="px-2 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-bold rounded border border-black/5 uppercase">By Nov 12</span>
+</div>
+</div>
+</div>
+<div class="relative pl-8 group">
+<div class="absolute left-0 top-1 w-[24px] h-[24px] bg-slate-400 rounded-full border-4 border-[var(--section-bg)] flex items-center justify-center z-10">
+<span class="text-[10px] font-bold text-white">02</span>
+</div>
+<div class="bg-white/40 border border-black/5 p-4 rounded-lg hover:border-[var(--lex-green)]/30 transition-colors">
+<h4 class="text-sm font-bold text-slate-800">Discovery Phase</h4>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">Request internal communications from HR regarding the 'Aero-Project' internal memo.</p>
+</div>
+</div>
+<div class="relative pl-8 group">
+<div class="absolute left-0 top-1 w-[24px] h-[24px] bg-slate-300 rounded-full border-4 border-[var(--section-bg)] flex items-center justify-center z-10">
+<span class="text-[10px] font-bold text-white">03</span>
+</div>
+<div class="bg-white/20 border border-black/5 p-4 rounded-lg">
+<h4 class="text-sm font-bold text-slate-400">Settlement Negotiation</h4>
+<p class="text-xs text-slate-400 mt-1 leading-relaxed">Leverage 'Good Faith' precedent if initial responses are evasive.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="glass-panel rounded-xl p-6">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-6">Key Clause Findings</h3>
+<div class="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+<div class="p-4 bg-white/60 rounded-xl border-l-4 border-[var(--lex-green)] shadow-sm">
+<div class="flex justify-between mb-2">
+<span class="text-[10px] font-bold text-[var(--lex-green)]">SNIPPET #1 • CONTRACT P.12</span>
+<span class="material-icons text-sm text-slate-400">open_in_new</span>
+</div>
+<p class="text-sm text-slate-700 italic leading-relaxed">
+                                "...provided that the <mark class="bg-[var(--lex-green)]/10 text-[var(--lex-green)] font-semibold px-1">termination without cause</mark> occurs prior to the vesting period of 36 months, the employee shall be entitled to..."
+                            </p>
+<div class="mt-3 text-[11px] text-[var(--lex-green)] font-medium flex items-center gap-2">
+<span class="material-icons text-xs">lightbulb</span>
+                                AI Suggestion: This clause directly contradicts Section 4.5. Possible ambiguity win.
+                            </div>
+</div>
+<div class="p-4 bg-white/40 rounded-xl border-l-4 border-slate-400">
+<div class="flex justify-between mb-2">
+<span class="text-[10px] font-bold text-slate-500">SNIPPET #2 • HR MEMO P.02</span>
+<span class="material-icons text-sm text-slate-400">open_in_new</span>
+</div>
+<p class="text-sm text-slate-600 italic leading-relaxed">
+                                "The restructuring plan was <mark class="bg-slate-200 text-slate-900 px-1">drafted in July</mark>, though performance reviews were only cited in October."
+                            </p>
+<div class="mt-3 text-[11px] text-slate-500 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs text-amber-600">warning</span>
+                                Conflict: Timeline indicates pre-determined termination regardless of performance.
+                            </div>
+</div>
+<div class="p-4 bg-white/40 rounded-xl border-l-4 border-slate-300">
+<div class="flex justify-between mb-2">
+<span class="text-[10px] font-bold text-slate-500">SNIPPET #3 • NDA P.05</span>
+<span class="material-icons text-sm text-slate-400">open_in_new</span>
+</div>
+<p class="text-sm text-slate-600 italic leading-relaxed">
+                                "Non-compete geographical scope includes the <mark class="bg-slate-200 text-slate-900 px-1">entirety of North America</mark> for a period of 24 months..."
+                            </p>
+<div class="mt-3 text-[11px] text-slate-500 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs text-blue-600">info</span>
+                                Legal Note: Overly broad scope; likely unenforceable in Delaware.
+                            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl px-6">
+<div class="bg-white/95 backdrop-blur-xl border border-white/40 rounded-full py-3 px-6 shadow-2xl flex items-center justify-between">
+<div class="flex items-center gap-4 border-r border-slate-200 pr-6 mr-6">
+<button class="flex items-center gap-2 text-slate-600 hover:text-[var(--lex-green)] transition-colors">
+<span class="material-icons">share</span>
+<span class="text-xs font-bold uppercase">Share Analysis</span>
+</button>
+<button class="flex items-center gap-2 text-slate-600 hover:text-[var(--lex-green)] transition-colors">
+<span class="material-icons">file_download</span>
+<span class="text-xs font-bold uppercase">PDF Report</span>
+</button>
+</div>
+<div class="flex-1 text-[11px] text-slate-400 font-medium">
+                Last updated by LexGrid AI: 4:32 PM EST
+            </div>
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-icons text-slate-500">bookmark_border</span>
+</button>
+<button class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-icons text-slate-500">print</span>
+</button>
+<button class="bg-[var(--lex-green)] text-white text-xs font-black uppercase tracking-tighter py-2.5 px-8 rounded-full hover:scale-105 transition-transform shadow-lg shadow-[var(--lex-green)]/20">
+                    Execute Plan
+                </button>
+</div>
+</div>
+</div>
+
+</body></html>

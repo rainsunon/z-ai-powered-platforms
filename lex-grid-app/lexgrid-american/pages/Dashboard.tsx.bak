@@ -1,0 +1,163 @@
+
+import React from 'react';
+import Layout from '../components/Layout';
+import { Link } from 'react-router-dom';
+
+interface DashboardProps {
+  theme?: string;
+  toggleTheme?: () => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ theme, toggleTheme }) => {
+  return (
+    <Layout theme={theme} toggleTheme={toggleTheme}>
+      <div className="p-8 space-y-10 max-w-7xl mx-auto">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Welcome back, Marcus</h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium italic">You have 3 active legal proceedings and 1 pending document review.</p>
+        </div>
+
+        {/* Action Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="group relative overflow-hidden bg-primary rounded-3xl p-8 shadow-2xl shadow-primary/30 cursor-pointer hover:-translate-y-2 transition-all">
+            <div className="absolute -right-6 -top-6 opacity-20 group-hover:scale-110 transition-transform text-white">
+              <span className="material-icons text-[140px]">psychology</span>
+            </div>
+            <div className="relative z-10 flex flex-col h-full justify-between">
+              <div>
+                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-white/30">
+                  <span className="material-icons text-white text-3xl">bolt</span>
+                </div>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Start AI Chat</h3>
+                <p className="text-white/80 text-sm mt-3 font-medium leading-relaxed">Instant legal analysis and document summarization powered by Gemini Pro.</p>
+              </div>
+              <Link to="/chat" className="mt-8 w-full py-4 bg-white text-primary font-black rounded-xl hover:bg-slate-50 transition-colors shadow-xl text-center uppercase tracking-widest text-xs">
+                Launch Assistant
+              </Link>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 flex flex-col justify-between shadow-xl shadow-slate-200/50 hover:-translate-y-2 transition-all transition-colors duration-300">
+            <div>
+              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+                <span className="material-icons text-primary text-3xl">upload_file</span>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Analyze File</h3>
+              <p className="text-slate-400 dark:text-slate-500 text-sm mt-3 font-medium leading-relaxed">Securely upload evidence, contracts, or court filings for deep extraction.</p>
+            </div>
+            <Link to="/analysis" className="mt-8 w-full py-4 bg-primary text-white font-black rounded-xl hover:brightness-110 transition-all shadow-xl shadow-primary/20 text-center uppercase tracking-widest text-xs">
+              Add Assets
+            </Link>
+          </div>
+
+          <div className="bg-slate-500 dark:bg-slate-700 rounded-3xl p-8 flex flex-col justify-between shadow-2xl hover:-translate-y-2 transition-all">
+            <div>
+              <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-6">
+                <span className="material-icons text-white text-3xl">videocam</span>
+              </div>
+              <h3 className="text-2xl font-black text-white uppercase tracking-tighter">View Meetings</h3>
+              <p className="text-white/70 text-sm mt-3 font-medium leading-relaxed">Connect with your legal council via encrypted HIPAA-compliant video.</p>
+            </div>
+            <Link to="/scheduling" className="mt-8 w-full py-4 bg-white text-slate-600 font-black rounded-xl hover:bg-white/90 transition-all shadow-xl text-center uppercase tracking-widest text-xs">
+              Join Call
+            </Link>
+          </div>
+        </div>
+
+        {/* Stats and Progress */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl shadow-slate-200/50 flex items-center gap-6 border border-slate-50 dark:border-slate-800 transition-colors duration-300">
+                <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center text-brand">
+                  <span className="material-icons text-3xl">gavel</span>
+                </div>
+                <div>
+                  <p className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">03</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-black tracking-[0.2em] mt-1">Active Cases</p>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl shadow-slate-200/50 flex items-center gap-6 border border-slate-50 dark:border-slate-800 transition-colors duration-300">
+                <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-900/10 flex items-center justify-center text-amber-600 dark:text-amber-500">
+                  <span className="material-icons text-3xl">schedule</span>
+                </div>
+                <div>
+                  <p className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">12</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-black tracking-[0.2em] mt-1">Days to Deadline</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 overflow-hidden border border-slate-50 dark:border-slate-800 transition-colors duration-300">
+              <div className="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
+                <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Active Progress: Sterling vs. OmniCorp</h3>
+                <span className="text-[10px] bg-primary/10 text-primary dark:text-primary-400 px-4 py-1.5 rounded-full font-black uppercase tracking-widest border border-primary/10">In Discovery</span>
+              </div>
+              <div className="p-8">
+                <div className="flex justify-between text-sm mb-4">
+                  <span className="text-slate-400 dark:text-slate-500 font-bold uppercase text-xs tracking-widest">Preparation Complete</span>
+                  <span className="text-primary dark:text-primary-400 font-black">65%</span>
+                </div>
+                <div className="w-full h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="bg-primary h-full w-[65%] rounded-full shadow-[0_0_15px_rgba(32,132,104,0.3)] transition-all duration-1000"></div>
+                </div>
+                <div className="mt-10 flex gap-6 items-center">
+                  <div className="flex -space-x-3">
+                    <img className="w-10 h-10 rounded-full border-4 border-white dark:border-slate-900 object-cover" src="https://picsum.photos/id/1/100/100" alt="L1" />
+                    <img className="w-10 h-10 rounded-full border-4 border-white dark:border-slate-900 object-cover" src="https://picsum.photos/id/2/100/100" alt="L2" />
+                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 border-4 border-white dark:border-slate-900 flex items-center justify-center text-[10px] font-black text-slate-600 dark:text-slate-400">+2</div>
+                  </div>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">Legal team assigned to this case</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-widest text-xs">Recent Alerts</h3>
+              <button className="text-[10px] text-primary dark:text-primary-400 font-black hover:underline uppercase tracking-widest">Mark all read</button>
+            </div>
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 divide-y divide-slate-50 dark:divide-slate-800 overflow-hidden border border-slate-50 dark:border-slate-800 transition-colors duration-300">
+              {[
+                { type: 'msg', title: 'Lawyer Message', time: '2m ago', desc: 'Please review the updated retainer agreement for Case #402 before tomorrow\'s filing.', urgent: true },
+                { type: 'ai', title: 'AI System Alert', time: '1h ago', desc: 'AI analysis of the Prosecution\'s Motion is complete. 4 inconsistencies found.' },
+                { type: 'cal', title: 'New Meeting', time: '4h ago', desc: 'Video consultation scheduled with Sarah Parker for June 12th.' }
+              ].map((note, i) => (
+                <div key={i} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                  <div className="flex gap-4">
+                    <div className={`mt-1 w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${note.urgent ? 'bg-red-50 dark:bg-red-900/20 text-red-500' : 'bg-slate-50 dark:bg-slate-800 text-slate-400 group-hover:text-primary dark:group-hover:text-primary-400 transition-colors'}`}>
+                      <span className="material-icons text-xl">{note.urgent ? 'priority_high' : note.type === 'ai' ? 'auto_awesome' : 'calendar_today'}</span>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-start gap-4">
+                        <p className="text-sm font-black text-slate-900 dark:text-white group-hover:text-primary dark:group-hover:text-primary-400 transition-colors uppercase tracking-tighter">{note.title}</p>
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">{note.time}</span>
+                      </div>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 leading-relaxed font-medium line-clamp-2">{note.desc}</p>
+                      {note.urgent && (
+                        <div className="mt-3">
+                          <span className="px-3 py-1 bg-red-500 text-white rounded-lg text-[8px] font-black uppercase tracking-widest">Urgent Action</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Link 
+              to="/activity"
+              className="w-full py-4 bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 text-[10px] font-black rounded-2xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all shadow-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2"
+            >
+              View All Activity
+              <span className="material-icons text-sm">open_in_new</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default Dashboard;

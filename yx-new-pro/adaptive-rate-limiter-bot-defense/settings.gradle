@@ -1,0 +1,26 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        // Official Central alternate hostname (sometimes bypasses proxy rules)
+        maven { url = uri("https://repo1.maven.org/maven2") }
+
+        // Google-hosted Maven Central mirror (often bypasses enterprise filters)
+        maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
+    }
+}
+
+dependencyResolutionManagement {
+    // allow project repos OR make sure repos are here.
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT) // <- safest
+    repositories {
+        mavenCentral()
+        // Official Central alternate hostname (sometimes bypasses proxy rules)
+        maven { url = uri("https://repo1.maven.org/maven2") }
+
+        // Google-hosted Maven Central mirror (often bypasses enterprise filters)
+        maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
+    }
+}
+
+rootProject.name = 'adaptive-rate-limiter-bot-defense'

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LexGrid | Subscription &amp; Billing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#208468",
+                        "brand-blue": "#5BA8FF",
+                        "background-light": "#f8f6f8",
+                        "background-dark": "#5BA8FF", 
+                        "surface-dark": "#208468",
+                        "neutral-muted": "#1a6b54",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .gradient-mesh {
+            background-color: #5BA8FF;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(32, 132, 104, 0.1) 0px, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-900 dark:text-white min-h-screen gradient-mesh font-display">
+<nav class="border-b border-white/10 bg-black/10 backdrop-blur-md sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16 items-center">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-icons text-white text-xl">gavel</span>
+</div>
+<span class="text-xl font-extrabold tracking-tight text-white">Lex<span class="text-primary">Grid</span></span>
+</div>
+<div class="hidden md:flex items-center space-x-8 text-sm font-medium">
+<a class="text-white/70 hover:text-white transition-colors" href="#">Dashboard</a>
+<a class="text-white/70 hover:text-white transition-colors" href="#">Research</a>
+<a class="text-white/70 hover:text-white transition-colors" href="#">Documents</a>
+<a class="text-white border-b-2 border-white py-5" href="#">Billing</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-white/70 hover:text-white transition-colors">
+<span class="material-icons">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary border border-white/20 flex items-center justify-center">
+<span class="text-xs font-bold text-white">JD</span>
+</div>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="mb-12 text-white">
+<h1 class="text-3xl font-extrabold mb-2">Subscription &amp; Billing</h1>
+<p class="text-white/80 max-w-2xl">Manage your legal AI toolkit, view upcoming invoices, and adjust your jurisdiction settings for Canada and USA operations.</p>
+<div class="mt-8 p-4 bg-white/10 border border-white/20 rounded-xl flex items-center gap-4 backdrop-blur-sm">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-icons text-white">warning</span>
+</div>
+<div class="flex-grow">
+<h4 class="text-white font-bold text-sm">Payment Method Expiring</h4>
+<p class="text-white/80 text-xs">Your Visa ending in 4242 expires next month. Update it to avoid service interruption.</p>
+</div>
+<button class="px-4 py-2 bg-white text-[#5BA8FF] text-xs font-bold rounded-lg hover:bg-white/90 transition-colors">
+                    Update Now
+                </button>
+</div>
+</div>
+<div class="flex flex-col items-center mb-12">
+<div class="bg-primary/20 backdrop-blur-md border border-white/20 p-1 rounded-xl flex items-center gap-1">
+<button class="px-6 py-2 text-sm font-bold text-white/70 rounded-lg hover:text-white transition-all">Monthly</button>
+<button class="px-6 py-2 text-sm font-bold text-white bg-primary rounded-lg shadow-lg shadow-black/10 transition-all">
+                    Yearly <span class="ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded uppercase tracking-wider">Save 20%</span>
+</button>
+</div>
+<p class="mt-4 text-xs text-white/60 uppercase tracking-widest font-bold">Prices in USD</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+<div class="bg-primary border border-white/10 rounded-2xl p-8 flex flex-col hover:shadow-xl transition-all text-white">
+<div class="mb-8">
+<h3 class="text-xl font-bold mb-2">Basic</h3>
+<p class="text-white/70 text-sm">For solo practitioners starting with AI.</p>
+</div>
+<div class="mb-8">
+<span class="text-4xl font-extrabold">$89</span>
+<span class="text-white/60">/mo</span>
+</div>
+<ul class="space-y-4 mb-10 flex-grow">
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white/60 text-sm mt-0.5">check_circle</span>
+                        AI Legal Research (Canada Only)
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white/60 text-sm mt-0.5">check_circle</span>
+                        50 Case Analysis/mo
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white/60 text-sm mt-0.5">check_circle</span>
+                        Standard Document Drafting
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/40 line-through">
+<span class="material-icons text-white/20 text-sm mt-0.5">cancel</span>
+                        USA Federal Research
+                    </li>
+</ul>
+<button class="w-full py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+                    Current Plan
+                </button>
+</div>
+<div class="bg-primary border-4 border-white rounded-2xl p-8 flex flex-col relative shadow-2xl scale-105 z-10 text-white">
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-primary px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                    Most Popular
+                </div>
+<div class="mb-8">
+<h3 class="text-xl font-bold mb-2">Professional</h3>
+<p class="text-white/70 text-sm">Complete cross-border legal automation.</p>
+</div>
+<div class="mb-8">
+<span class="text-4xl font-extrabold">$199</span>
+<span class="text-white/60">/mo</span>
+</div>
+<ul class="space-y-4 mb-10 flex-grow">
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white text-sm mt-0.5">check_circle</span>
+                        USA &amp; Canada Full Access
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white text-sm mt-0.5">check_circle</span>
+                        Unlimited Case Analysis
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white text-sm mt-0.5">check_circle</span>
+                        Advanced AI Brief Drafting
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white text-sm mt-0.5">check_circle</span>
+                        Priority Jurisdictional Support
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white text-sm mt-0.5">check_circle</span>
+                        Up to 3 Team Members
+                    </li>
+</ul>
+<button class="w-full py-4 bg-white text-primary font-bold rounded-xl hover:bg-white/90 transition-all transform hover:-translate-y-1 shadow-lg">
+                    Subscribe
+                </button>
+</div>
+<div class="bg-primary border border-white/10 rounded-2xl p-8 flex flex-col hover:shadow-xl transition-all text-white">
+<div class="mb-8">
+<h3 class="text-xl font-bold mb-2">Enterprise</h3>
+<p class="text-white/70 text-sm">Bespoke solutions for large firms.</p>
+</div>
+<div class="mb-8">
+<span class="text-4xl font-extrabold">Custom</span>
+</div>
+<ul class="space-y-4 mb-10 flex-grow">
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white/60 text-sm mt-0.5">check_circle</span>
+                        Custom API Integrations
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white/60 text-sm mt-0.5">check_circle</span>
+                        Single Sign-On (SSO)
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white/60 text-sm mt-0.5">check_circle</span>
+                        On-premise Deployment Options
+                    </li>
+<li class="flex items-start gap-3 text-sm text-white/90">
+<span class="material-icons text-white/60 text-sm mt-0.5">check_circle</span>
+                        Dedicated Compliance Officer
+                    </li>
+</ul>
+<button class="w-full py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+                    Contact Sales
+                </button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-1 space-y-6">
+<div class="bg-primary border border-white/10 p-6 rounded-2xl text-white">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-bold">Payment Method</h3>
+<button class="text-xs text-white hover:underline font-bold">Edit</button>
+</div>
+<div class="flex items-center gap-4 p-4 bg-black/10 border border-white/10 rounded-xl">
+<div class="w-12 h-8 bg-white/10 rounded flex items-center justify-center overflow-hidden">
+<span class="material-icons text-white/60">credit_card</span>
+</div>
+<div>
+<p class="text-sm font-bold">Visa ending in 4242</p>
+<p class="text-xs text-white/50 uppercase">Expires 08/25</p>
+</div>
+</div>
+<div class="mt-6 pt-6 border-t border-white/10">
+<p class="text-xs text-white/50 mb-2">Billing Address</p>
+<p class="text-sm text-white/80">123 Lawyer St, Suite 400<br/>Toronto, ON M5V 2T6<br/>Canada</p>
+</div>
+</div>
+<div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl text-white">
+<h3 class="font-bold mb-2">Need Help?</h3>
+<p class="text-sm text-white/70 mb-4">Our billing support team is available for firm-wide adjustments or VAT questions.</p>
+<button class="flex items-center gap-2 text-white font-bold text-sm">
+<span class="material-icons text-sm">support_agent</span>
+                        Chat with Support
+                    </button>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="bg-primary border border-white/10 rounded-2xl overflow-hidden text-white">
+<div class="p-6 border-b border-white/10 flex justify-between items-center">
+<h3 class="font-bold">Billing History</h3>
+<button class="text-xs text-white/60 flex items-center gap-1 hover:text-white transition-colors">
+<span class="material-icons text-sm">filter_list</span>
+                            Filter
+                        </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm">
+<thead>
+<tr class="bg-black/10 text-white/50 text-[10px] uppercase tracking-widest font-bold">
+<th class="px-6 py-4">Invoice ID</th>
+<th class="px-6 py-4">Date</th>
+<th class="px-6 py-4">Amount</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/10">
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-medium text-white/90">INV-2024-004</td>
+<td class="px-6 py-4 text-white/60">Oct 01, 2023</td>
+<td class="px-6 py-4 font-bold">$89.00</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/20 text-white">Paid</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-white hover:text-white/80">
+<span class="material-icons text-lg">file_download</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-medium text-white/90">INV-2024-003</td>
+<td class="px-6 py-4 text-white/60">Sep 01, 2023</td>
+<td class="px-6 py-4 font-bold">$89.00</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/20 text-white">Paid</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-white hover:text-white/80">
+<span class="material-icons text-lg">file_download</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-medium text-white/90">INV-2024-002</td>
+<td class="px-6 py-4 text-white/60">Aug 01, 2023</td>
+<td class="px-6 py-4 font-bold">$89.00</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/20 text-white">Paid</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-white hover:text-white/80">
+<span class="material-icons text-lg">file_download</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-black/10 text-center">
+<button class="text-xs text-white/60 hover:text-white font-bold transition-colors">Load More History</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="mt-20 border-t border-white/10 py-10">
+<div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-2 grayscale opacity-50">
+<div class="w-6 h-6 bg-white rounded flex items-center justify-center">
+<span class="material-icons text-[#5BA8FF] text-xs">gavel</span>
+</div>
+<span class="text-sm font-bold tracking-tight text-white">LexGrid</span>
+</div>
+<div class="flex gap-8 text-xs text-white/50 font-bold uppercase tracking-widest">
+<a class="hover:text-white transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-white transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-white transition-colors" href="#">Security</a>
+</div>
+<p class="text-xs text-white/40">© 2024 LexGrid Legal Technologies Inc. North American Jurisdiction.</p>
+</div>
+</footer>
+
+</body></html>

@@ -1,0 +1,7 @@
+.alert {
+  color: rgb(231, 166, 67);
+  font-size: 12px;
+  width: 90%;
+  display: block;
+  margin-top: 8px;
+}

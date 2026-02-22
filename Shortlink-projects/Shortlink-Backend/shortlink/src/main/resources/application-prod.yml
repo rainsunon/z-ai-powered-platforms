@@ -1,0 +1,81 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: ${APP_NAME:shortlink}
+
+  datasource:
+    url: ${SHORTLINK_DB_URL:jdbc:postgresql://postgres.shortlink.svc.cluster.local:5432/shortlink}
+    username: ${SHORTLINK_DB_USER:admin}
+    password: ${SHORTLINK_DB_PASSWORD:admin}
+
+  jpa:
+    hibernate:
+      ddl-auto: none           # disable auto create/alter tables in prod
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false            # optional: turn off for prod
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis.shortlink.svc.cluster.local}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      # Note: password is intentionally not set - Redis server does not require authentication
+      # Redisson will not attempt AUTH if spring.data.redis.password is not set
+      # TODO: Future upgrade to Vault for password management
+      lettuce:
+        cluster:
+          refresh:
+            adaptive: true
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 3000ms
+  # Kafka (Prod)        
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka.shortlink.svc.cluster.local:9092}
+
+management:
+  endpoints:
+    web:
+      base-path: /api/shortlink/actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+# Kafka topic (prod)
+kafka:
+  topics:
+    stats-events:
+      name: ${KAFKA_TOPIC_STATS_EVENTS:shortlink-stats-events}
+      partitions: ${KAFKA_TOPIC_STATS_EVENTS_PARTITIONS:20}
+      replication-factor: ${KAFKA_TOPIC_STATS_EVENTS_REPLICATION_FACTOR:1}
+      auto-create: false
+
+## ClickHouse (stats query; optional - stats API returns empty when not set)
+## When kafka-sync-enabled=true and url is set, Kafka engine table + MV will sync topic -> link_stats_events
+clickhouse:
+  url: ${CLICKHOUSE_URL:jdbc:clickhouse://clickhouse.shortlink.svc.cluster.local:8123}
+  username: ${CLICKHOUSE_USERNAME:default}
+  password: ${CLICKHOUSE_PASSWORD:default}
+  database: ${CLICKHOUSE_DATABASE:shortlink_stats}
+  # CK Kafka engine: sync from topic into link_stats_events (only used when kafka-sync-enabled=true)
+  # Enabled by default in prod (requires Kafka and ClickHouse running in K8s)
+  kafka-sync-enabled: ${CLICKHOUSE_KAFKA_SYNC_ENABLED:true}
+  kafka-broker-list: ${CLICKHOUSE_KAFKA_BROKER_LIST:kafka.shortlink.svc.cluster.local:9092}
+  kafka-topic: ${CLICKHOUSE_KAFKA_TOPIC:shortlink-stats-events}
+  kafka-consumer-group: ${CLICKHOUSE_KAFKA_CONSUMER_GROUP:clickhouse-shortlink-stats}
+
+shortlink:
+  domain:
+    default: shortlink.tus

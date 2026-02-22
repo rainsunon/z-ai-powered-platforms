@@ -1,0 +1,67 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: aws-s3-multipart-upload-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/uploads}
+    username: ${DB_USER:uploads}
+    password: ${DB_PASS:uploads}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Keycloak realm issuer (OIDC discovery + JWKS)
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/s3-demo}
+
+app:
+  s3:
+    region: ${AWS_REGION:eu-central-1}
+    bucket: ${S3_BUCKET:s3-demo-uploads}
+    # For LocalStack set S3_ENDPOINT=http://localhost:4566
+    endpoint: ${S3_ENDPOINT:}
+    presign-expiration-minutes: ${S3_PRESIGN_MINUTES:20}
+
+    # Multipart constraints: 5 MiB minimum part size (except last). See AWS docs.
+    part-size-bytes: ${S3_PART_SIZE_BYTES:16777216} # 16 MiB
+    max-part-count: ${S3_MAX_PARTS:10000}
+
+    # Optional server-side encryption: NONE | AES256 | AWS_KMS
+    sse: ${S3_SSE:NONE}
+    kms-key-id: ${S3_KMS_KEY_ID:}
+
+  uploads:
+    max-file-size-bytes: ${UPLOAD_MAX_SIZE_BYTES:3221225472} # 3 GiB default
+    allowed-content-types: ${UPLOAD_ALLOWED_CONTENT_TYPES:video/*,application/octet-stream}
+    stale-abort-after-minutes: ${UPLOAD_STALE_ABORT_AFTER_MINUTES:1440}
+    cleanup-enabled: ${UPLOAD_CLEANUP_ENABLED:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.xrs.gateway: INFO

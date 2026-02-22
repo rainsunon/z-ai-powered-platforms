@@ -1,0 +1,59 @@
+.contentBox {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  height: calc(100vh - 280px);
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.chartItem {
+  height: 300px;
+  min-width: 300px;
+  margin: 10px;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.listChart {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.top10 {
+  padding: 15px 30px;
+  width: 400px;
+  height: 270px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.top10 span:first-child {
+  color: #3464e0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.keyValue {
+  display: flex;
+  justify-content: space-between;
+  width: 150px;
+  margin-top: 10px;
+  padding: 5px 0;
+}
+
+.lineChart {
+  margin: 10px;
+  width: 600px;
+  height: 200px;
+}
+
+.paginationBlock {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}

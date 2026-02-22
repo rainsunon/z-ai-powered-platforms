@@ -1,0 +1,63 @@
+.container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.sidebar {
+  position: relative;
+  height: 100%;
+  width: 190px;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  padding-top: 15px;
+}
+
+.sidebar > div {
+  flex: 1;
+  display: flex;
+  height: 50px;
+  align-items: center;
+  padding-left: 15px;
+  background-color: rgb(235, 239, 250);
+  font-family: PingFangSC-Semibold, PingFang SC;
+  color: #3464e0;
+  font-weight: 600;
+}
+
+.mainBox {
+  position: relative;
+  flex: 1;
+  padding: 15px;
+  background-color: rgb(238, 240, 245);
+  height: calc(100vh - 50px);
+  display: flex;
+  flex-direction: column;
+}
+
+.contentBox {
+  flex: 1;
+  background-color: #ffffff;
+  padding: 20px;
+  max-width: 600px;
+}
+
+.cellItem {
+  display: flex;
+  align-items: center;
+}
+
+.editButton {
+  position: absolute;
+  left: 35px;
+  top: 250px;
+}
+
+.formContainer {
+  padding-right: 30px;
+}
+
+/* Ant Design Descriptions customization */
+.contentBox :global(.ant-descriptions-item-label) {
+  width: 200px !important;
+}

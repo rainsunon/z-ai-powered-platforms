@@ -1,0 +1,8 @@
+{
+  "name": "LexGrid - North American Legal AI",
+  "description": "A comprehensive AI-powered legal platform for North American lawyers featuring document analysis, case management, and intelligent research.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

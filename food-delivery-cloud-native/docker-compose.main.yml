@@ -1,0 +1,176 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  discovery-service:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    container_name: discovery-service
+    depends_on:
+      - logstash
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  config-server:
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    depends_on:
+      - logstash
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: gateway-service
+    depends_on:
+      redis:
+        condition: service_started
+      logstash:
+        condition: service_started
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_CONFIG_IMPORT: ${SPRING_CONFIG_IMPORT}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+
+  order-service:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    env_file:
+      - .env.docker
+    container_name: order-service
+    depends_on:
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_started
+      logstash:
+        condition: service_started
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+
+  restaurant-service:
+    build:
+      context: .
+      dockerfile: restaurant-service/Dockerfile
+    env_file:
+      - .env.docker
+    container_name: restaurant-service
+    depends_on:
+      postgres:
+        condition: service_started
+      logstash:
+        condition: service_started
+      otel-collector:
+        condition: service_started
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+
+  delivery-service:
+    build:
+      context: .
+      dockerfile: delivery-service/Dockerfile
+    env_file:
+      - .env.docker
+    container_name: delivery-service
+    depends_on:
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+      logstash:
+        condition: service_started
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+
+  tracking-service:
+    build:
+      context: .
+      dockerfile: tracking-service/Dockerfile
+    env_file:
+      - .env.docker
+    container_name: tracking-service
+    depends_on:
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+      logstash:
+        condition: service_started
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "8084:8084"
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    env_file:
+      - .env.docker
+    container_name: notification-service
+    depends_on:
+      kafka:
+        condition: service_started
+      logstash:
+        condition: service_started
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "8085:8085"
+
+volumes:
+  pgdata:

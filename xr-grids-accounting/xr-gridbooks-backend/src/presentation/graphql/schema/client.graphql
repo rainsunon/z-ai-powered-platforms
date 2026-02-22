@@ -1,0 +1,103 @@
+type Client {
+  id: ID!
+  userId: ID!
+  name: String!
+  contact: ContactInfo!
+  preferences: ClientPreferences!
+  metadata: JSON!
+  totalOutstanding: Float!
+  credit: Float!
+  initials: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ContactInfo {
+  firstName: String
+  lastName: String
+  email: String!
+  phone: String
+  businessPhone: String
+  mobilePhone: String
+  address: Address
+}
+
+type ClientPreferences {
+  sendReminders: Boolean!
+  lateFees: Boolean!
+  currency: String!
+  language: String!
+  attachments: Boolean!
+  customSettings: JSON
+}
+
+type Address {
+  street: String
+  city: String
+  state: String
+  zip: String
+  country: String
+}
+
+input CreateClientInput {
+  firstName: String
+  lastName: String
+  companyName: String
+  email: String!
+  phone: String
+  businessPhone: String
+  mobilePhone: String
+  address: AddressInput
+  sendReminders: Boolean
+  lateFees: Boolean
+  currency: String
+  language: String
+  attachments: Boolean
+  tags: [String!]
+  customFields: JSON
+}
+
+input AddressInput {
+  street: String
+  city: String
+  state: String
+  zip: String
+  country: String
+}
+
+input UpdateClientInput {
+  name: String
+  contact: ContactInfoInput
+  preferences: ClientPreferencesInput
+  metadata: JSON
+}
+
+input ContactInfoInput {
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  businessPhone: String
+  mobilePhone: String
+  address: AddressInput
+}
+
+input ClientPreferencesInput {
+  sendReminders: Boolean
+  lateFees: Boolean
+  currency: String
+  language: String
+  attachments: Boolean
+}
+
+type Query {
+  client(id: ID!): Client
+  clients: [Client!]!
+  clientsByPreference(key: String!, value: JSON!): [Client!]!
+}
+
+type Mutation {
+  createClient(input: CreateClientInput!): Client!
+  updateClient(id: ID!, input: UpdateClientInput!): Client!
+  deleteClient(id: ID!): Boolean!
+}

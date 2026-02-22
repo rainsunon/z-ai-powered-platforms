@@ -25,7 +25,7 @@ Spring Boot microservice implementing the RAG (Retrieval-Augmented Generation) p
 
 ## Tech Stack
 
-- Java 17
+- Java21
 - Spring Boot 3
 - Spring WebFlux (reactive for streaming)
 - AWS Bedrock SDK (Claude, Titan Embeddings)

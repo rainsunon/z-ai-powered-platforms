@@ -1,0 +1,232 @@
+
+import React, { useState } from 'react';
+import Layout from '../components/Layout';
+
+interface BillingProps {
+  theme?: string;
+  toggleTheme?: () => void;
+}
+
+type BillingCycle = 'monthly' | 'yearly';
+
+const Billing: React.FC<BillingProps> = ({ theme, toggleTheme }) => {
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('yearly');
+  const [isSubscribing, setIsSubscribing] = useState<string | null>(null);
+  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
+  const [paymentMethodUpdated, setPaymentMethodUpdated] = useState(false);
+
+  const plans = [
+    { 
+      id: 'basic',
+      name: 'Basic', 
+      monthlyPrice: 89, 
+      yearlyPrice: 71,
+      desc: 'For solo practitioners starting with AI.', 
+      features: ['AI Legal Research (Canada)', '50 Case Analysis/mo', 'Standard Drafting'], 
+      current: true 
+    },
+    { 
+      id: 'professional',
+      name: 'Professional', 
+      monthlyPrice: 199, 
+      yearlyPrice: 159,
+      desc: 'Complete cross-border legal automation.', 
+      features: ['USA & Canada Full Access', 'Unlimited Analysis', 'Advanced AI Briefing', 'Priority Support', 'Up to 3 Team Members'], 
+      popular: true 
+    },
+    { 
+      id: 'enterprise',
+      name: 'Enterprise', 
+      price: 'Custom', 
+      desc: 'Bespoke solutions for large firms.', 
+      features: ['Custom API Integrations', 'Single Sign-On (SSO)', 'On-premise Deployment', 'Dedicated Compliance Officer'] 
+    }
+  ];
+
+  const handleUpdatePayment = () => {
+    setIsUpdatingPayment(true);
+    // Simulate a secure redirect and update process
+    setTimeout(() => {
+      setIsUpdatingPayment(false);
+      setPaymentMethodUpdated(true);
+      alert("Payment method successfully updated. Your account is now in good standing.");
+    }, 2000);
+  };
+
+  const handleSubscribe = (planId: string) => {
+    setIsSubscribing(planId);
+    setTimeout(() => {
+      setIsSubscribing(null);
+      alert(`Success! You have successfully upgraded to the ${planId.toUpperCase()} plan. Your new billing cycle starts immediately.`);
+    }, 1500);
+  };
+
+  const handleContactSales = () => {
+    const subject = encodeURIComponent("Inquiry about LexGrid Enterprise Plan");
+    const body = encodeURIComponent("Hello LexGrid Sales Team,\n\nI am interested in the Enterprise plan for my firm. Please provide more information about on-premise deployment and SSO integration.\n\nThank you.");
+    window.location.href = `mailto:sales@lexgrid.ai?subject=${subject}&body=${body}`;
+  };
+
+  return (
+    <Layout theme={theme} toggleTheme={toggleTheme}>
+      <div className="bg-brand dark:bg-slate-950 min-h-screen p-10 font-sans transition-colors duration-300">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-white">
+            <h1 className="text-4xl font-extrabold mb-4 tracking-tighter uppercase">Subscription & Billing</h1>
+            <p className="text-white/70 dark:text-slate-400 max-w-2xl text-lg font-medium leading-relaxed">Manage your legal AI toolkit, view upcoming invoices, and adjust your jurisdiction settings for Canada and USA operations.</p>
+            
+            {!paymentMethodUpdated ? (
+              <div className="mt-10 p-6 bg-white/10 dark:bg-slate-900 border border-white/20 dark:border-slate-800 rounded-3xl flex items-center gap-6 backdrop-blur-xl group transition-all animate-in fade-in slide-in-from-top-4">
+                <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-white/20 dark:bg-slate-800 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                  <span className={`material-icons text-white text-2xl ${isUpdatingPayment ? 'animate-spin' : ''}`}>
+                    {isUpdatingPayment ? 'sync' : 'warning'}
+                  </span>
+                </div>
+                <div className="flex-grow">
+                  <h4 className="text-white font-black text-sm uppercase tracking-tighter">Payment Method Expiring</h4>
+                  <p className="text-white/60 dark:text-slate-500 text-xs mt-1 font-bold tracking-widest uppercase">Your Visa ending in 4242 expires next month. Update it to avoid service interruption.</p>
+                </div>
+                <button 
+                  disabled={isUpdatingPayment}
+                  onClick={handleUpdatePayment}
+                  className={`px-8 py-3 bg-white text-brand dark:text-slate-900 text-xs font-black rounded-xl hover:bg-slate-100 active:scale-95 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-2 ${isUpdatingPayment ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isUpdatingPayment ? 'Securing...' : 'Update Now'}
+                </button>
+              </div>
+            ) : (
+              <div className="mt-10 p-6 bg-emerald-500/20 dark:bg-emerald-900/40 border border-emerald-500/30 rounded-3xl flex items-center gap-6 backdrop-blur-xl animate-in fade-in zoom-in-95">
+                <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-xl shadow-emerald-500/20">
+                  <span className="material-icons text-white text-2xl">check_circle</span>
+                </div>
+                <div className="flex-grow">
+                  <h4 className="text-white font-black text-sm uppercase tracking-tighter">Account in Good Standing</h4>
+                  <p className="text-white/70 text-xs mt-1 font-bold tracking-widest uppercase">Your payment information is up to date. Next billing date: Nov 01, 2024.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col items-center">
+            <div className="bg-white/10 dark:bg-slate-900 backdrop-blur-2xl border border-white/20 dark:border-slate-800 p-2 rounded-2xl flex items-center gap-2 shadow-2xl">
+              <button 
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-8 py-3 text-xs font-black rounded-xl transition-all uppercase tracking-widest ${billingCycle === 'monthly' ? 'bg-white dark:bg-slate-800 text-brand dark:text-primary-400 shadow-2xl' : 'text-white/60 dark:text-slate-500 hover:text-white'}`}
+              >
+                Monthly
+              </button>
+              <button 
+                onClick={() => setBillingCycle('yearly')}
+                className={`px-8 py-3 text-xs font-black rounded-xl transition-all uppercase tracking-widest relative ${billingCycle === 'yearly' ? 'bg-white dark:bg-slate-800 text-brand dark:text-primary-400 shadow-2xl' : 'text-white/60 dark:text-slate-500 hover:text-white'}`}
+              >
+                Yearly <span className="ml-2 text-[8px] bg-brand text-white dark:bg-primary-500 px-2 py-0.5 rounded-full border border-white/10">Save 20%</span>
+              </button>
+            </div>
+            <p className="mt-4 text-[9px] text-white/40 dark:text-slate-600 uppercase tracking-[0.4em] font-black">Prices in USD</p>
+          </div>
+
+          {/* Pricing Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {plans.map((plan, i) => {
+              const isEnterprise = plan.price === 'Custom';
+              const displayPrice = isEnterprise 
+                ? 'Custom' 
+                : billingCycle === 'monthly' ? `$${plan.monthlyPrice}` : `$${plan.yearlyPrice}`;
+
+              return (
+                <div key={plan.id} className={`rounded-3xl p-10 flex flex-col transition-all relative group shadow-3xl ${plan.popular ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white scale-105 z-10 border-4 border-primary dark:border-primary-500' : 'bg-primary dark:bg-slate-900 text-white border border-white/10 dark:border-slate-800'}`}>
+                  {plan.popular && (
+                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary dark:bg-primary-500 text-white px-6 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.3em] shadow-xl">
+                      Most Popular
+                    </div>
+                  )}
+                  <div className="mb-10">
+                    <h3 className={`text-2xl font-black mb-3 uppercase tracking-tighter ${plan.popular ? 'text-primary dark:text-primary-400' : ''}`}>{plan.name}</h3>
+                    <p className={`text-sm font-bold uppercase tracking-tighter opacity-70`}>{plan.desc}</p>
+                  </div>
+                  <div className="mb-10 flex items-baseline gap-1">
+                    <span className="text-5xl font-black tracking-tighter">{displayPrice}</span>
+                    {!isEnterprise && <span className="opacity-60 text-sm font-bold">/mo</span>}
+                  </div>
+                  <ul className="space-y-5 mb-12 flex-grow">
+                    {plan.features.map((f, j) => (
+                      <li key={j} className="flex items-start gap-3 text-[11px] font-bold uppercase tracking-widest opacity-90">
+                        <span className={`material-icons text-sm mt-0.5 ${plan.popular ? 'text-primary dark:text-primary-400' : 'text-white/60 dark:text-slate-500'}`}>check_circle</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <button 
+                    disabled={plan.current || isSubscribing !== null}
+                    onClick={() => {
+                      if (isEnterprise) {
+                        handleContactSales();
+                      } else {
+                        handleSubscribe(plan.id);
+                      }
+                    }}
+                    className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-2xl flex items-center justify-center gap-2 ${
+                      plan.current 
+                        ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-default' 
+                        : plan.popular 
+                          ? 'bg-primary dark:bg-primary-600 text-white hover:brightness-110 transform hover:-translate-y-1' 
+                          : 'border border-white/30 dark:border-slate-700 text-white hover:bg-white/10 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {isSubscribing === plan.id && <span className="material-icons text-sm animate-spin">sync</span>}
+                    {plan.current ? 'Current Plan' : isEnterprise ? 'Contact Sales' : (isSubscribing === plan.id ? 'Processing...' : 'Subscribe')}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* History Table */}
+          <div className="bg-primary/90 dark:bg-slate-900 backdrop-blur-2xl border border-white/10 dark:border-slate-800 rounded-3xl overflow-hidden shadow-3xl">
+            <div className="p-8 border-b border-white/10 dark:border-slate-800 flex justify-between items-center">
+              <h3 className="font-black text-white uppercase tracking-widest text-sm">Billing History</h3>
+              <button className="text-[10px] text-white/50 flex items-center gap-2 hover:text-white transition-colors font-black uppercase tracking-widest">
+                <span className="material-icons text-sm">filter_list</span> Filter
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-white">
+                <thead>
+                  <tr className="bg-white/5 dark:bg-slate-800/50 text-white/40 dark:text-slate-600 text-[9px] uppercase tracking-[0.3em] font-black">
+                    <th className="px-8 py-5">Invoice ID</th>
+                    <th className="px-8 py-5">Date</th>
+                    <th className="px-8 py-5">Amount</th>
+                    <th className="px-8 py-5">Status</th>
+                    <th className="px-8 py-5 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 dark:divide-slate-800">
+                  {[4, 3, 2].map((num) => (
+                    <tr key={num} className="hover:bg-white/5 dark:hover:bg-slate-800 transition-colors group">
+                      <td className="px-8 py-6 font-black tracking-tighter opacity-90">INV-2024-00{num}</td>
+                      <td className="px-8 py-6 opacity-60 font-bold uppercase text-[11px]">Oct 01, 2023</td>
+                      <td className="px-8 py-6 font-black text-lg tracking-tighter">$89.00</td>
+                      <td className="px-8 py-6">
+                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-white/20 dark:bg-slate-800 text-white">Paid</span>
+                      </td>
+                      <td className="px-8 py-6 text-right">
+                        <button className="w-10 h-10 rounded-full bg-white/10 dark:bg-slate-800 text-white hover:bg-primary dark:hover:bg-primary-600 transition-all flex items-center justify-center ml-auto">
+                          <span className="material-icons text-lg">file_download</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="p-6 bg-white/5 dark:bg-slate-900/50 text-center border-t border-white/5 dark:border-slate-800">
+              <button className="text-[10px] text-white/40 hover:text-white dark:hover:text-slate-400 font-black uppercase tracking-[0.3em] transition-colors">Load More History</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default Billing;

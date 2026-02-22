@@ -1,0 +1,53 @@
+server:
+  port: 8094
+
+spring:
+  application:
+    name: AI-ML-SERVICE
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ai-ml-service
+      auto-offset-reset: earliest
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+ai:
+  model:
+    active-primary: model-v1
+    active-secondary: model-v2
+  chat:
+    default-provider: auto
+    gemini:
+      enabled: true
+      api-key: ${GEMINI_API_KEY:}
+      model: ${GEMINI_MODEL:gemini-1.5-flash}
+      endpoint-template: ${GEMINI_ENDPOINT_TEMPLATE:https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent}
+    mcp:
+      enabled: true
+      endpoint: ${MCP_CHAT_ENDPOINT:}
+      auth-token: ${MCP_CHAT_AUTH_TOKEN:}
+      api-key: ${MCP_API_KEY:}
+      api-key-header: ${MCP_API_KEY_HEADER:X-API-Key}
+  ab-test:
+    split-percentage: 50
+  moderation:
+    blocked-keywords: violence,terrorism,hate,nsfw,abuse
+  async:
+    processing-delay-ms: 800
+  observability:
+    inference-latency-threshold-ms: 5000

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: api-gateway
+description: API Gateway Service Helm Chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - ecommerce
+  - api-gateway
+  - spring-boot
+maintainers:
+  - name: E-commerce Team
+    email: dev@ecommerce.com

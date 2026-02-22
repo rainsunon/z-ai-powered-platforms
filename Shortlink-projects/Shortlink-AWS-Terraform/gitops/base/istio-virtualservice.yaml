@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vs-shortlink
+  namespace: istio-system
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - shortlink-gateway
+  http:
+    # Route to Spring Gateway (application-level gateway)
+    - match:
+        - uri:
+            prefix: /api/shortlink
+      route:
+        - destination:
+            host: gateway.shortlink.svc.cluster.local
+            port:
+              number: 8080
+          weight: 100

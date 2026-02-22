@@ -1,0 +1,51 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: rate-limiter-mtls
+  namespace: food-delivery
+spec:
+  selector:
+    matchLabels:
+      app: rate-limiter-service
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: rate-limiter-authz
+  namespace: food-delivery
+spec:
+  selector:
+    matchLabels:
+      app: rate-limiter-service
+  action: ALLOW
+  rules:
+  # Allow health checks
+  - to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/health", "/ready"]
+  # Allow rate limit checks from specific services
+  - from:
+    - source:
+        principals:
+        - "cluster.local/ns/food-delivery/sa/api-gateway"
+        - "cluster.local/ns/food-delivery/sa/auth-service"
+        - "cluster.local/ns/food-delivery/sa/order-service"
+        - "cluster.local/ns/food-delivery/sa/restaurant-service"
+        - "cluster.local/ns/food-delivery/sa/payment-service"
+        - "cluster.local/ns/food-delivery/sa/admin-service"
+    to:
+    - operation:
+        methods: ["POST"]
+        paths: ["/api/rate-limiter/check"]
+  # Allow admin operations from admin service only
+  - from:
+    - source:
+        principals:
+        - "cluster.local/ns/food-delivery/sa/admin-service"
+    to:
+    - operation:
+        methods: ["GET", "POST", "DELETE"]
+        paths: ["/api/rate-limiter/rules*"]

@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rate-limiter-config
+  namespace: food-delivery
+data:
+  PORT: "3000"
+  REDIS_URL: "redis://redis-service:6379"
+  DATABASE_URL: "postgresql://postgres:postgres@postgres-service:5432/rate_limiter_db"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rate-limiter-service
+  namespace: food-delivery
+  labels:
+    app: rate-limiter-service
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rate-limiter-service
+  template:
+    metadata:
+      labels:
+        app: rate-limiter-service
+        version: v1
+    spec:
+      containers:
+      - name: rate-limiter-service
+        image: rate-limiter-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: rate-limiter-config
+              key: PORT
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: rate-limiter-config
+              key: REDIS_URL
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: rate-limiter-secrets
+              key: DATABASE_URL
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rate-limiter-service
+  namespace: food-delivery
+  labels:
+    app: rate-limiter-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: rate-limiter-service
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rate-limiter-secrets
+  namespace: food-delivery
+type: Opaque
+stringData:
+  DATABASE_URL: "postgresql://postgres:postgres@postgres-service:5432/rate_limiter_db"
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: rate-limiter-pdb
+  namespace: food-delivery
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: rate-limiter-service
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: rate-limiter-hpa
+  namespace: food-delivery
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: rate-limiter-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

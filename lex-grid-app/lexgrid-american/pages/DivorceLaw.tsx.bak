@@ -1,0 +1,337 @@
+
+import React, { useState, useMemo, useEffect } from 'react';
+import Layout from '../components/Layout';
+
+interface DivorceLawProps {
+  theme?: string;
+  toggleTheme?: () => void;
+}
+
+interface Page {
+  id: number;
+  content: string;
+}
+
+interface Section {
+  id: string;
+  title: string;
+  pages: Page[];
+}
+
+interface Chapter {
+  id: string;
+  title: string;
+  sections: Section[];
+}
+
+const MOCK_BOOK: Chapter[] = [
+  {
+    id: 'ch1',
+    title: 'Chapter 1: Jurisdiction and Conflict of Laws',
+    sections: [
+      {
+        id: 's1-1',
+        title: 'Section 1.1: Residency Requirements',
+        pages: [
+          { id: 1, content: "Residency requirements for divorce vary significantly across North American jurisdictions. In most US states, at least one spouse must have been a resident of the state for a continuous period, typically six months to one year, immediately preceding the filing of the petition. In Canada, the Divorce Act requires that either spouse has been 'ordinarily resident' in the province for at least one year before the commencement of the proceeding." },
+          { id: 2, content: "Establishing jurisdiction is the primary step in any dissolution proceeding. Failure to meet residency thresholds can lead to dismissal of the case. Practitioners must verify utility bills, tax filings, and driver's licenses to substantiate residency claims. Special considerations apply to military personnel stationed outside their home state or province." }
+        ]
+      },
+      {
+        id: 's1-2',
+        title: 'Section 1.2: International Service of Process',
+        pages: [
+          { id: 3, content: "When one spouse resides in a different country, the Hague Convention on the Service Abroad of Judicial and Extrajudicial Documents in Civil or Commercial Matters applies. This treaty streamlines the process but requires adherence to specific forms and translations. Service must be made through the Central Authority of the receiving state." }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'ch2',
+    title: 'Chapter 2: Equitable Distribution & Community Property',
+    sections: [
+      {
+        id: 's2-1',
+        title: 'Section 2.1: Defining Marital Assets',
+        pages: [
+          { id: 4, content: "Marital assets generally include all property acquired during the marriage, regardless of whose name is on the title. Exceptions include inheritances and gifts from third parties, provided they have not been 'commingled' with marital funds. The distinction between separate and marital property is the most litigated aspect of asset division." },
+          { id: 5, content: "The 'Equitable Distribution' model used in most US states and Canadian provinces does not mean 'equal' distribution. Courts look at factors like the duration of the marriage, each spouse's contribution (including non-financial), and their future earning potential. In Community Property states (e.g., California), the split is strictly 50/50 for marital assets." }
+        ]
+      },
+      {
+        id: 's2-2',
+        title: 'Section 2.2: Valuation of Professional Practices',
+        pages: [
+          { id: 6, content: "Valuing a professional practice or a small business requires forensic accounting. Goodwill—both personal and enterprise—must be carefully calculated. Courts often employ the 'capitalization of excess earnings' method to determine the value that should be considered a marital asset." }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'ch3',
+    title: 'Chapter 3: Spousal Support and Alimony',
+    sections: [
+      {
+        id: 's3-1',
+        title: 'Section 3.1: Duration and Amount',
+        pages: [
+          { id: 7, content: "Spousal support is intended to mitigate the economic impact of divorce. In Canada, the Spousal Support Advisory Guidelines (SSAG) provide a formula based on income and length of marriage. In the USA, many states have moved away from permanent alimony towards 'rehabilitative' support, designed to help a spouse become self-sufficient." }
+        ]
+      }
+    ]
+  }
+];
+
+const DivorceLaw: React.FC<DivorceLawProps> = ({ theme, toggleTheme }) => {
+  const [activeChapterIndex, setActiveChapterIndex] = useState(0);
+  const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+  const [activePageIndex, setActivePageIndex] = useState(0);
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [gotoValue, setGotoValue] = useState('');
+
+  // Flat list of all pages for easy "Go To" and navigation
+  const allPages = useMemo(() => {
+    const pages: { chapter: number, section: number, page: number, absolutePage: number, title: string, content: string }[] = [];
+    let count = 1;
+    MOCK_BOOK.forEach((ch, chIdx) => {
+      ch.sections.forEach((s, sIdx) => {
+        s.pages.forEach((p, pIdx) => {
+          pages.push({
+            chapter: chIdx,
+            section: sIdx,
+            page: pIdx,
+            absolutePage: count++,
+            title: `${ch.title} > ${s.title}`,
+            content: p.content
+          });
+        });
+      });
+    });
+    return pages;
+  }, []);
+
+  const totalPages = allPages.length;
+  const currentPageObj = allPages.find(p => 
+    p.chapter === activeChapterIndex && 
+    p.section === activeSectionIndex && 
+    p.page === activePageIndex
+  );
+
+  const handleNext = () => {
+    if (!currentPageObj || currentPageObj.absolutePage >= totalPages) return;
+    const next = allPages[currentPageObj.absolutePage];
+    setActiveChapterIndex(next.chapter);
+    setActiveSectionIndex(next.section);
+    setActivePageIndex(next.page);
+  };
+
+  const handlePrev = () => {
+    if (!currentPageObj || currentPageObj.absolutePage <= 1) return;
+    const prev = allPages[currentPageObj.absolutePage - 2];
+    setActiveChapterIndex(prev.chapter);
+    setActiveSectionIndex(prev.section);
+    setActivePageIndex(prev.page);
+  };
+
+  const handleGoTo = (e: React.FormEvent) => {
+    e.preventDefault();
+    const pageNum = parseInt(gotoValue);
+    if (isNaN(pageNum) || pageNum < 1 || pageNum > totalPages) {
+      alert('Invalid page number');
+      return;
+    }
+    const target = allPages[pageNum - 1];
+    setActiveChapterIndex(target.chapter);
+    setActiveSectionIndex(target.section);
+    setActivePageIndex(target.page);
+    setGotoValue('');
+  };
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return allPages.filter(p => 
+      p.content.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      p.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, allPages]);
+
+  return (
+    <Layout theme={theme} toggleTheme={toggleTheme}>
+      <div className="flex h-[calc(100vh-80px)] overflow-hidden bg-white dark:bg-slate-950 transition-colors">
+        
+        {/* Table of Contents Sidebar */}
+        <aside className="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900/50">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">Legal Manual</h2>
+            <h1 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tighter">Cross-Border Dissolution: A Practitioner's Manual</h1>
+          </div>
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+            {MOCK_BOOK.map((chapter, chIdx) => (
+              <div key={chapter.id} className="space-y-1">
+                <button 
+                  onClick={() => { setActiveChapterIndex(chIdx); setActiveSectionIndex(0); setActivePageIndex(0); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-black uppercase tracking-tight transition-colors ${activeChapterIndex === chIdx ? 'bg-primary text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}`}
+                >
+                  {chapter.title}
+                </button>
+                <div className="ml-4 border-l-2 border-slate-200 dark:border-slate-800 pl-4 space-y-1 mt-1">
+                  {chapter.sections.map((section, sIdx) => (
+                    <button 
+                      key={section.id}
+                      onClick={() => { setActiveChapterIndex(chIdx); setActiveSectionIndex(sIdx); setActivePageIndex(0); }}
+                      className={`w-full text-left px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors ${activeChapterIndex === chIdx && activeSectionIndex === sIdx ? 'text-primary' : 'text-slate-400 dark:text-slate-500 hover:text-primary'}`}
+                    >
+                      {section.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        {/* Reader Area */}
+        <div className="flex-1 flex flex-col relative">
+          
+          {/* Reader Header */}
+          <header className="h-16 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <button onClick={handlePrev} disabled={currentPageObj?.absolutePage === 1} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30">
+                  <span className="material-icons text-lg">chevron_left</span>
+                </button>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Page <span className="text-slate-900 dark:text-white">{currentPageObj?.absolutePage}</span> of {totalPages}
+                </span>
+                <button onClick={handleNext} disabled={currentPageObj?.absolutePage === totalPages} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30">
+                  <span className="material-icons text-lg">chevron_right</span>
+                </button>
+              </div>
+              <form onSubmit={handleGoTo} className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-6">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Go To:</span>
+                <input 
+                  type="text" 
+                  className="w-12 h-8 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-xs font-black text-center text-slate-900 dark:text-white focus:ring-1 focus:ring-primary" 
+                  placeholder="0"
+                  value={gotoValue}
+                  onChange={(e) => setGotoValue(e.target.value)}
+                />
+              </form>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <button 
+                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isSearchOpen ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-primary'}`}
+                >
+                  <span className="material-icons text-lg">search</span>
+                </button>
+                
+                {/* Search Dropdown */}
+                {isSearchOpen && (
+                  <div className="absolute top-12 right-0 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-3xl border border-slate-200 dark:border-slate-800 p-4 animate-in fade-in slide-in-from-top-2 z-50">
+                    <input 
+                      autoFocus
+                      type="text" 
+                      placeholder="Search within book..." 
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <div className="mt-4 max-h-60 overflow-y-auto custom-scrollbar space-y-2">
+                      {searchQuery ? (
+                        searchResults.length > 0 ? (
+                          searchResults.map((res, i) => (
+                            <button 
+                              key={i}
+                              onClick={() => {
+                                setActiveChapterIndex(res.chapter);
+                                setActiveSectionIndex(res.section);
+                                setActivePageIndex(res.page);
+                                setIsSearchOpen(false);
+                              }}
+                              className="w-full text-left p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                            >
+                              <p className="text-[9px] font-black text-primary uppercase mb-1">Page {res.absolutePage}</p>
+                              <p className="text-[11px] font-bold text-slate-800 dark:text-slate-200 line-clamp-2 italic">"...{res.content.substring(0, 80)}..."</p>
+                            </button>
+                          ))
+                        ) : (
+                          <p className="text-center py-4 text-[10px] text-slate-400 font-black uppercase tracking-widest">No results found</p>
+                        )
+                      ) : (
+                        <p className="text-center py-4 text-[10px] text-slate-400 font-black uppercase tracking-widest italic">Type to search</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <button className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center hover:text-primary transition-colors">
+                <span className="material-icons text-lg">bookmark_border</span>
+              </button>
+              <button className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center hover:text-primary transition-colors">
+                <span className="material-icons text-lg">print</span>
+              </button>
+            </div>
+          </header>
+
+          {/* Book Content */}
+          <main className="flex-1 overflow-y-auto custom-scrollbar p-16 bg-slate-50/30 dark:bg-slate-950 transition-colors">
+            <div className="max-w-2xl mx-auto bg-white dark:bg-slate-900 p-16 rounded-[40px] shadow-2xl border border-slate-100 dark:border-slate-800 min-h-full animate-in fade-in zoom-in-95 duration-500">
+              <div className="space-y-12">
+                <div className="pb-8 border-b border-slate-100 dark:border-slate-800">
+                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">
+                    {MOCK_BOOK[activeChapterIndex].title}
+                  </p>
+                  <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight">
+                    {MOCK_BOOK[activeChapterIndex].sections[activeSectionIndex].title}
+                  </h2>
+                </div>
+                
+                <div className="prose dark:prose-invert max-w-none">
+                  <p className="text-lg leading-loose text-slate-700 dark:text-slate-300 font-serif font-medium tracking-wide">
+                    {MOCK_BOOK[activeChapterIndex].sections[activeSectionIndex].pages[activePageIndex].content}
+                  </p>
+                  
+                  {/* Decorative element for long text */}
+                  <div className="mt-12 p-8 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+                      <span className="material-icons text-sm">sticky_note_2</span> Practitioner's Note
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold italic leading-relaxed">
+                      "Always cross-reference Section 12 with provincial guidelines if filing in Ontario or British Columbia, as jurisdictional conflicts often arise in multi-property division."
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          {/* Reader Footer Controls */}
+          <div className="h-16 border-t border-slate-200 dark:border-slate-800 flex items-center justify-center gap-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+             <button 
+               onClick={handlePrev}
+               disabled={currentPageObj?.absolutePage === 1}
+               className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-primary transition-colors disabled:opacity-20"
+             >
+               <span className="material-icons text-sm">arrow_back</span> Previous Page
+             </button>
+             <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+             <button 
+               onClick={handleNext}
+               disabled={currentPageObj?.absolutePage === totalPages}
+               className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-primary transition-colors disabled:opacity-20"
+             >
+               Next Page <span className="material-icons text-sm">arrow_forward</span>
+             </button>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default DivorceLaw;

@@ -1,0 +1,78 @@
+.layoutContainer {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  color: rgba(0, 0, 0, 0.85);
+  background-color: #252b30;
+  padding: 0 0 0 20px;
+  height: 54px;
+}
+
+.headerContent {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 15px;
+  font-weight: 600;
+  color: #e8e8e8;
+  font-family: Helvetica, Tahoma, Arial, 'PingFang SC', 'Hiragino Sans GB',
+    'Heiti SC', 'Microsoft YaHei', 'WenQuanYi Micro Hei';
+  cursor: pointer;
+}
+
+.logo:hover {
+  color: #fff;
+}
+
+.linkSpan {
+  color: #fff;
+  opacity: 0.6;
+  margin-right: 30px;
+  font-size: 16px;
+  font-family: 'Helvetica Neue', Helvetica, STHeiTi, Arial, sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.linkSpan:hover {
+  text-decoration: underline !important;
+  opacity: 1;
+  color: #fff;
+}
+
+.block {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border: 0px;
+}
+
+.nameSpan {
+  color: #fff;
+  opacity: 0.6;
+  margin-right: 30px;
+  font-size: 12px;
+  font-family: 'Helvetica Neue', Helvetica, STHeiTi, Arial, sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.contentBox {
+  height: calc(100vh - 54px);
+  background-color: white;
+  overflow: auto;
+}
+
+.contentSpace {
+  height: 100%;
+}

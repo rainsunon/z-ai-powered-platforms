@@ -1,0 +1,46 @@
+# Prod overlay: uses emptyDir instead of PVCs (ephemeral storage, suitable for local/dev).
+# User config is directly mounted from ConfigMap (no initContainer needed).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse
+  namespace: shortlink
+spec:
+  replicas: 1
+  template:
+    spec:
+      volumes:
+        - name: clickhouse-config
+          configMap:
+            name: clickhouse-config
+        - name: clickhouse-data
+          emptyDir: {}
+        - name: clickhouse-logs
+          emptyDir: {}
+      containers:
+        - name: clickhouse-server
+          volumeMounts:
+            - name: clickhouse-data
+              mountPath: /var/lib/clickhouse
+            - name: clickhouse-config
+              mountPath: /etc/clickhouse-server/config.d/config.xml
+              subPath: config.xml
+            - name: clickhouse-config
+              mountPath: /etc/clickhouse-server/users.d/users.xml
+              subPath: users.xml
+            - name: clickhouse-logs
+              mountPath: /var/log/clickhouse-server
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          env:
+            - name: CLICKHOUSE_DB
+              value: "default"
+            - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
+              value: "1"
+  # Empty list: prod uses emptyDir (above), not PVCs. If cluster already had PVCs, delete StatefulSet first: kubectl delete sts clickhouse -n shortlink
+  volumeClaimTemplates: []

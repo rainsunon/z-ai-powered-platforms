@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/adaptive-rate-limiter-bot-defense.main.iml" filepath="$PROJECT_DIR$/.idea/modules/adaptive-rate-limiter-bot-defense.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/booking-apartments.main.iml" filepath="$PROJECT_DIR$/.idea/modules/booking-apartments.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/secure-file-storage.main.iml" filepath="$PROJECT_DIR$/.idea/modules/secure-file-storage.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/secure-multi-tenant-api-platform.main.iml" filepath="$PROJECT_DIR$/.idea/modules/secure-multi-tenant-api-platform.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/strong-idempotent-payments-api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/strong-idempotent-payments-api.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/yx-new-pro.iml" filepath="$PROJECT_DIR$/.idea/yx-new-pro.iml" />
+    </modules>
+  </component>
+</project>

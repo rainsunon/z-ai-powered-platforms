@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+  namespace: ecommerce
+  labels:
+    app: analytics-service
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: analytics-service
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+        version: v1
+    spec:
+      containers:
+      - name: analytics-service
+        image: ecommerce/analytics-service:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8093
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: common-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: EUREKA_URI
+          valueFrom:
+            configMapKeyRef:
+              name: common-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8093
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8093
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-service
+  namespace: ecommerce
+  labels:
+    app: analytics-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8093
+    targetPort: 8093
+    protocol: TCP
+    name: http
+  selector:
+    app: analytics-service

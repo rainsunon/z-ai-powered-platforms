@@ -1,0 +1,38 @@
+spring:
+  kafka:
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        enable.metrics.push: false
+        spring.json.trusted.packages: "com.baskaaleksander.nuvine.infrastructure.messaging.dto"
+        spring.json.type.mapping: >
+          emailVerificationEvent:com.baskaaleksander.nuvine.infrastructure.messaging.dto.EmailVerificationEvent,
+          passwordResetEvent:com.baskaaleksander.nuvine.infrastructure.messaging.dto.PasswordResetEvent,
+          userRegisteredEvent:com.baskaaleksander.nuvine.infrastructure.messaging.dto.UserRegisteredEvent,
+          workspaceMemberAddedEvent:com.baskaaleksander.nuvine.infrastructure.messaging.dto.WorkspaceMemberAddedEvent,
+          paymentActionRequiredEvent:com.baskaaleksander.nuvine.infrastructure.messaging.dto.PaymentActionRequiredEvent,
+          workspaceMemberInvitedEvent:com.baskaaleksander.nuvine.infrastructure.messaging.dto.WorkspaceMemberInvitedEvent
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.metrics.push: false
+        spring.json.add.type.headers: true
+  mail:
+    properties:
+      mail:
+        smtp:
+          trust: '*'
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+
+server:
+  port: 8050

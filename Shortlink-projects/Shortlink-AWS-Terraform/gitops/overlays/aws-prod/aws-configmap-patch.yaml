@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-config
+  namespace: shortlink
+data:
+  # AWS RDS Configuration
+  RDS_ENDPOINT: "${RDS_ENDPOINT}"  # Will be replaced by ArgoCD or CI/CD
+  RDS_PORT: "5432"
+  RDS_DB_NAME: "shortlink"
+  
+  # AWS Kinesis Configuration
+  KINESIS_STREAM_NAME: "shortlink-stats-events"
+  KINESIS_REGION: "us-west-2"
+  
+  # AWS ElastiCache Redis Configuration
+  REDIS_ENDPOINT: "${REDIS_ENDPOINT}"  # Will be replaced by ArgoCD or CI/CD
+  REDIS_PORT: "6379"
+  
+  # EKS Cluster Configuration
+  CLUSTER_NAME: "shortlink-eks-prod"
+  AWS_REGION: "us-west-2"

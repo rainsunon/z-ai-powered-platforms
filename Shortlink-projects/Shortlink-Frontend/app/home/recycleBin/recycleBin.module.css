@@ -1,0 +1,144 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding: 16px;
+  background-color: #eef0f5;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 4px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.header span {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+}
+
+.tableBox {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 4px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.paginationBlock {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.tableLinkBox {
+  display: flex;
+  align-items: center;
+}
+
+.nameDate {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
+.nameDate > span:first-child {
+  font-size: 15px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.time span {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.expiredBadge {
+  border: 1.5px solid rgb(253, 81, 85);
+  border-radius: 8px;
+  line-height: 20px;
+  font-size: 12px;
+  transform: scale(0.9);
+  color: rgb(253, 81, 85);
+  padding: 0 4px;
+  background-color: rgba(250, 210, 211);
+  font-weight: bolder;
+}
+
+.tableUrlBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.tableUrlBox > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 250px;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 12px;
+}
+
+.timesBox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.todayBox,
+.totalBox {
+  display: flex;
+  gap: 10px;
+}
+
+.todayBox span:first-child,
+.totalBox span:first-child {
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 13px;
+}
+
+.todayBox span:last-child {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.totalBox span:last-child {
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.tableEdit {
+  font-size: 20px;
+  margin-right: 15px;
+  color: #3677c2;
+  cursor: pointer;
+}
+
+.tableEdit:hover {
+  color: #98cafe;
+}

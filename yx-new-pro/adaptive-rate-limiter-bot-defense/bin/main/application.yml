@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: adaptive-rate-limiter-bot-defense
+  datasource:
+    url: jdbc:postgresql://localhost:5432/botdefense
+    username: botdefense
+    password: botdefense
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+botdefense:
+  ip:
+    # Example: trust local Docker/Ingress proxies. Adjust in production.
+    trustedProxyCidrs: ["127.0.0.1/32", "::1/128"]
+  allowlist:
+    ipCidrs: ["127.0.0.1/32"]
+  routeGroups:
+    - name: login
+      paths: ["/api/auth/login"]
+      methods: ["POST"]
+    - name: public
+      paths: ["/api/public/**"]
+      methods: ["GET","POST"]
+  limits:
+    ip:
+      capacity: 60
+      refillPerSecond: 1.0
+    user:
+      capacity: 30
+      refillPerSecond: 0.5
+    tenant:
+      capacity: 300
+      refillPerSecond: 5.0
+  risk:
+    tightenMediumAt: 30
+    tightenHighAt: 60
+    stepUpAt: 80
+    factors:
+      medium: 0.5
+      high: 0.2
+  signals:
+    loginFailureWindowSeconds: 600
+    requestRateWindowSeconds: 60
+
+  consumer:
+    inputTopic: captcha-stepup-events
+    securityActionTopic: security-action-requests
+    dlqTopic: captcha-stepup-dlq
+    captchaProviderBaseUrl: http://localhost:8082
+    captchaRequestTimeoutMs: 2000
+    dedupeTtlSeconds: 86400
+
+logging:
+  level:
+    root: INFO

@@ -1,0 +1,302 @@
+package com.baskaaleksander.nuvine.domain.service;
+
+import com.baskaaleksander.nuvine.application.dto.*;
+import com.baskaaleksander.nuvine.application.util.MaskingUtil;
+import com.baskaaleksander.nuvine.domain.exception.EmailExistsException;
+import com.baskaaleksander.nuvine.domain.exception.InvalidTokenException;
+import com.baskaaleksander.nuvine.domain.exception.TokenNotFoundException;
+import com.baskaaleksander.nuvine.domain.exception.UserNotFoundException;
+import com.baskaaleksander.nuvine.domain.model.EmailVerificationToken;
+import com.baskaaleksander.nuvine.domain.model.RefreshToken;
+import com.baskaaleksander.nuvine.domain.model.User;
+import com.baskaaleksander.nuvine.infrastructure.config.KeycloakClientProvider;
+import com.baskaaleksander.nuvine.infrastructure.messaging.UserRegisteredEventProducer;
+import com.baskaaleksander.nuvine.infrastructure.messaging.dto.UserRegisteredEvent;
+import com.baskaaleksander.nuvine.infrastructure.repository.RefreshTokenRepository;
+import com.baskaaleksander.nuvine.infrastructure.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class AuthService {
+
+    private final KeycloakClientProvider keycloakClientProvider;
+    private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRegisteredEventProducer userRegisteredEventProducer;
+    private final EmailVerificationTokenGenerationService tokenGenerationService;
+    private final UserCacheService cacheService;
+
+    @Value("${keycloak.realm}")
+    private String realm;
+
+    private static final String DEFAULT_ROLE = "ROLE_USER";
+
+    @Transactional
+    public UserResponse register(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.email())) {
+            log.info("REGISTER FAILED email={}", MaskingUtil.maskEmail(request.email()));
+            throw new EmailExistsException("User with email " + request.email() + " already exists");
+        }
+
+        UserResponse userCreated = createUserInKeycloak(request);
+
+        User user = User.builder()
+                .id(userCreated.id())
+                .email(request.email())
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .onboardingCompleted(false)
+                .emailVerified(false)
+                .build();
+
+        var userEntity = userRepository.save(user);
+        EmailVerificationToken emailVerificationToken = tokenGenerationService.createToken(userEntity);
+
+        log.info("REGISTER SUCCESS id={} email={}", userCreated.id(), MaskingUtil.maskEmail(userCreated.email()));
+        userRegisteredEventProducer.sendUserRegisteredEvent(
+                new UserRegisteredEvent(
+                        userCreated.firstName(),
+                        userCreated.lastName(),
+                        userCreated.email(),
+                        emailVerificationToken.getToken(),
+                        userCreated.id().toString()
+                )
+        );
+
+        return userCreated;
+    }
+
+    private UserResponse createUserInKeycloak(RegisterRequest request) {
+
+        var userResource = keycloakClientProvider.getInstance()
+                .realm(realm)
+                .users();
+
+        var existing = userResource.search(request.email(), true);
+
+        if (!existing.isEmpty()) {
+            log.info("CREATE_USER_IN_KEYCLOAK FAILED email={}", MaskingUtil.maskEmail(request.email()));
+            throw new EmailExistsException("User with email " + request.email() + " already exists");
+        }
+
+        UserRepresentation user = new UserRepresentation();
+        user.setUsername(request.email());
+        user.setEmail(request.email());
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setEnabled(true);
+        user.setEmailVerified(false);
+
+        var response = userResource.create(user);
+
+        if (response.getStatus() != 201) {
+            log.error("CREATE_USER_IN_KEYCLOAK FAILED reason={}", response.getStatusInfo().getReasonPhrase());
+            throw new RuntimeException("Failed to create user in Keycloak: " + response.getStatusInfo().getReasonPhrase());
+        }
+
+        String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
+
+        CredentialRepresentation passwordCred = new CredentialRepresentation();
+        passwordCred.setTemporary(false);
+        passwordCred.setType(CredentialRepresentation.PASSWORD);
+        passwordCred.setValue(request.password());
+
+        userResource.get(userId).resetPassword(passwordCred);
+
+        var roles = assignRole(DEFAULT_ROLE, userId);
+
+        response.close();
+
+        log.info("CREATE_USER_IN_KEYCLOAK SUCCESS id={} email={}", userId, MaskingUtil.maskEmail(request.email()));
+
+        return new UserResponse(
+                UUID.fromString(userId),
+                request.firstName(),
+                request.lastName(),
+                request.email(),
+                roles
+        );
+    }
+
+    private List<String> assignRole(String role, String userId) {
+        var realmResource = keycloakClientProvider.getInstance().realm(realm);
+        var userResource = realmResource.users();
+        var rolesResource = realmResource.roles();
+
+        RoleRepresentation userRole = rolesResource.get(role).toRepresentation();
+
+        userResource.get(userId)
+                .roles()
+                .realmLevel()
+                .add(List.of(userRole));
+
+        return userResource.get(userId)
+                .roles().
+                getAll()
+                .getRealmMappings()
+                .stream()
+                .map(RoleRepresentation::getName)
+                .toList();
+    }
+
+    @Transactional
+    public KeycloakTokenResponse login(LoginRequest request) {
+
+        log.info("LOGIN START email={}", MaskingUtil.maskEmail(request.email()));
+        var response = keycloakClientProvider.loginUser(request);
+
+        String refreshToken = response.refreshToken();
+
+        RefreshToken token = RefreshToken.builder()
+                .token(refreshToken)
+                .expiresAt(Instant.now().plusSeconds(24 * 60 * 60))
+                .user(
+                        userRepository.findByEmail(request.email())
+                                .orElseThrow(() -> new UserNotFoundException("User not found"))
+                )
+                .revoked(false)
+                .build();
+
+        refreshTokenRepository.save(token);
+
+        log.info("LOGIN SUCCESS email={}", request.email());
+
+        return response;
+    }
+
+    @Transactional
+    public KeycloakTokenResponse refreshToken(String refreshToken) {
+        log.info("REFRESH_TOKEN START token={}", MaskingUtil.maskToken(refreshToken));
+
+        RefreshToken dbToken = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new TokenNotFoundException("Refresh token not found"));
+
+        if (dbToken == null || dbToken.getRevoked() || dbToken.getExpiresAt().isBefore(Instant.now())) {
+            log.info("REFRESH_TOKEN FAILED token={}", MaskingUtil.maskToken(refreshToken));
+            throw new InvalidTokenException("Refresh token not found");
+        }
+
+        var response = keycloakClientProvider.refreshToken(refreshToken);
+
+        String email = dbToken.getUser().getEmail();
+
+        String newRefreshToken = response.refreshToken();
+
+
+        refreshTokenRepository.revokeToken(refreshToken);
+        refreshTokenRepository.updateUsedAt(Instant.now(), dbToken.getId());
+
+        RefreshToken token = RefreshToken.builder()
+                .token(newRefreshToken)
+                .expiresAt(Instant.now().plusSeconds(24 * 60 * 60))
+                .user(
+                        userRepository.findByEmail(email)
+                                .orElseThrow(() -> new UserNotFoundException("User not found"))
+                )
+                .revoked(false)
+                .build();
+
+        refreshTokenRepository.save(token);
+
+        log.info("REFRESH_TOKEN SUCCESS email={}", MaskingUtil.maskEmail(email));
+
+
+        return response;
+    }
+
+    @CacheEvict(value = "users", key = "#jwt.subject")
+    @Transactional
+    public void logoutAll(String refreshToken, Jwt jwt) {
+        var dbToken = refreshTokenRepository.findByToken(refreshToken);
+
+        dbToken.ifPresent(token -> {
+            log.info("LOGOUT_ALL email={}", MaskingUtil.maskEmail(token.getUser().getEmail()));
+            refreshTokenRepository.revokeAllTokensByEmail(token.getUser().getEmail());
+        });
+    }
+
+    @CacheEvict(value = "users", key = "#jwt.subject")
+    @Transactional
+    public void logout(String refreshToken, Jwt jwt) {
+        log.info("LOGOUT START token={}", MaskingUtil.maskToken(refreshToken));
+        try {
+            refreshTokenRepository.revokeToken(refreshToken);
+        } catch (Exception ignored) {
+        }
+    }
+
+    @Cacheable(value = "users", key = "#jwt.subject")
+    public MeResponse getMe(Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        log.info("GET_ME START email={}", MaskingUtil.maskEmail(jwt.getClaimAsString("email")));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+        List<String> roles = List.of();
+        if (realmAccess != null) {
+            Object rolesObj = realmAccess.get("roles");
+            if (rolesObj instanceof Collection<?> r) {
+                roles = r.stream().map(Object::toString).filter(string -> string.startsWith("ROLE")).toList();
+            }
+        }
+
+        log.info("GET_ME SUCCESS email={}", MaskingUtil.maskEmail(jwt.getClaimAsString("email")));
+        return new MeResponse(
+                userId,
+                jwt.getClaimAsString("email"),
+                user.getFirstName(),
+                user.getLastName(),
+                roles,
+                jwt.getClaim("email_verified") != null
+                        ? jwt.getClaim("email_verified")
+                        : user.isEmailVerified(),
+                user.isOnboardingCompleted()
+        );
+    }
+
+    @Transactional
+    @CachePut(value = "users", key = "#jwt.subject")
+    @CacheEvict(value = {"users-internal", "users-admin"}, key = "#jwt.subject")
+    public MeResponse updateMe(Jwt jwt, UpdateMeRequest request) {
+        log.info("UPDATE_ME START email={}", MaskingUtil.maskEmail(jwt.getClaimAsString("email")));
+        User user = userRepository.findById(UUID.fromString(jwt.getSubject()))
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (request.firstName() != null && StringUtils.hasText(request.firstName()) && !user.getFirstName().equals(request.firstName())) {
+            user.setFirstName(request.firstName());
+        }
+        if (request.lastName() != null && StringUtils.hasText(request.firstName()) && !user.getLastName().equals(request.lastName())) {
+            user.setLastName(request.lastName());
+        }
+
+        userRepository.save(user);
+
+        log.info("UPDATE_ME SUCCESS email={}", MaskingUtil.maskEmail(jwt.getClaimAsString("email")));
+
+        cacheService.evictUserInternalByEmail(user.getEmail());
+        return getMe(jwt);
+    }
+}

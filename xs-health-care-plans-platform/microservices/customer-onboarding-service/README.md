@@ -13,7 +13,7 @@ Spring Boot microservice handling customer registration, authentication, and pro
 
 ## Tech Stack
 
-- Java 17
+- Java 21
 - Spring Boot 3
 - Spring Security (JWT)
 - Spring Data JPA

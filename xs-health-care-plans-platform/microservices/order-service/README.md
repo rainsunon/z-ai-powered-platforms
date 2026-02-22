@@ -13,7 +13,7 @@ Spring Boot microservice handling shopping cart, checkout, and order management 
 
 ## Tech Stack
 
-- Java 17
+- Java 21
 - Spring Boot 3
 - Spring Data JPA
 - PostgreSQL

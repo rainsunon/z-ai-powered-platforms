@@ -1,0 +1,22 @@
+{
+  "name": "@food-delivery/s3-utils",
+  "version": "1.0.0",
+  "description": "Shared S3 utilities for Food Delivery System",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": ["s3", "aws", "upload", "images"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.490.0",
+    "@aws-sdk/s3-request-presigner": "^3.490.0",
+    "sharp": "^0.33.1",
+    "mime-types": "^2.1.35",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

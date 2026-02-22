@@ -1,0 +1,20 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven { url 'https://repo.spring.io/release' }
+    }
+}
+
+dependencyResolutionManagement {
+    // Keep this robust for IDE imports / envs that prefer settings repos
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        mavenCentral()
+        // optional fallback if repo.maven.apache.org is DNS-filtered
+        maven { url 'https://repo1.maven.org/maven2' }
+        maven { url 'https://repo.spring.io/release' }
+    }
+}
+
+rootProject.name = 'secure-multi-tenant-api-platform'

@@ -1,0 +1,61 @@
+type Invoice {
+  id: ID!
+  invoiceNumber: String!
+  userId: ID!
+  clientId: ID!
+  client: Client
+  lineItems: [LineItem!]!
+  metadata: JSON!
+  status: InvoiceStatus!
+  amount: Float!
+  subtotal: Float!
+  tax: Float!
+  dueDate: DateTime!
+  sentAt: DateTime
+  paidAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type LineItem {
+  description: String!
+  quantity: Float!
+  rate: Float!
+  amount: Float!
+  metadata: JSON
+}
+
+enum InvoiceStatus {
+  Draft
+  Sent
+  Paid
+  Overdue
+}
+
+input CreateInvoiceInput {
+  clientId: ID!
+  lineItems: [LineItemInput!]!
+  dueDate: DateTime!
+  metadata: JSON
+}
+
+input LineItemInput {
+  description: String!
+  quantity: Float!
+  rate: Float!
+  metadata: JSON
+}
+
+type Query {
+  invoice(id: ID!): Invoice
+  invoices(status: InvoiceStatus): [Invoice!]!
+  overdueInvoices: [Invoice!]!
+  totalOutstanding: Float!
+}
+
+type Mutation {
+  createInvoice(input: CreateInvoiceInput!): Invoice!
+  sendInvoice(id: ID!): Invoice!
+  markInvoiceAsPaid(id: ID!): Invoice!
+  deleteInvoice(id: ID!): Boolean!
+}

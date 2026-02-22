@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: delivery-service
+
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG

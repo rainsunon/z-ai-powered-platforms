@@ -1,0 +1,773 @@
+{
+  "info": {
+    "name": "Shortlink API - Mock Server",
+    "description": "API collection for Shortlink Frontend Mock Server (MSW)\n\n**Note**: MSW runs in the browser and doesn't use a port. Requests are intercepted by the Service Worker.\n\n**Setup**:\n1. Start Next.js dev server: `npm run dev`\n2. MSW will automatically intercept requests at `http://localhost:3000`\n3. Use base URL: `http://localhost:3000` for Postman requests\n\n**Authentication**:\n- Login first to get token: `POST /api/shortlink/admin/v1/user/login`\n- Use credentials: username: `testuser`, password: `password`\n- Token will be returned in response, add it to `Token` header\n- Add `Username` header with your username",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "shortlink-api"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3030",
+      "type": "string",
+      "description": "MSW Standalone Server URL. Run 'npm run msw:server' to start."
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "testuser",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "User APIs",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password\",\n  \"rememberMe\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/user/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "user", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"password123\",\n  \"email\": \"newuser@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/user",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "user"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/user/info",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "user", "info"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"1\",\n  \"email\": \"updated@example.com\",\n  \"phone\": \"9876543210\",\n  \"realName\": \"Updated Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/user",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "user"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/user/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "user", "logout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Username Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/user/has-username?username=newuser",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "user", "has-username"],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "newuser"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by Username",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/actual/user/testuser",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "actual", "user", "testuser"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Group APIs",
+      "item": [
+        {
+          "name": "Get Groups",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/group",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "group"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Group\",\n  \"title\": \"New Group Title\",\n  \"description\": \"Description for new group\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/group",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "group"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Group",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"1\",\n  \"gid\": \"group1\",\n  \"name\": \"Updated Group\",\n  \"title\": \"Updated Title\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/group",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "group"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Group",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/group?gid=group2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "group"],
+              "query": [
+                {
+                  "key": "gid",
+                  "value": "group2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sort Groups",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"gid\": \"group1\",\n    \"sortOrder\": 1\n  },\n  {\n    \"gid\": \"group2\",\n    \"sortOrder\": 2\n  }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/group/sort",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "group", "sort"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Group Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/stats/group",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "stats", "group"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Group Access Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/stats/access-record/group?gid=group1&current=1&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "stats", "access-record", "group"],
+              "query": [
+                {
+                  "key": "gid",
+                  "value": "group1"
+                },
+                {
+                  "key": "current",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Short Link APIs",
+      "item": [
+        {
+          "name": "Get Short Links (Page)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/page?current=1&size=15",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "page"],
+              "query": [
+                {
+                  "key": "current",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "15"
+                },
+                {
+                  "key": "gid",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "orderTag",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Short Link",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originUrl\": \"https://example.com/test\",\n  \"describe\": \"Test short link\",\n  \"gid\": \"group1\",\n  \"validDate\": \"2024-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/v1/links/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "v1", "links", "create"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Batch Create Short Links",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"urlList\": [\n    {\n      \"originUrl\": \"https://example.com/page1\",\n      \"describe\": \"Page 1\"\n    },\n    {\n      \"originUrl\": \"https://example.com/page2\",\n      \"describe\": \"Page 2\"\n    }\n  ],\n  \"gid\": \"group1\",\n  \"validDate\": \"2024-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/create/batch",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "create", "batch"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Short Link",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"1\",\n  \"fullShortUrl\": \"https://shortlink.tus/abc123\",\n  \"originUrl\": \"https://example.com/updated\",\n  \"describe\": \"Updated description\",\n  \"gid\": \"group1\",\n  \"validDate\": \"2024-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/update",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "update"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Title from URL",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/title?url=https://example.com",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "title"],
+              "query": [
+                {
+                  "key": "url",
+                  "value": "https://example.com"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Move to Recycle Bin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"1\",\n  \"gid\": \"group1\",\n  \"fullShortUrl\": \"https://shortlink.tus/abc123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/recycle-bin/save",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "recycle-bin", "save"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recycle Bin Page",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/recycle-bin/page?current=1&size=15",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "recycle-bin", "page"],
+              "query": [
+                {
+                  "key": "current",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "15"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Recover from Recycle Bin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"1\",\n  \"gid\": \"group1\",\n  \"fullShortUrl\": \"https://shortlink.tus/abc123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/recycle-bin/recover",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "recycle-bin", "recover"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove from Recycle Bin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"1\",\n  \"gid\": \"group1\",\n  \"fullShortUrl\": \"https://shortlink.tus/abc123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/recycle-bin/remove",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "recycle-bin", "remove"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Link Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/stats?fullShortUrl=https://shortlink.tus/abc123&startDate=2024-01-01 00:00:00&endDate=2024-01-31 23:59:59",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "stats"],
+              "query": [
+                {
+                  "key": "fullShortUrl",
+                  "value": "https://shortlink.tus/abc123"
+                },
+                {
+                  "key": "gid",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "enableStatus",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01 00:00:00"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31 23:59:59"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Access Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Token",
+                "value": "{{token}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/shortlink/admin/v1/stats/access-record?fullShortUrl=https://shortlink.tus/abc123&current=1&size=10&startDate=2024-01-01 00:00:00&endDate=2024-01-31 23:59:59",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shortlink", "admin", "v1", "stats", "access-record"],
+              "query": [
+                {
+                  "key": "fullShortUrl",
+                  "value": "https://shortlink.tus/abc123"
+                },
+                {
+                  "key": "gid",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "enableStatus",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "current",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01 00:00:00"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31 23:59:59"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

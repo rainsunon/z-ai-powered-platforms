@@ -1,0 +1,83 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.10'
+    // NOTE: Spring Boot Gradle plugin already manages dependency versions via spring-boot-dependencies.
+    // Using Gradle's native BOM support is faster and avoids the extra dependency-management plugin.
+    id 'io.freefair.lombok' version '9.2.0'
+}
+
+// Use Gradle's native platform/BOM support (no io.spring.dependency-management plugin).
+// This prevents unresolved dependencies with missing versions ("Could not resolve ...:")
+// in IDEs/builds where Spring Boot's dependency management is not applied implicitly.
+ext {
+    springBootVersion = '3.5.10'
+    springBootBom = "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+}
+
+group = 'com.xrs.gateway'
+version = '0.1.0'
+
+description = 'Adaptive Rate Limiter + Bot Defense (Redis + Kafka)'
+
+springBoot {
+    mainClass = 'com.xrs.gateway.botdefense.BotDefenseApplication'
+}
+
+//java {
+//    toolchain {
+//        languageVersion = JavaLanguageVersion.of(21)
+//    }
+//}
+
+repositories {
+    mavenCentral()
+    // Official Central alternate hostname (sometimes bypasses proxy rules)
+    maven { url = uri("https://repo1.maven.org/maven2") }
+
+    // Google-hosted Maven Central mirror (often bypasses enterprise filters)
+    maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
+}
+
+dependencies {
+    // Import Spring Boot's curated dependency versions via BOM.
+    implementation platform(springBootBom)
+    testImplementation platform(springBootBom)
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+//    implementation "org.springframework.boot:spring-boot-starter-kafka:${springBootVersion}"
+    implementation "org.springframework.kafka:spring-kafka"
+    
+    // SpringDoc OpenAPI / Swagger UI
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Retry/backoff + timeout policies
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
+    implementation 'io.github.resilience4j:resilience4j-retry:2.3.0'
+    implementation 'io.github.resilience4j:resilience4j-timelimiter:2.3.0'
+
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly  'org.postgresql:postgresql'
+
+    implementation 'net.logstash.logback:logstash-logback-encoder:9.0'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.awaitility:awaitility:4.3.0'
+
+    // Kafka & Redis integration tests with real dependencies (preferred over embedded/in-memory fakes)
+    testImplementation platform('org.testcontainers:testcontainers-bom:2.0.3')
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:kafka'
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation "org.springframework.kafka:spring-kafka-test"
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

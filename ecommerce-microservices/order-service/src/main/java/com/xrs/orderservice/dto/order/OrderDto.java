@@ -1,0 +1,38 @@
+package com.xrs.orderservice.dto.order;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.xrs.orderservice.constrant.AppConstant;
+import com.xrs.orderservice.dto.product.ProductDto;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+public record OrderDto(
+    Integer orderId,
+    
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(pattern = AppConstant.LOCAL_DATE_TIME_FORMAT, shape = JsonFormat.Shape.STRING)
+    @DateTimeFormat(pattern = AppConstant.LOCAL_DATE_TIME_FORMAT)
+    LocalDateTime orderDate,
+    
+    String orderDesc,
+    Double orderFee,
+    Integer productId,
+    
+    @JsonProperty("product")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    ProductDto productDto,
+    
+    @JsonProperty("cart")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    CartDto cartDto
+) implements Serializable {
+}

@@ -1,0 +1,155 @@
+name: AWS EKS Deployment
+on: 
+  push: 
+    branches: ["main"]
+    paths: 
+      - 'aws-terraform/**'
+      - 'gateway/**'
+      - 'admin/**'
+      - 'shortlink/**'
+  workflow_dispatch: 
+env: 
+  AWS_REGION: us-west-2
+  ECR_REGISTRY: ${aws_account_id}.dkr.ecr.us-west-2.amazonaws.com # ECR registry 
+  EKS_CLUSTER_NAME: shortlink-eks-prod
+
+jobs: 
+  terraform-plan: 
+    name: Terraform Plan 
+    runs-on: ubuntu-latest
+    defaults: 
+      run:
+        working-directory: ./Shortlink-AWS-Terraform/terraform/environments/prod 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with: 
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with: 
+          terraform_version: 1.5.0 
+
+      - name: Terraform Init 
+        run: terraform init 
+
+      - name: Terraform Validate
+        run: terraform validate 
+
+      - name: Terraform Plan 
+        run: terraform plan -out=tfplan 
+        continue-on-error: true 
+
+      - name: Upload Terraform Plan 
+        uses: actions/upload-artifact@v3
+        with: 
+          name: terraform-plan
+          path: aws-terraform/terraform/environments/prod/tfplan
+        
+  build-and-push-images:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    
+    strategy:
+      matrix:
+        service: [gateway, admin, shortlink]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build JAR
+        run: |
+          mvn clean package -pl ${{ matrix.service }} -am -DskipTests -DskipITs
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REPOSITORY: shortlink-${{ matrix.service }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./${{ matrix.service }}
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+  update-gitops:
+    name: Update GitOps Repository
+    runs-on: ubuntu-latest
+    needs: build-and-push-images
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Image Tags in GitOps
+        run: |
+          # Update image tags in gitops overlay
+          cd aws-terraform/gitops/overlays/aws-prod
+          
+          # Update gateway image tag
+          sed -i "s|image:.*shortlink-gateway.*|image: ${{ env.ECR_REGISTRY }}/shortlink-gateway:${{ github.sha }}|g" gateway/gateway-deployment.yaml
+          
+          # Update admin image tag (if exists in kustomization)
+          # Update shortlink image tag (if exists in kustomization)
+          
+          git config user.name "github-actions"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update image tags to ${{ github.sha }}" || exit 0
+          git push
+  deploy-to-eks:
+    name: Deploy to EKS via ArgoCD
+    runs-on: ubuntu-latest
+    needs: update-gitops
+
+    steps: 
+      - name: Checkout
+        uses: actions/chckout@v3
+      - name: Configure AWS credentials 
+        uses: aws-actions/configure-aws-credentials@v4
+        with: 
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Trigger ArgoCD Sync 
+        run: |
+          # ArgoCD will automatically sync when GitOps repo is updated
+          # Or manually trigger sync: 
+          # argocd app sync shortlink-platform
+          echo "GitOps repository updated. ArgoCD will sync automatically."
+
+      - name: Wait for Deployment 
+        run: |
+          kubectl rollout status deployment/gateway -n shortlink --timeout=5m
+          kubectl rollout status deployment/admin -n shortlink --timeout=5m
+          kubectl rollout status deployment/shortlink -n shortlink --timeout=5m

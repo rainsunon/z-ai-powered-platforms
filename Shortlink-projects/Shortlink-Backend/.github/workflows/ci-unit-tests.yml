@@ -1,0 +1,73 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run Unit Tests (Surefire)
+        run: |
+          mvn clean test -DskipITs
+
+      - name: List Test Results (Debug)
+        if: always()
+        run: |
+          echo "Checking for test results..."
+          echo "=== Surefire reports directories ==="
+          find . -type d -name "surefire-reports" 2>/dev/null | head -10 || echo "No surefire-reports directories found"
+          echo ""
+          echo "=== Test XML files ==="
+          find . -type f -path "*/target/surefire-reports/TEST-*.xml" 2>/dev/null | head -20 || echo "No TEST-*.xml files found"
+          echo ""
+          echo "=== Sample surefire-reports contents ==="
+          find . -type d -name "surefire-reports" -exec ls -la {} \; 2>/dev/null | head -30 || echo "No contents found"
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: unit-test-results
+          path: |
+            **/target/surefire-reports/**
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() && github.event_name == 'push'
+        continue-on-error: true
+        with:
+          files: |
+            **/target/surefire-reports/TEST-*.xml
+          check_name: Unit Test Results
+          comment_mode: off
+          report_individual_runs: false
+          deduplicate_classes_by_file_name: false
+          action_fail: false
+          action_fail_on_inconclusive: false

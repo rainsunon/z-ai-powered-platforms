@@ -1,0 +1,24 @@
+.mainBox {
+  padding: 20px;
+}
+
+.flexBox {
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+}
+
+.flexItem {
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flexItem span {
+  font-size: 15px;
+}
+
+.flexItem img {
+  margin-right: 10px;
+}

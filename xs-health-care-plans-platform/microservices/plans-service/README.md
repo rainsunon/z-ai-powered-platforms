@@ -13,7 +13,7 @@ Spring Boot microservice managing healthcare plans catalog, search, and plan det
 
 ## Tech Stack
 
-- Java 17
+- Java 21
 - Spring Boot 3
 - Spring Data JPA
 - PostgreSQL

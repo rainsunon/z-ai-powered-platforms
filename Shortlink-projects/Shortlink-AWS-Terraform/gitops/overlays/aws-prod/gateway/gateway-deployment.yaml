@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: shortlink
+
+# Base configuration (from k8s/overlays/prod)
+bases:
+  - ../../../k8s/overlays/prod
+
+# AWS-specific patches
+patches:
+  - path: aws-configmap-patch.yaml
+    target:
+      kind: ConfigMap
+  - path: aws-secret-patch.yaml
+    target:
+      kind: Secret
+
+resources:
+  - gateway/
+  - aws-service-account.yaml
+
+# Image tags (updated by CI/CD)
+images:
+  - name: shortlink-admin
+    newTag: latest  # Will be updated by CI/CD
+  - name: shortlink-shortlink
+    newTag: latest  # Will be updated by CI/CD
+  - name: shortlink-gateway
+    newTag: latest  # Will be updated by CI/CD

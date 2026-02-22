@@ -1,0 +1,76 @@
+<!-- C:\Users\OjiamboFelix\Downloads\2024\DistributedTransactions\pom.xml -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- This POM acts as the parent for all modules and is of packaging type 'pom' -->
+    <groupId>com.distributedtransactions</groupId>
+    <artifactId>distributed-transactions</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>Distributed Transactions - Parent</name>
+    <description>Parent POM for Saga-based Distributed Transactions</description>
+
+    <!-- Optionally, you can inherit the Spring Boot parent,
+         but usually for multi-module setups, you manage versions via dependencyManagement. -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.10</version>
+        <relativePath/> <!-- Always resolve from repository -->
+    </parent>
+
+    <properties>
+        <!-- Use Java 21 for cutting-edge features and performance -->
+        <java.version>21</java.version>
+
+        <!-- Spring Boot version for consistency across sub-modules -->
+        <spring.boot.version>3.4.2</spring.boot.version>
+
+        <!-- Orkes Conductor and Kafka versions -->
+        <orques.conductor.version>3.13.0</orques.conductor.version>
+        <kafka.version>3.4.0</kafka.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Inherit official Spring Boot BOM to ensure aligned versions -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Additional BOM imports or explicit version management can go here. -->
+        </dependencies>
+    </dependencyManagement>
+
+    <modules>
+        <!-- List all sub-modules here -->
+<!--        <module>common</module>-->
+<!--        <module>orchestrator</module>-->
+<!--        <module>order-service</module>-->
+<!--        <module>inventory-service</module>-->
+<!--        <module>payment-service</module>-->
+<!--        <module>shipping-service</module>-->
+<!--        <module>notification-service</module>-->
+<!--        <module>query-service</module>-->
+    </modules>
+
+    <build>
+        <plugins>
+            <!-- Optionally, set defaults for your entire project.
+                 For example, the Spring Boot Maven plugin. -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <!-- Usually configured in sub-modules,
+                     but you can set any default settings here. -->
+            </plugin>
+        </plugins>
+    </build>
+</project>

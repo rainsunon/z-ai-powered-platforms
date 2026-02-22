@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LexGrid - Client Dashboard Overview Updated</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#208468",
+                        "lexgrid-bg": "#5BA8FF",
+                        "sidebar-bg": "#208468",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Manrope', sans-serif;
+            }
+        }
+        .sidebar-custom {
+            background-color: #208468;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #20846888;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-lexgrid-bg text-slate-900 font-display min-h-screen flex">
+<aside class="w-64 sidebar-custom flex flex-col fixed h-full z-50 shadow-2xl">
+<div class="p-6 flex items-center gap-3">
+<div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+<span class="material-icons text-primary">gavel</span>
+</div>
+<span class="text-xl font-bold tracking-tight text-white uppercase">LexGrid</span>
+</div>
+<nav class="flex-1 px-4 mt-6 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white text-primary shadow-lg font-bold" href="#">
+<span class="material-icons text-sm">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all font-medium" href="#">
+<span class="material-icons text-sm">folder_open</span>
+<span>My Cases</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all font-medium" href="#">
+<span class="material-icons text-sm">description</span>
+<span>Document Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all font-medium" href="#">
+<span class="material-icons text-sm">manage_search</span>
+<span>Legal Research</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all font-medium" href="#">
+<span class="material-icons text-sm">event</span>
+<span>Calendar</span>
+</a>
+</nav>
+<div class="p-4 mt-auto border-t border-white/10">
+<div class="flex items-center gap-3 p-2 rounded-lg bg-white/10">
+<img alt="Profile" class="w-10 h-10 rounded-full border-2 border-white/20 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVa1G3Zd4EvyE2XYPXbmTjTy-arkkf4bG68dzADPvgPaTKb98NPANGTXQ84jfRgQVPxFMeMXxHmojZ6je7WBs0D9vTTl88GMO4oX-IV07FP9jcGC01YhIiN2FJUB-7UBBaCdOb6sN1OOlz-cO3HOuU9tASG8kKID4BE5vzYJ9Fdw6Khuvo7iJgllmone52Vqi1tdWIczKNPKVajAWOk1Ojd7797IMup30Ixu861w1wyXIfIiPjYR63VTvPc4_Ck9xR7O9skiA7xKU"/>
+<div class="overflow-hidden">
+<p class="text-sm font-bold text-white truncate">Marcus Sterling</p>
+<p class="text-[10px] text-white/70 uppercase tracking-widest font-bold">USA Jurisdiction</p>
+</div>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg text-white/80 hover:text-red-300 transition-all text-sm font-bold" href="#">
+<span class="material-icons text-sm">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<main class="ml-64 flex-1 flex flex-col min-h-screen">
+<header class="h-20 bg-white/90 backdrop-blur-md sticky top-0 z-40 px-8 flex items-center justify-between border-b border-black/5">
+<div class="relative w-96">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full bg-slate-100 border-none rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/30 text-slate-800 placeholder-slate-400" placeholder="Search case files or messages..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center relative hover:bg-slate-200 transition-colors">
+<span class="material-icons text-slate-600">notifications</span>
+<span class="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full ring-2 ring-white"></span>
+</button>
+<div class="h-8 w-px bg-slate-200 mx-2"></div>
+<div class="flex items-center gap-2">
+<span class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-black tracking-wider">
+<span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span> AI ONLINE
+                </span>
+</div>
+</div>
+</header>
+<div class="p-8 space-y-8">
+<div class="flex flex-col gap-1">
+<h1 class="text-3xl font-black text-slate-900 tracking-tight">Welcome back, Marcus</h1>
+<p class="text-slate-800/80 font-medium">You have 3 active legal proceedings and 1 pending document review.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="group relative overflow-hidden bg-primary rounded-2xl p-6 shadow-xl shadow-primary/30 cursor-pointer">
+<div class="absolute -right-6 -top-6 opacity-20 group-hover:scale-110 transition-transform text-white">
+<span class="material-icons text-[140px]">psychology</span>
+</div>
+<div class="relative z-10 flex flex-col h-full justify-between">
+<div>
+<div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 ring-1 ring-white/30">
+<span class="material-icons text-white">bolt</span>
+</div>
+<h3 class="text-xl font-black text-white">Start AI Chat</h3>
+<p class="text-white/80 text-sm mt-2 font-medium">Instant legal analysis and document summarization.</p>
+</div>
+<button class="mt-6 w-full py-3 bg-white text-primary font-black rounded-xl hover:bg-slate-50 transition-colors shadow-lg">Launch Assistant</button>
+</div>
+</div>
+<div class="bg-white border border-white/20 rounded-2xl p-6 flex flex-col justify-between shadow-xl shadow-black/5 hover:translate-y-[-4px] transition-all">
+<div>
+<div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+<span class="material-icons text-primary">upload_file</span>
+</div>
+<h3 class="text-xl font-black text-slate-900">Upload Documents</h3>
+<p class="text-slate-600 text-sm mt-2 font-medium">Securely upload evidence, contracts, or court filings.</p>
+</div>
+<button class="mt-6 w-full py-3 bg-primary text-white font-black rounded-xl hover:bg-opacity-90 transition-all shadow-md shadow-primary/20">Add Files</button>
+</div>
+<div class="bg-white border border-white/20 rounded-2xl p-6 flex flex-col justify-between shadow-xl shadow-black/5 hover:translate-y-[-4px] transition-all">
+<div>
+<div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-4">
+<span class="material-icons text-slate-600">videocam</span>
+</div>
+<h3 class="text-xl font-black text-slate-900">View Meetings</h3>
+<p class="text-slate-600 text-sm mt-2 font-medium">Connect with your legal council via secure video link.</p>
+</div>
+<button class="mt-6 w-full py-3 bg-slate-800 text-white font-black rounded-xl hover:bg-slate-700 transition-all shadow-md">Join Call</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 space-y-6">
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white p-6 rounded-2xl shadow-xl shadow-black/5 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+<span class="material-icons">gavel</span>
+</div>
+<div>
+<p class="text-2xl font-black text-slate-900">03</p>
+<p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Active Cases</p>
+</div>
+</div>
+<div class="bg-white p-6 rounded-2xl shadow-xl shadow-black/5 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+<span class="material-icons">schedule</span>
+</div>
+<div>
+<p class="text-2xl font-black text-slate-900">12</p>
+<p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Days to Deadline</p>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-2xl shadow-xl shadow-black/5 overflow-hidden">
+<div class="p-6 border-b border-slate-100 flex items-center justify-between">
+<h3 class="font-black text-slate-900">Case Progress: Sterling vs. OmniCorp</h3>
+<span class="text-[10px] bg-primary/10 text-primary px-3 py-1 rounded-full font-black uppercase tracking-wider">In Discovery</span>
+</div>
+<div class="p-6">
+<div class="flex justify-between text-sm mb-3">
+<span class="text-slate-500 font-bold">Preparation Complete</span>
+<span class="text-primary font-black">65%</span>
+</div>
+<div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[65%] rounded-full"></div>
+</div>
+<div class="mt-6 flex gap-4 items-center">
+<div class="flex -space-x-2">
+<img alt="Lawyer" class="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQ4TbjCEd4UjQMhEVJ48Qj_ocJbydAfRSV8jCs6HmwLjVeykI3V7O5tJqU2cMoUeAt-AtywBXxqUG6Urs8qGfPr23ojv2dGETljacxt5-fbXNuhbVGAkT0EC7ig3e8gJIpuXnXWTsWss1ES2Glt7IVKWVHuJHEgRWp4U0G7ntc2f_MjJP712FTE2ktYK3mDDNR-FaiSC9vIbUJETLZUk07ehB_Irlqf4oC9c3ieIXXrPH0hSaVP7Fq9kZh3P3DzVrrXBgw5ZBSnKU"/>
+<img alt="Advisor" class="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfB6B9xDgHiMlQQlAu1GpOesMpoy53Irke_clmBdlDPm--SYlUjPcxWsOIAhc_iOAoB_Jl2wGilAZlagVg2JC0-0P9IdFP4Wn6SE5-ihbbh0mkKsNb5t6RSu3XDqXo8KAvxqroYQc3qIeafV_KBCkKa7lcdifDn8L66bZSwp0lQXIyn6t0PnMgC4qlVBpXzTyOmdMK7PiF8SGwRGw0SbCTP2z-d3O8fB0meUYn6RjKuBRJ373Npk6rOi3zyNWuh7LuHllSMvxZ38A"/>
+<div class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-black text-slate-600">+2</div>
+</div>
+<p class="text-xs text-slate-500 font-bold">Legal team assigned to this case</p>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-black text-slate-900">Recent Notifications</h3>
+<button class="text-[10px] text-primary font-black hover:underline uppercase tracking-wider">Mark all read</button>
+</div>
+<div class="bg-white rounded-2xl shadow-xl shadow-black/5 divide-y divide-slate-100 overflow-hidden">
+<div class="p-4 hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="flex gap-3">
+<div class="mt-1 w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+<span class="material-icons text-lg">priority_high</span>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<p class="text-sm font-black text-slate-900 group-hover:text-primary transition-colors">Lawyer Message</p>
+<span class="text-[9px] text-slate-400 font-bold uppercase">2m ago</span>
+</div>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2 font-medium">Please review the updated retainer agreement for Case #402 before tomorrow's filing.</p>
+<div class="mt-2">
+<span class="px-2 py-0.5 bg-red-500 text-white rounded text-[9px] font-black uppercase">Urgent Action</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="flex gap-3">
+<div class="mt-1 w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+<span class="material-icons text-lg">auto_awesome</span>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<p class="text-sm font-black text-slate-900 group-hover:text-primary transition-colors">System Alert</p>
+<span class="text-[9px] text-slate-400 font-bold uppercase">1h ago</span>
+</div>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed font-medium">AI analysis of the Prosecution's Motion is complete. 4 inconsistencies found.</p>
+</div>
+</div>
+</div>
+<div class="p-4 hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="flex gap-3">
+<div class="mt-1 w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
+<span class="material-icons text-lg">calendar_today</span>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<p class="text-sm font-black text-slate-900 group-hover:text-primary transition-colors">New Meeting</p>
+<span class="text-[9px] text-slate-400 font-bold uppercase">4h ago</span>
+</div>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed font-medium">Video consultation scheduled with Sarah Parker for June 12th.</p>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full py-3 bg-white text-slate-600 text-xs font-black rounded-xl border border-slate-100 hover:bg-slate-50 transition-all shadow-sm uppercase tracking-wider">View All Activity</button>
+</div>
+</div>
+<div class="pt-12 border-t border-black/5 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-icons text-[14px] text-slate-700">public</span>
+<span class="text-[10px] font-black text-slate-700 uppercase tracking-widest">Jurisdiction: USA &amp; Canada (Federal)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-black text-slate-700 uppercase tracking-widest">Timezone: EST (UTC-5)</span>
+</div>
+</div>
+<p class="text-[10px] text-slate-700 font-black uppercase tracking-widest">© 2024 LexGrid Technologies Inc.</p>
+</div>
+</div>
+</main>
+
+</body></html>

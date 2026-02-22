@@ -1,0 +1,106 @@
+scalar JSON
+
+type Query {
+    clients: [Client]
+    client(id: ID!): Client
+    expenses: [Expense]
+    expense(id: ID!): Expense
+    invoices: [Invoice]
+    invoicesByClient(clientId: ID!): [Invoice]
+    invoice(id: ID!): Invoice
+}
+
+type Mutation {
+    createClient(input: ClientInput!): Client
+    createExpense(input: ExpenseInput!): Expense
+    createInvoice(input: InvoiceInput!): Invoice
+}
+
+type Client {
+    id: ID!
+    name: String
+    initials: String
+    color: String
+    email: String
+    mobile: String
+    firstName: String
+    lastName: String
+    gender: String
+    memberTime: String
+    preferences: JSON
+}
+
+input ClientInput {
+    name: String
+    initials: String
+    color: String
+    email: String
+    mobile: String
+    firstName: String
+    lastName: String
+    gender: String
+    memberTime: String
+    preferences: JSON
+}
+
+type Expense {
+    id: ID!
+    date: String
+    merchant: String
+    category: String
+    amount: Float
+    status: String
+    member: String
+    claimedAt: String
+    memo: String
+    approvedBy: String
+    metadata: JSON
+}
+
+input ExpenseInput {
+    date: String
+    merchant: String
+    category: String
+    amount: Float
+    status: String
+    member: String
+    claimedAt: String
+    memo: String
+    approvedBy: String
+    metadata: JSON
+}
+
+type Invoice {
+    id: ID!
+    description: String
+    date: String
+    dueDate: String
+    amount: Float
+    status: String
+    clientId: String
+    lineItems: [LineItem]
+}
+
+input InvoiceInput {
+    description: String
+    date: String
+    dueDate: String
+    amount: Float
+    status: String
+    clientId: String
+    lineItems: [LineItemInput]
+}
+
+type LineItem {
+    description: String
+    quantity: Int
+    rate: Float
+    amount: Float
+}
+
+input LineItemInput {
+    description: String
+    quantity: Int
+    rate: Float
+    amount: Float
+}

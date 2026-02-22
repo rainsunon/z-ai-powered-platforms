@@ -1,0 +1,74 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: ${APP_NAME:shortlink-admin}
+
+  datasource:
+    url: ${SHORTLINK_DB_URL:jdbc:postgresql://postgres.shortlink.svc.cluster.local:5432/shortlink}
+    username: ${SHORTLINK_DB_USER:admin}
+    password: ${SHORTLINK_DB_PASSWORD:admin}
+
+  jpa:
+    hibernate:
+      ddl-auto: none           # disable auto create/alter tables in prod
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false            # optional: turn off for prod
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis.shortlink.svc.cluster.local}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      # Note: password is intentionally not set - Redis server does not require authentication
+      # Redisson will not attempt AUTH if spring.data.redis.password is not set
+      # TODO: Future upgrade to Vault for password management
+      lettuce:
+        cluster:
+          refresh:
+            adaptive: true
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 3000ms
+  # Redisson configuration for connection timeout and retry
+  redisson:
+    config: |
+      singleServerConfig:
+        address: "redis://${REDIS_HOST:redis.shortlink.svc.cluster.local}:${REDIS_PORT:6379}"
+        connectionTimeout: 10000
+        timeout: 3000
+        retryAttempts: 3
+        retryInterval: 1500
+        connectionPoolSize: 10
+        connectionMinimumIdleSize: 5
+
+management:
+  endpoints:
+    web:
+      base-path: /api/admin/actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# Shortlink service configuration (prod: K8s service)
+shortlink:
+  service:
+    # K8s service name for internal communication
+    # Format: http://<service-name>.<namespace>.svc.cluster.local:<port>
+    base-url: ${SHORTLINK_SERVICE_URL:http://shortlink.shortlink.svc.cluster.local:8081}
+    # HTTP client configuration
+    connect-timeout: 5000  # milliseconds
+    read-timeout: 10000    # milliseconds
+    write-timeout: 10000   # milliseconds
+
+logging:
+  level:
+    root: INFO

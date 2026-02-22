@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: rate-limiter-gateway
+  namespace: food-delivery
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "rate-limiter.example.com"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: rate-limiter-external-vs
+  namespace: food-delivery
+spec:
+  hosts:
+  - "rate-limiter.example.com"
+  gateways:
+  - rate-limiter-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/api/rate-limiter"
+    route:
+    - destination:
+        host: rate-limiter-service
+        port:
+          number: 3000

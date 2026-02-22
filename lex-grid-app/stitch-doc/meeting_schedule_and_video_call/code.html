@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LexGrid | Meeting Schedule and Video Call Updated</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,FILL@0..1&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        :root {
+            --app-bg: #5BA8FF;
+            --highlight: #208468;
+            --surface-dark: #161b2a;
+            --border-dark: #252b3d;
+        }
+        @layer base {
+            body {
+                font-family: 'Manrope', sans-serif;
+            }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#208468",
+                        "app-blue": "#5BA8FF",
+                        "background-dark": "#0a0c14",
+                        "surface-dark": "#161b2a",
+                        "border-dark": "#252b3d",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.4rem",
+                        "lg": "0.6rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-[var(--app-bg)] text-slate-900 min-h-screen font-display">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-20 lg:w-64 border-r border-black/5 flex flex-col items-center lg:items-start py-6 px-4 bg-white/95 backdrop-blur-md">
+<div class="flex items-center gap-3 mb-10 px-2">
+<div class="w-10 h-10 bg-[var(--highlight)] rounded-lg flex items-center justify-center text-white">
+<span class="material-icons-round">gavel</span>
+</div>
+<span class="text-xl font-bold tracking-tight hidden lg:block text-slate-900">LexGrid</span>
+</div>
+<nav class="flex-1 w-full space-y-2">
+<a class="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-100 transition-all" href="#">
+<span class="material-icons-round">dashboard</span>
+<span class="font-medium hidden lg:block">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 px-3 py-3 rounded-xl bg-[var(--highlight)]/10 text-[var(--highlight)] transition-all" href="#">
+<span class="material-icons-round">calendar_today</span>
+<span class="font-medium hidden lg:block">Scheduling</span>
+</a>
+<a class="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-100 transition-all" href="#">
+<span class="material-icons-round">folder_shared</span>
+<span class="font-medium hidden lg:block">Case Files</span>
+</a>
+<a class="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-100 transition-all" href="#">
+<span class="material-icons-round">smart_toy</span>
+<span class="font-medium hidden lg:block">AI Assistant</span>
+</a>
+</nav>
+<div class="w-full mt-auto pt-6 border-t border-slate-200">
+<div class="flex items-center gap-3 px-2">
+<img alt="Profile" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2dOqyUZW0g27vR-2zpSWSHoBjOseIMXirF2nFqfCpPJ4yJbjFuOvHC1WXxkxJdZnk3gyHeVO0Gl2fViGhft50JRIfWeCQvg2TsvcUZkuseM98Cu0YHkizA2IlGy5k_PoLgAygLLHItRPZxSglT64m6ux_8fI0OvPFi130GLmn0rZQjjnpNPLSaoeJQKjvuuIR0RWwFmbjGqDRXIJfXVgzP92183yM9BLHTh4aFQL2FDBb8LG8Fkwk974aS6JL3uZm1P_7mubM7WA"/>
+<div class="hidden lg:block overflow-hidden">
+<p class="text-sm font-semibold truncate text-slate-900">Marcus Thorne</p>
+<p class="text-xs text-slate-500 truncate">Senior Counsel</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 overflow-y-auto custom-scrollbar px-6 py-8">
+<header class="flex justify-between items-center mb-8">
+<div>
+<h1 class="text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">Meeting Schedule</h1>
+<p class="text-white/90 font-medium mt-1">Manage your North American legal consultations.</p>
+</div>
+<div class="flex gap-4">
+<button class="px-4 py-2 rounded-xl border border-white/30 bg-white/20 text-white backdrop-blur-sm flex items-center gap-2 hover:bg-white/30 transition-colors">
+<span class="material-icons-round text-sm">language</span>
+<span class="text-sm font-medium uppercase">GMT-7 (PST)</span>
+</button>
+<button class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md">
+<span class="material-icons-round text-slate-500">notifications</span>
+</button>
+</div>
+</header>
+<div class="grid grid-cols-12 gap-8">
+<div class="col-span-12 lg:col-span-7 space-y-8">
+<div class="bg-white rounded-2xl p-6 shadow-xl shadow-black/5">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-lg font-bold text-slate-900">Select Date</h2>
+<div class="flex gap-2">
+<button class="p-1 hover:bg-slate-100 rounded transition-colors">
+<span class="material-icons-round">chevron_left</span>
+</button>
+<span class="font-semibold text-sm">October 2024</span>
+<button class="p-1 hover:bg-slate-100 rounded transition-colors">
+<span class="material-icons-round">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">
+<span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+</div>
+<div class="grid grid-cols-7 gap-2">
+<button class="aspect-square flex items-center justify-center rounded-lg text-slate-300">29</button>
+<button class="aspect-square flex items-center justify-center rounded-lg text-slate-300">30</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">1</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">2</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-bold bg-[var(--highlight)] text-white shadow-lg shadow-[var(--highlight)]/30">3</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">4</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">5</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">6</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">7</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">8</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">9</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">10</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">11</button>
+<button class="aspect-square flex items-center justify-center rounded-lg font-semibold hover:bg-[var(--highlight)]/10 transition-colors">12</button>
+</div>
+</div>
+<div class="bg-white rounded-2xl p-6 shadow-xl shadow-black/5">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-lg font-bold text-slate-900">Available Slots <span class="text-slate-500 font-normal text-sm ml-2">Thursday, Oct 3</span></h2>
+<select class="bg-transparent border-none text-sm font-bold text-[var(--highlight)] focus:ring-0 cursor-pointer">
+<option>45 Min Session</option>
+<option>60 Min Session</option>
+<option>90 Min Session</option>
+</select>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+<button class="py-3 px-4 border border-slate-200 rounded-xl text-sm font-semibold hover:border-[var(--highlight)] hover:text-[var(--highlight)] transition-all bg-slate-50/50">09:00 AM</button>
+<button class="py-3 px-4 border border-slate-200 rounded-xl text-sm font-semibold hover:border-[var(--highlight)] hover:text-[var(--highlight)] transition-all bg-slate-50/50">10:30 AM</button>
+<button class="py-3 px-4 border-2 border-[var(--highlight)] bg-[var(--highlight)]/5 rounded-xl text-sm font-bold text-[var(--highlight)] transition-all">11:15 AM</button>
+<button class="py-3 px-4 border border-slate-200 rounded-xl text-sm font-semibold hover:border-[var(--highlight)] hover:text-[var(--highlight)] transition-all bg-slate-50/50">01:45 PM</button>
+<button class="py-3 px-4 border border-slate-200 rounded-xl text-sm font-semibold hover:border-[var(--highlight)] hover:text-[var(--highlight)] transition-all bg-slate-50/50">03:00 PM</button>
+<button class="py-3 px-4 border border-slate-100 rounded-xl text-sm font-semibold opacity-50 cursor-not-allowed bg-slate-100 text-slate-400">04:30 PM</button>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-5 space-y-6">
+<div class="relative overflow-hidden bg-[var(--highlight)] rounded-2xl p-6 text-white shadow-2xl shadow-black/20">
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-4">
+<span class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md uppercase tracking-widest">In 15 Minutes</span>
+<span class="material-icons-round cursor-pointer">more_horiz</span>
+</div>
+<h3 class="text-2xl font-extrabold mb-1">Corporate Tax Strategy</h3>
+<p class="text-white/80 text-sm mb-6 flex items-center gap-2">
+<span class="material-icons-round text-sm">schedule</span> 11:15 AM — 12:00 PM
+                            </p>
+<div class="flex items-center -space-x-3 mb-8">
+<img alt="Attendee" class="w-10 h-10 rounded-full border-2 border-[var(--highlight)] object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGoIxfgi2VE2TMVuKcxy2hbXp7GcdQaOdfoWsoWmGrg_D4XF6TyduwizaWMxjziVEzZxpnoQCCZulYhQNOqusNnaFdyZ_p7CpU8ziDsLfEfYbHYUfUVdKgA4VyIKSmIUZ4yQaHGndecbT2wfioJBO-j2Rb9qil7C7-bE2Ih2ENidEm6e9fAy5g6atXtJqm94q13u-RWUVm0vzUO9lIZ6HGi6-YOyQRbdF2crE5xRmvOyeo5IVwuoZlJY47wduXo1UyPDKYVeWCYus"/>
+<img alt="Attendee" class="w-10 h-10 rounded-full border-2 border-[var(--highlight)] object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAk3Hc-JIQZzge41b9DokbIdPU5Tr5_9FXe_mtE5fX1M-U67BxMMGvNQIN9duPgCbBNvrZ7idvHh1TY1MfPb0-20hfh7e33RSWr0pQYO-ssPYUNYwwOdBFwauXrfyp9pGe8vxC9FiXEUUlyLEa2I30nuvktU5u1-3QE99Qu3b77POBA1FGCgpNorKPODOluBZ2m78P2HVLvHv2ClxtuAgu5QMWuSKT8DwVqnvt-Jugi4cJcJLE5lXThwPW0OQFW6Yxn3qExxFGdX-Q"/>
+<div class="w-10 h-10 rounded-full border-2 border-[var(--highlight)] bg-white/20 flex items-center justify-center text-xs font-bold backdrop-blur-sm shadow-sm">+1</div>
+</div>
+<button class="w-full bg-white text-[var(--highlight)] py-4 rounded-xl font-bold text-lg hover:bg-slate-50 transition-all shadow-xl active:scale-[0.98]">
+                                Join Meeting
+                            </button>
+</div>
+<div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute -left-10 -top-10 w-48 h-48 bg-black/5 rounded-full blur-3xl"></div>
+</div>
+<div class="bg-white rounded-2xl p-6 shadow-xl shadow-black/5">
+<h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
+<span class="material-icons-round text-[var(--highlight)]">videocam</span>
+                            Camera &amp; Audio Preview
+                        </h2>
+<div class="relative group aspect-video rounded-xl overflow-hidden bg-slate-900 mb-4 border border-slate-100">
+<img alt="Camera Preview" class="w-full h-full object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNjGyyL3pJRhgV62ATKG7yyfgEMHYgYv8yXnHOLtUIiuuinLtnrjGzLPsqoD60fYSU_wmHxYdpcSU9ibpwAoquZHoT5bky8KnwkEI9bky6XXSwLXltLIlDCqx8wb2BHPwlD1Y9ryrkPH9MfF0C1aejtc1Y2RQqiuYIT9DpbcMs1y-3RIBAzNxpe-MBUIdpdop4WsYy4NCGE4oBVF6xKA3nzRWnhBP1dxyU65idyOTWktaRg01UHk0zBk54un4oCDP5dY28CZJiXWs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3">
+<button class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/40 transition-colors">
+<span class="material-icons-round">mic</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/40 transition-colors">
+<span class="material-icons-round">videocam</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/40 transition-colors">
+<span class="material-icons-round">settings</span>
+</button>
+</div>
+<div class="absolute top-4 right-4 bg-emerald-500 w-3 h-3 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-sm">
+<span class="text-slate-500">Microphone</span>
+<span class="font-medium text-slate-900">Built-in Mic (MacBook Pro)</span>
+</div>
+<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+<div class="bg-[var(--highlight)] h-full w-2/3"></div>
+</div>
+</div>
+</div>
+<div class="bg-white/20 border border-white/30 backdrop-blur-md rounded-2xl p-4 flex items-center gap-4">
+<div class="w-10 h-10 bg-[var(--highlight)]/20 rounded-lg flex items-center justify-center text-[var(--highlight)]">
+<span class="material-icons-round">security</span>
+</div>
+<div>
+<p class="text-xs font-extrabold text-[var(--highlight)] uppercase tracking-wider">Secure Consultation</p>
+<p class="text-xs text-white/90">AES-256 Encrypted &amp; HIPAA/PIPEDA Compliant</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

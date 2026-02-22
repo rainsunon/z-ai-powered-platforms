@@ -1,0 +1,152 @@
+{
+  "info": {
+    "name": "aws-s3-multipart-upload-service",
+    "_postman_id": "b55e6930-7b7c-4e69-9f2d-1e0b1f8f7c2d",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Get Access Token (Keycloak password grant)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": "{{keycloak_token_url}}",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "password"
+            },
+            {
+              "key": "client_id",
+              "value": "postman"
+            },
+            {
+              "key": "client_secret",
+              "value": "postman-secret"
+            },
+            {
+              "key": "username",
+              "value": "demo"
+            },
+            {
+              "key": "password",
+              "value": "demo"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "pm.environment.set('access_token', json.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Upload Session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/uploads",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fileName\": \"video.mp4\",\n  \"contentType\": \"video/mp4\",\n  \"fileSize\": 1073741824,\n  \"idempotencyKey\": \"demo-1\"\n}"
+        }
+      }
+    },
+    {
+      "name": "List My Uploads",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/uploads"
+      }
+    },
+    {
+      "name": "Get Upload",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/uploads/{{upload_id}}"
+      }
+    },
+    {
+      "name": "Presign Part URL",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/uploads/{{upload_id}}/parts/{{part_number}}/url"
+      }
+    },
+    {
+      "name": "Complete Upload",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/uploads/{{upload_id}}/complete",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"parts\": [\n    {\"partNumber\": 1, \"eTag\": \"etag-from-s3\"}\n  ]\n}"
+        }
+      }
+    },
+    {
+      "name": "Abort Upload",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/uploads/{{upload_id}}/abort"
+      }
+    }
+  ]
+}

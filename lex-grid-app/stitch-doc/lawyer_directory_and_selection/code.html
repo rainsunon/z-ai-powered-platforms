@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LexGrid | Lawyer Directory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        :root {
+            --brand-bg: #5BA8FF;
+            --brand-accent: #208468;
+            --brand-accent-hover: #1a6e56;
+        }
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#208468",
+                        "brand-blue": "#5BA8FF",
+                        "background-main": "#5BA8FF",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </style>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #20846833;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #208468;
+        }
+    </style>
+</head>
+<body class="bg-[var(--brand-bg)] text-slate-900 font-display min-h-screen">
+<nav class="sticky top-0 z-50 bg-white border-b border-black/5 px-6 py-4 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-2">
+<div class="bg-[var(--brand-accent)] p-1.5 rounded-lg">
+<span class="material-icons text-white text-2xl">gavel</span>
+</div>
+<span class="text-2xl font-extrabold tracking-tight text-[var(--brand-accent)]">LexGrid</span>
+<span class="ml-2 text-xs font-semibold px-2 py-0.5 bg-[var(--brand-accent)]/10 text-[var(--brand-accent)] border border-[var(--brand-accent)]/20 rounded-full uppercase tracking-wider">AI Powered</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-6 text-sm font-bold">
+<a class="text-[var(--brand-accent)]" href="#">Directory</a>
+<a class="text-slate-600 hover:text-[var(--brand-accent)] transition-colors" href="#">Cases</a>
+<a class="text-slate-600 hover:text-[var(--brand-accent)] transition-colors" href="#">Resources</a>
+</div>
+<div class="flex items-center gap-4 border-l border-slate-200 pl-6">
+<button class="material-icons text-slate-400 hover:text-[var(--brand-accent)] transition-colors">notifications</button>
+<div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
+<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBatL3PVeAayghzf8YfO_CTGPBaaJtGYZu9aANwDXqceI24DZ6FD6Rktr9lpHhOE5p5Xb4Qn9nskkMhzzxB2-dfsV6_YSN5zz8jesFQQUSwRim4MjU6wvP8KrXuMsz9lNEFEnpd_Jd3bIUFc6r87SYyxYCv-3mUBh1QMR48YHjeaom4rBSZqS5epbljpCCj_EsvMqwwjr_Mf1JiJNUXuKIb70rawas0bFk8ukUJ5NP7GXX321xuUJXXCxhW7VJRpdDzfL8I-XLqCio"/>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-[1600px] mx-auto flex gap-8 p-6">
+<aside class="w-80 flex-shrink-0 space-y-6">
+<div class="bg-white p-6 rounded-2xl shadow-xl shadow-black/5 border border-white/20">
+<h3 class="text-lg font-bold mb-6 flex items-center gap-2 text-[var(--brand-accent)]">
+<span class="material-icons">filter_list</span>
+                Search Filters
+            </h3>
+<div class="space-y-3 mb-8">
+<label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Jurisdiction</label>
+<div class="grid grid-cols-2 gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
+<button class="bg-[var(--brand-accent)] text-white text-sm font-bold py-2 rounded-lg shadow-md">Canada</button>
+<button class="text-slate-500 hover:text-[var(--brand-accent)] text-sm font-bold py-2 rounded-lg transition-all">USA</button>
+</div>
+</div>
+<div class="space-y-3 mb-8">
+<label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Legal Specialty</label>
+<div class="relative">
+<select class="w-full bg-slate-50 border-slate-200 rounded-xl py-3 px-4 text-sm focus:ring-[var(--brand-accent)] focus:border-[var(--brand-accent)] appearance-none font-medium">
+<option>Corporate Law</option>
+<option>Criminal Defense</option>
+<option>Intellectual Property</option>
+<option>Family Law</option>
+<option>Immigration</option>
+<option>Taxation</option>
+</select>
+<span class="material-icons absolute right-3 top-3 text-slate-400 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="space-y-3 mb-8">
+<label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex justify-between">
+                    Min. Rating
+                    <span class="text-[var(--brand-accent)]">4.0+ Stars</span>
+</label>
+<input class="w-full accent-[var(--brand-accent)] bg-slate-100 h-2 rounded-lg appearance-none cursor-pointer" max="5" min="1" step="0.5" type="range" value="4"/>
+</div>
+<div class="space-y-3 mb-8">
+<label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Experience</label>
+<div class="space-y-2.5">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-5 h-5 rounded border-slate-300 text-[var(--brand-accent)] focus:ring-[var(--brand-accent)]" type="checkbox"/>
+<span class="text-sm font-medium text-slate-700 group-hover:text-[var(--brand-accent)] transition-colors">Senior (15+ years)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-5 h-5 rounded border-slate-300 text-[var(--brand-accent)] focus:ring-[var(--brand-accent)]" type="checkbox"/>
+<span class="text-sm font-medium text-slate-700 group-hover:text-[var(--brand-accent)] transition-colors">Mid-Level (5-15 years)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-5 h-5 rounded border-slate-300 text-[var(--brand-accent)] focus:ring-[var(--brand-accent)]" type="checkbox"/>
+<span class="text-sm font-medium text-slate-700 group-hover:text-[var(--brand-accent)] transition-colors">Junior (1-5 years)</span>
+</label>
+</div>
+</div>
+<button class="w-full py-3.5 bg-slate-50 hover:bg-slate-100 text-[var(--brand-accent)] font-bold rounded-xl border border-slate-200 transition-all flex items-center justify-center gap-2">
+                Reset All Filters
+            </button>
+</div>
+<div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/30 text-white">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-icons text-white">auto_awesome</span>
+<span class="font-bold text-sm">LexGrid Intelligence</span>
+</div>
+<p class="text-xs text-white/90 leading-relaxed font-medium">
+                Based on your previous search for "IP Law in Toronto," we've prioritized 12 high-match candidates with active litigation history.
+            </p>
+</div>
+</aside>
+<section class="flex-grow space-y-6">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white/10 backdrop-blur-lg p-8 rounded-3xl border border-white/20">
+<div>
+<h1 class="text-3xl font-extrabold mb-2 text-white">Find Your Legal Expert</h1>
+<p class="text-white/80 max-w-xl font-medium">Browse our vetted directory of top-tier legal professionals across North America. Powered by LexGrid Match™ technology.</p>
+</div>
+<div class="flex items-center gap-3 bg-white/20 p-1.5 rounded-2xl">
+<button class="px-5 py-2.5 text-sm font-bold rounded-xl bg-white text-[var(--brand-accent)] shadow-sm">Grid View</button>
+<button class="px-5 py-2.5 text-sm font-bold text-white/70 hover:text-white transition-colors">List View</button>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+<div class="group bg-white rounded-3xl p-6 shadow-xl shadow-black/5 hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-300 flex flex-col justify-between border border-transparent hover:border-[var(--brand-accent)]/20">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="relative">
+<img alt="Lawyer" class="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAPf2C6FogQ0I4LZYaxonAOi2cRIIM8ujCB2q7TiM4H2hX65byuV-S86059VYWj-KqH7hsMmRZnzLdLs1ZVC0SRMYU5o3gvhbxZ_9Yzhm5qmFJKHEIeudk_HwKZm_VrAdw_xA9xvM-UXwqeL79pSTTp9ZVpXTwovO_J0LhNcupQzRZAahhfxyLnxZ61LzsEoiniptCHCmOMTfUIPMoUvuKGb3VGpSRjupGfBJYzv9Ec5GZOhR5p28S1qc4EM7RNK51McvAk7Cmf5g"/>
+<div class="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-4 border-white" title="Available Now"></div>
+</div>
+<div class="text-right">
+<div class="bg-[var(--brand-accent)]/10 text-[var(--brand-accent)] text-[10px] font-black px-2.5 py-1 rounded-full border border-[var(--brand-accent)]/10 inline-block mb-2">98% MATCH</div>
+<div class="flex items-center justify-end text-amber-500 gap-1">
+<span class="material-icons text-base">star</span>
+<span class="text-sm font-bold text-slate-900">4.9</span>
+<span class="text-[10px] text-slate-400 font-bold">(128)</span>
+</div>
+</div>
+</div>
+<h2 class="text-xl font-extrabold text-slate-900 mb-1">Marcus Sterling</h2>
+<p class="text-sm font-bold text-[var(--brand-accent)] mb-4">Senior Partner | Corporate Law</p>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">M&amp;A</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">Toronto, ON</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">18 yrs Exp.</span>
+</div>
+<p class="text-sm text-slate-500 font-medium line-clamp-2 mb-6">Expert in cross-border acquisitions and tech sector financing. AI summary: Highly recommended for rapid scale-up transitions.</p>
+</div>
+<button class="w-full py-4 bg-[var(--brand-accent)] hover:bg-[var(--brand-accent-hover)] text-white font-bold rounded-2xl shadow-lg shadow-[var(--brand-accent)]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-icons text-lg">calendar_today</span>
+                    Schedule Meeting
+                </button>
+</div>
+<div class="group bg-white rounded-3xl p-6 shadow-xl shadow-black/5 hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-300 flex flex-col justify-between border border-transparent hover:border-[var(--brand-accent)]/20">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="relative">
+<img alt="Lawyer" class="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoIj--I1Ja-nVkQq2TtP6btSGTZnWWDYTEC_ywdcO1FJDbE7d6f8Tn4JZuaQ_uh6jUvNZCLPjHGALgcGy7W1Hk4Zd1ZOJ6ThhwAUKK794QTsYoAjGC16_y4tqd33VyJh5KtUS_FDNH0V6-0H7y1TY6TmRLMA-2UgOpq3mfQMwKlKGeBuUOYy61ZSuJUqnhkm-Iniepob-Yo8Sw2qDpfFzocHNkL2kl22fQ5D916sA98caxucOUDfUBTDr2RaK-msjlpm0DMWcaOak"/>
+<div class="absolute -bottom-1 -right-1 bg-slate-400 w-5 h-5 rounded-full border-4 border-white" title="Away"></div>
+</div>
+<div class="text-right">
+<div class="bg-[var(--brand-accent)]/10 text-[var(--brand-accent)] text-[10px] font-black px-2.5 py-1 rounded-full border border-[var(--brand-accent)]/10 inline-block mb-2">94% MATCH</div>
+<div class="flex items-center justify-end text-amber-500 gap-1">
+<span class="material-icons text-base">star</span>
+<span class="text-sm font-bold text-slate-900">4.8</span>
+<span class="text-[10px] text-slate-400 font-bold">(215)</span>
+</div>
+</div>
+</div>
+<h2 class="text-xl font-extrabold text-slate-900 mb-1">Elena Rodriguez</h2>
+<p class="text-sm font-bold text-[var(--brand-accent)] mb-4">Lead Specialist | Intellectual Property</p>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">Patents</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">New York, NY</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">12 yrs Exp.</span>
+</div>
+<p class="text-sm text-slate-500 font-medium line-clamp-2 mb-6">Specializing in global trademark strategy and software patent litigation for Fortune 500 companies.</p>
+</div>
+<button class="w-full py-4 bg-[var(--brand-accent)] hover:bg-[var(--brand-accent-hover)] text-white font-bold rounded-2xl shadow-lg shadow-[var(--brand-accent)]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-icons text-lg">calendar_today</span>
+                    Schedule Meeting
+                </button>
+</div>
+<div class="group bg-white rounded-3xl p-6 shadow-xl shadow-black/5 hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-300 flex flex-col justify-between border border-transparent hover:border-[var(--brand-accent)]/20">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="relative">
+<img alt="Lawyer" class="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCV0nvTFAJIRTTJ7BKsiwwqCGF27k4qC9i5PywrH8Uz8gNE4Y-R75N9gRDQlZIfRnbO7ZP9JOZcMM7ce7df3cGaFr0Uba52p5dFyG8P8RtTlUZBkgKdccj0rpsW80ZLYxV4cj7nwUGHhP1qjGph90P8bVQe-dve_xqB1C9wSR3nqUSDHjZmlN7uWpvmAluky63JL-6FEMjRAeH-8ERYEMzpJYtsAFXDywzQj2xDS7EERrjvrOy269DZgEJrKH9TpS35fqgDR2DdXdk"/>
+<div class="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-4 border-white" title="Available Now"></div>
+</div>
+<div class="text-right">
+<div class="bg-[var(--brand-accent)]/10 text-[var(--brand-accent)] text-[10px] font-black px-2.5 py-1 rounded-full border border-[var(--brand-accent)]/10 inline-block mb-2">91% MATCH</div>
+<div class="flex items-center justify-end text-amber-500 gap-1">
+<span class="material-icons text-base">star</span>
+<span class="text-sm font-bold text-slate-900">4.7</span>
+<span class="text-[10px] text-slate-400 font-bold">(89)</span>
+</div>
+</div>
+</div>
+<h2 class="text-xl font-extrabold text-slate-900 mb-1">David Chen</h2>
+<p class="text-sm font-bold text-[var(--brand-accent)] mb-4">Partner | Immigration Law</p>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">Visa Specialist</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">Vancouver, BC</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">22 yrs Exp.</span>
+</div>
+<p class="text-sm text-slate-500 font-medium line-clamp-2 mb-6">Renowned for high-stakes business immigration and investor-class applications across the border.</p>
+</div>
+<button class="w-full py-4 bg-[var(--brand-accent)] hover:bg-[var(--brand-accent-hover)] text-white font-bold rounded-2xl shadow-lg shadow-[var(--brand-accent)]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-icons text-lg">calendar_today</span>
+                    Schedule Meeting
+                </button>
+</div>
+<div class="group bg-white rounded-3xl p-6 shadow-xl shadow-black/5 hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-300 flex flex-col justify-between border border-transparent hover:border-[var(--brand-accent)]/20">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="relative">
+<img alt="Lawyer" class="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDii2SKy2T8-0lyZEomh5BG99vJh3veed6zLrZgVHI3hKFS4jTq6Yb45yQYPe4pS-aUnnxTUd71dUl8cRr3EkjJXBGUX-mMbUYLbV06uU4dtPfDskQTJRjjcc3nokMkLXkX_S5sHhl2obY_hXN_6z59xePrt789zU8XmSgoNDw5CwMnxvqCeJAfq4yOZND4CBXeMsCG_t7h4ooEYaiN9X74-HIsebgbiBFI1GxyoIFPKqf8ub7Yf-H40_sFjhgx3e_SDy2lZpeIWmY"/>
+<div class="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-4 border-white" title="Available Now"></div>
+</div>
+<div class="text-right">
+<div class="bg-[var(--brand-accent)]/10 text-[var(--brand-accent)] text-[10px] font-black px-2.5 py-1 rounded-full border border-[var(--brand-accent)]/10 inline-block mb-2">87% MATCH</div>
+<div class="flex items-center justify-end text-amber-500 gap-1">
+<span class="material-icons text-base">star</span>
+<span class="text-sm font-bold text-slate-900">4.9</span>
+<span class="text-[10px] text-slate-400 font-bold">(45)</span>
+</div>
+</div>
+</div>
+<h2 class="text-xl font-extrabold text-slate-900 mb-1">Sarah Jenkins</h2>
+<p class="text-sm font-bold text-[var(--brand-accent)] mb-4">Senior Associate | Civil Litigation</p>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">Torts</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">Chicago, IL</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">9 yrs Exp.</span>
+</div>
+<p class="text-sm text-slate-500 font-medium line-clamp-2 mb-6">Aggressive and dedicated representation for complex civil disputes and liability claims.</p>
+</div>
+<button class="w-full py-4 bg-[var(--brand-accent)] hover:bg-[var(--brand-accent-hover)] text-white font-bold rounded-2xl shadow-lg shadow-[var(--brand-accent)]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-icons text-lg">calendar_today</span>
+                    Schedule Meeting
+                </button>
+</div>
+<div class="group bg-white rounded-3xl p-6 shadow-xl shadow-black/5 hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-300 flex flex-col justify-between border border-transparent hover:border-[var(--brand-accent)]/20">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="relative">
+<img alt="Lawyer" class="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPbxXq4ftrUOCLN-bp0jvtT2qHAm9wh6tY448yiI3XLGQAME7XKmfBh19SZ1stVxL9ueEfp-UdNJJZB2ESMroCjei0QXGWR-x21HotcaWShwsiMtajV_ROtu55ASgylGXT3Vcea19Wlg77LM7CNjS_AiA97nVpCe2KS1OtYQyFr3yNm72Pq7OALrMJPrBzf5499-bPDxTvUVpTuKOPg4MNd4HAmwK3CMe2PtoZg_0WhdmF7r0Rc5Y3gmzjM8qxF36ZlseYyme-7DU"/>
+<div class="absolute -bottom-1 -right-1 bg-slate-400 w-5 h-5 rounded-full border-4 border-white" title="Away"></div>
+</div>
+<div class="text-right">
+<div class="bg-[var(--brand-accent)]/10 text-[var(--brand-accent)] text-[10px] font-black px-2.5 py-1 rounded-full border border-[var(--brand-accent)]/10 inline-block mb-2">82% MATCH</div>
+<div class="flex items-center justify-end text-amber-500 gap-1">
+<span class="material-icons text-base">star</span>
+<span class="text-sm font-bold text-slate-900">4.6</span>
+<span class="text-[10px] text-slate-400 font-bold">(92)</span>
+</div>
+</div>
+</div>
+<h2 class="text-xl font-extrabold text-slate-900 mb-1">Robert Fox</h2>
+<p class="text-sm font-bold text-[var(--brand-accent)] mb-4">Of Counsel | Criminal Defense</p>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">White Collar</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">Ottawa, ON</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">25 yrs Exp.</span>
+</div>
+<p class="text-sm text-slate-500 font-medium line-clamp-2 mb-6">Specializing in financial crimes and regulatory compliance. Extensive trial experience in federal courts.</p>
+</div>
+<button class="w-full py-4 bg-[var(--brand-accent)] hover:bg-[var(--brand-accent-hover)] text-white font-bold rounded-2xl shadow-lg shadow-[var(--brand-accent)]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-icons text-lg">calendar_today</span>
+                    Schedule Meeting
+                </button>
+</div>
+<div class="group bg-white rounded-3xl p-6 shadow-xl shadow-black/5 hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-300 flex flex-col justify-between border border-transparent hover:border-[var(--brand-accent)]/20">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="relative">
+<img alt="Lawyer" class="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEqOq-68hZ9d8TAq49yMnNzzHNcbSUYYBg2Or94Ok0y55MwGEZTnLkb3RoVyGOQN75wsmBCWtAAc6uw9PhxTu75cbvggyOW6S0s81mIG1NEd2pwreVNNkF6n_QdunvEjy3KDUNyjJPs3WpcZyAoMTCoKBR74qJDPLWevueWBvZiREsmQMh1o8SHu-etZOU__CRBUPAazI_ofBKyWxIovJZhQ8Qik_r0OpRDFnH2TFM9jiF00ww-JssYQjHVnimn2QISqfADqhEysg"/>
+<div class="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-4 border-white" title="Available Now"></div>
+</div>
+<div class="text-right">
+<div class="bg-[var(--brand-accent)]/10 text-[var(--brand-accent)] text-[10px] font-black px-2.5 py-1 rounded-full border border-[var(--brand-accent)]/10 inline-block mb-2">79% MATCH</div>
+<div class="flex items-center justify-end text-amber-500 gap-1">
+<span class="material-icons text-base">star</span>
+<span class="text-sm font-bold text-slate-900">4.9</span>
+<span class="text-[10px] text-slate-400 font-bold">(16)</span>
+</div>
+</div>
+</div>
+<h2 class="text-xl font-extrabold text-slate-900 mb-1">Linda Kwok</h2>
+<p class="text-sm font-bold text-[var(--brand-accent)] mb-4">Partner | Family Law</p>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">Divorce</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">Seattle, WA</span>
+<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">14 yrs Exp.</span>
+</div>
+<p class="text-sm text-slate-500 font-medium line-clamp-2 mb-6">Compassionate and strategic counsel for high-net-worth family disputes and custody arrangements.</p>
+</div>
+<button class="w-full py-4 bg-[var(--brand-accent)] hover:bg-[var(--brand-accent-hover)] text-white font-bold rounded-2xl shadow-lg shadow-[var(--brand-accent)]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-icons text-lg">calendar_today</span>
+                    Schedule Meeting
+                </button>
+</div>
+</div>
+<div class="flex items-center justify-center gap-2 pt-8">
+<button class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm">
+<span class="material-icons text-slate-400">chevron_left</span>
+</button>
+<button class="w-12 h-12 rounded-xl bg-[var(--brand-accent)] text-white font-bold shadow-lg shadow-[var(--brand-accent)]/20">1</button>
+<button class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm font-bold text-slate-600">2</button>
+<button class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm font-bold text-slate-600">3</button>
+<span class="px-2 text-white font-bold">...</span>
+<button class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm">
+<span class="material-icons text-slate-400">chevron_right</span>
+</button>
+</div>
+</section>
+</main>
+<div class="fixed bottom-6 right-6 flex flex-col gap-3">
+<button class="w-14 h-14 bg-white rounded-full shadow-2xl border border-slate-100 flex items-center justify-center group hover:scale-110 transition-transform">
+<span class="material-icons text-slate-600 group-hover:text-[var(--brand-accent)]">map</span>
+</button>
+<button class="w-14 h-14 bg-[var(--brand-accent)] rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform text-white">
+<span class="material-icons">chat</span>
+</button>
+</div>
+
+</body></html>

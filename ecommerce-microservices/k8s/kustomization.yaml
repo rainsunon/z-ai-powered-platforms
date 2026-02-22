@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ecommerce
+
+resources:
+  - base/namespace.yaml
+  - base/configmap.yaml
+  - base/secret.yaml
+  - base/hpa.yaml
+  - base/ingress.yaml
+  - services/discovery-service/deployment.yaml
+  - services/api-gateway/deployment.yaml
+  - services/user-service/deployment.yaml
+  - services/product-service/deployment.yaml
+  - services/analytics-service/deployment.yaml
+  - services/ai-ml-service/deployment.yaml
+
+images:
+  - name: ecommerce/discovery-service
+    newTag: "1.0.0"
+  - name: ecommerce/api-gateway
+    newTag: "1.0.0"
+  - name: ecommerce/user-service
+    newTag: "1.0.0"
+  - name: ecommerce/product-service
+    newTag: "1.0.0"
+  - name: ecommerce/analytics-service
+    newTag: "1.0.0"
+  - name: ecommerce/ai-ml-service
+    newTag: "1.0.0"
+
+commonLabels:
+  app.kubernetes.io/name: ecommerce-microservices
+  app.kubernetes.io/managed-by: kustomize

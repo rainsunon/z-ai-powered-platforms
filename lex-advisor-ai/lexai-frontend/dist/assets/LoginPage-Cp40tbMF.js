@@ -1,0 +1,1 @@
+import{j as e,S as r}from"./index-CaeO38rI.js";const t=()=>e.jsx("div",{className:"flex justify-center items-center h-screen bg-gray-50",children:e.jsx(r,{routing:"hash",forceRedirectUrl:"/chat"})});export{t as default};
