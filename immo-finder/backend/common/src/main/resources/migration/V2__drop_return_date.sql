@@ -1,0 +1,1 @@
+ALTER TABLE asset_assignment DROP COLUMN return_date;

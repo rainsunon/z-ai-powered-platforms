@@ -1,0 +1,82 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.10'
+}
+
+group = 'com.github.dimitryivaniuta.audit'
+version = '0.1.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    bootBom = '3.5.10'
+    lombokVersion = '1.18.42'
+    testcontainersBom = '1.21.4'
+    jsonwebtoken = '0.13.0'
+}
+
+dependencies {
+    implementation "org.apache.commons:commons-compress:1.28.0"
+    implementation "org.assertj:assertj-core:3.27.7"
+    // Spring Boot BOM (versions for starters/flyway/postgres/kafka)
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${bootBom}")
+    testImplementation platform("org.springframework.boot:spring-boot-dependencies:${bootBom}")
+
+    // Testcontainers BOM (single source of truth)
+    testImplementation platform("org.testcontainers:testcontainers-bom:${testcontainersBom}")
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly  'org.postgresql:postgresql'
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'org.apache.commons:commons-lang3:3.20.0'
+
+    // Optional: publish events to Kafka (disabled by default)
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // --- Lombok ---
+    compileOnly         "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly     "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:kafka'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+    testImplementation 'org.awaitility:awaitility:4.2.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+    options.compilerArgs += ['-parameters']
+}

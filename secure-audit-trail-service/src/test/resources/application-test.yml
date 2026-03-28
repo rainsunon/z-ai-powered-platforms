@@ -1,0 +1,12 @@
+spring:
+  cache:
+    type: simple
+  data:
+    redis:
+      repositories:
+        enabled: false
+audit:
+  hmac:
+    activeKeyId: key1
+    keys:
+      key1: "test-secret"

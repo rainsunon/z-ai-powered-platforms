@@ -1,0 +1,92 @@
+package com.deliverysystem.restaurants.service;
+
+import com.deliverysystem.restaurants.controller.advice.exceptions.RestaurantNotFoundException;
+import com.deliverysystem.restaurants.controller.dto.RestaurantQueryFilter;
+import com.deliverysystem.restaurants.controller.dto.RestaurantRequestDTO;
+import com.deliverysystem.restaurants.controller.dto.RestaurantResponseDTO;
+import com.deliverysystem.restaurants.event.publisher.RestaurantEventPublisher;
+import com.deliverysystem.restaurants.event.representation.RestaurantDeletedEvent;
+import com.deliverysystem.restaurants.mapper.RestaurantMapper;
+import com.deliverysystem.restaurants.model.Restaurant;
+import com.deliverysystem.restaurants.model.enums.AuditStatus;
+import com.deliverysystem.restaurants.model.enums.RestaurantStatus;
+import com.deliverysystem.restaurants.repository.RestaurantRepository;
+import com.deliverysystem.restaurants.repository.specification.RestaurantSpecification;
+import com.deliverysystem.restaurants.validator.RestaurantValidator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class RestaurantService {
+
+    private final RestaurantRepository repository;
+    private final RestaurantValidator validator;
+    private final RedisService redisService;
+    private final RestaurantMapper mapper;
+    private final RestaurantEventPublisher restaurantEventPublisher;
+
+    public Restaurant createRestaurant(RestaurantRequestDTO dto){
+        validator.checkIfExistRestaurantWithSameEmail(dto.email());
+
+        Restaurant restaurant = mapper.toEntity(dto);
+        restaurant.setStatus(RestaurantStatus.OPEN);
+        restaurant.setAuditStatus(AuditStatus.ACTIVE);
+        return repository.save(restaurant);
+    }
+
+    public Restaurant findRestaurantById(UUID restaurantId){
+       return repository.findById(restaurantId)
+               .filter(r -> !r.getAuditStatus().equals(AuditStatus.DELETED))
+               .orElseThrow(() -> new RestaurantNotFoundException(String.format("Restaurant ID: %s not found", restaurantId)));
+    }
+
+    public void toggleRestaurantStatus(UUID restaurantId){
+        Restaurant restaurant = findRestaurantById(restaurantId);
+
+        if(restaurant.getStatus().equals(RestaurantStatus.OPEN)){
+            restaurant.setStatus(RestaurantStatus.CLOSED);
+        } else {
+            restaurant.setStatus(RestaurantStatus.OPEN);
+        }
+
+        redisService.insertRestaurantInCache(restaurant);
+        repository.save(restaurant);
+    }
+
+    public Page<RestaurantResponseDTO> findRestaurantsByFilter(RestaurantQueryFilter filter, Pageable pageable){
+        Page<Restaurant> restaurantsPage = repository.findAll(RestaurantSpecification.specification(filter), pageable);
+        List<RestaurantResponseDTO> restaurantList = restaurantsPage.map(mapper::toResponse).toList();
+        return new PageImpl<>(restaurantList, pageable, restaurantList.size());
+    }
+
+    public void disableRestaurantById(UUID restaurantId) {
+        Restaurant restaurant = findRestaurantById(restaurantId);
+
+        if(!restaurant.getMenus().isEmpty()){
+            restaurant.getMenus().forEach(menu -> menu.setAuditStatus(AuditStatus.DELETED));
+        }
+
+        restaurant.setAuditStatus(AuditStatus.DELETED);
+        repository.save(restaurant);
+
+        RestaurantDeletedEvent restaurantEvent = new RestaurantDeletedEvent(
+                restaurant.getId(),
+                restaurant.getEmail(),
+                AuditStatus.DELETED.toString()
+        );
+
+        restaurantEventPublisher.publisherInRestaurantDeleted(restaurantEvent);
+    }
+
+    public void deleteRestaurantById(UUID restaurantId) {
+        Restaurant restaurant = findRestaurantById(restaurantId);
+        repository.delete(restaurant);
+    }
+
+}

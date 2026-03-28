@@ -1,0 +1,68 @@
+server:
+  port: 8080
+
+logging:
+  pattern:
+    level: "%5p [corr:%X{correlationId} tenant:%X{tenantId}]"
+  level:
+    root: INFO
+
+spring:
+  application:
+    name: secure-multi-tenant-api-platform
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tenantdb
+    username: tenant
+    password: tenant
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+
+  flyway:
+    enabled: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  cache:
+    type: redis
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    properties:
+      spring.json.trusted.packages: com.github.dimitryivaniuta.multitenant.kafka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# Optional: return 404 instead of leaking that another tenant has a row
+# (RLS already prevents reads; the service maps empty results to 404).
+
+app:
+  security:
+    jwt:
+      issuer: "https://auth.local"
+      audience: "api"
+      jwks:
+        keys:
+          - kid: "k1"
+            publicKeyLocation: "classpath:keys/jwks-k1-public.pem"
+          - kid: "k2"
+            publicKeyLocation: "classpath:keys/jwks-k2-public.pem"

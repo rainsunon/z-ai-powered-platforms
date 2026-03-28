@@ -1,0 +1,243 @@
+{
+  "info": {
+    "name": "Secure Audit Trail Service",
+    "_postman_id": "50f8ba96-b1ff-49ac-bbeb-3822a25e96db",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Append-only, tamper-evident audit records (hash chain + HMAC)."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "writerUser",
+      "value": "writer"
+    },
+    {
+      "key": "writerPass",
+      "value": "writer-pass"
+    },
+    {
+      "key": "auditorUser",
+      "value": "auditor"
+    },
+    {
+      "key": "auditorPass",
+      "value": "auditor-pass"
+    },
+    {
+      "key": "tenantId",
+      "value": "tenant-demo"
+    }
+  ],
+  "item": [
+    {
+      "name": "Writer",
+      "item": [
+        {
+          "name": "Append audit record",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{writerUser}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{writerPass}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/audit/records",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit",
+                "records"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"actor\": \"user@example.com\",\n  \"action\": \"ORDER_CREATED\",\n  \"resourceType\": \"ORDER\",\n  \"resourceId\": \"order-123\",\n  \"correlationId\": \"corr-123\",\n  \"data\": {\n    \"amount\": 10,\n    \"currency\": \"PLN\",\n    \"note\": \"demo\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auditor",
+      "item": [
+        {
+          "name": "Get record by id",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{auditorUser}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{auditorPass}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/audit/records/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit",
+                "records",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search records",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{auditorUser}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{auditorPass}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/audit/records?tenantId={{tenantId}}&page=0&size=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit",
+                "records"
+              ],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify chain",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{auditorUser}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{auditorPass}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/audit/verify?tenantId={{tenantId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit",
+                "verify"
+              ],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export CSV",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{auditorUser}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{auditorPass}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/audit/export?tenantId={{tenantId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

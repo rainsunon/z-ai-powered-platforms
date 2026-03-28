@@ -1,0 +1,2 @@
+ALTER TABLE asset_request
+ADD COLUMN note VARCHAR(255);

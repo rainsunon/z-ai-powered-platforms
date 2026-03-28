@@ -1,0 +1,119 @@
+x-common-variables:
+  &env-vars
+    ######MY SQL SERVER DETAILS####
+    MYSQL_URL: 
+    MYSQL_USER: 
+    MYSQL_PASSWORD: 
+    #####MONGO DB SERVER DETAILS####
+    MONGODB_URI: 
+######################################################
+    OFO_GATEWAY: http://ofo-gateway:80
+    MONGODB_DB: ofo
+
+# Define services
+services:
+# Configuration for #building the docker image for the each of the services
+  security-service:
+    #build: security-service
+    container_name: security-service
+    image: "satheeshkumart50/security-service:1.0.0"
+    ports:
+    - "8080:8080" # Forward the exposed port 8080 to port 8080 on the host machine
+    networks:
+      - ofonet
+    depends_on:
+      - ofo-gateway
+#####################################
+  restaurant-service:
+    #build: restaurant-service
+    container_name: restaurant-service
+    image: "satheeshkumart50/restaurant-service:1.0.0"
+    ports:
+    - "8081:8081" # Forward the exposed port 8087 to port 8087 on the host machine
+    networks:
+      - ofonet
+    depends_on:
+      - ofo-gateway
+    environment:
+      *env-vars
+#####################################
+  search-service:
+    #build: search-service
+    container_name: search-service
+    image: "satheeshkumart50/search-service:1.0.0"
+    ports:
+    - "8082:8082" # Forward the exposed port 8082 to port 8082 on the host machine
+    networks:
+      - ofonet
+    depends_on:
+      - ofo-gateway
+    environment:
+      *env-vars
+#####################################
+  user-service:
+    #build: user-service
+    container_name: user-service
+    image: "satheeshkumart50/user-service:1.0.0"
+    ports:
+    - "8083:8083" # Forward the exposed port 8083 to port 8083 on the host machine
+    networks:
+      - ofonet
+    depends_on:
+      - ofo-gateway
+    environment:
+      *env-vars
+#####################################
+  order-service:
+    #build: order-service
+    container_name: order-service
+    image: "satheeshkumart50/order-service:1.0.0"
+    ports:
+    - "8084:8084" # Forward the exposed port 8084 to port 8084 on the host machine
+    networks:
+      - ofonet
+    depends_on:
+      - ofo-gateway
+    environment:
+      *env-vars
+#####################################
+  payment-service:
+    #build: payment-service
+    container_name: payment-service
+    image: "satheeshkumart50/payment-service:1.0.0"
+    ports:
+    - "8085:8085" # Forward the exposed port 8085 to port 8085 on the host machine
+    networks:
+      - ofonet
+    depends_on:
+      - ofo-gateway
+      - order-service
+    environment:
+      *env-vars
+#####################################
+  review-service:
+    #build: review-service
+    container_name: review-service
+    image: "satheeshkumart50/review-service:1.0.0"
+    ports:
+    - "8086:8086" # Forward the exposed port 8086 to port 8086 on the host machine
+    networks:
+      - ofonet
+    depends_on:
+      - ofo-gateway
+      - restaurant-service
+    environment:
+      *env-vars
+#####################################
+  ofo-gateway:
+    #build: ofo-gateway 
+    container_name: ofo-gateway
+    image: "satheeshkumart50/ofo-gateway:1.0.0"
+    ports:
+    - "80:80" # Map the exposed port 9191 on container to port 9191 on the host machine
+    networks:
+      - ofonet
+#####################################
+# Docker Network Details
+networks:
+  ofonet:
+    driver: bridge

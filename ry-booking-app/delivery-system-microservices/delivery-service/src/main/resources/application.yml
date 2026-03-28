@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: deliveries-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/delivery_db
+    username: ${DELIVERIES_DB_USER}
+    password: ${DELIVERIES_DB_PASSWORD}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    subscribe-payment-queue: ${DELIVERIES_RABBITMQ_SUBSCRIBE_PAYMENT_QUEUE}
+    publisher-delivery-ready: ${DELIVERIES_RABBITMQ_PUBLISHER_DELIVERY_READY}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_URI}
+
+  output:
+    ansi:
+      enabled: ALWAYS
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+logging:
+  pattern:
+    console: "%clr(%d{dd-MM-yyyy HH:mm:ss}){faint} %clr(%5p) %clr([%t]){faint} %clr(%-40.40logger){cyan} %clr(:){yellow} %m%n"
+
+server:
+  port: 0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_ZONE_URL}
+  instance:
+    instance-id: ${spring.application.name}:${random.value}
+

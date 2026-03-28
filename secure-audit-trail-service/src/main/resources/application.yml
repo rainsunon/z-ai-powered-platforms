@@ -1,0 +1,55 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: secure-audit-trail-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/auditdb
+    username: audit
+    password: audit
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cache:
+    type: redis
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+audit:
+  security:
+    writer:
+      username: writer
+      password: writer-pass
+    auditor:
+      username: auditor
+      password: auditor-pass
+
+  hmac:
+    activeKeyId: key1
+    keys:
+      key1: "CHANGE_ME_IN_PROD"
+
+  kafka:
+    enabled: false
+    topic: audit-records
+
+logging:
+  level:
+    root: INFO

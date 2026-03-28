@@ -1,0 +1,582 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Nova-Health JSONB Column Schemas",
+  "description": "JSON Schema definitions for every JSONB column in the PostgreSQL data model, matching frontend form data shapes.",
+
+  "definitions": {
+
+    "users__profile_data": {
+      "description": "users.profile_data — Extended profile from useProfileStore + Profile form",
+      "type": "object",
+      "properties": {
+        "bloodType":   { "type": "string", "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] },
+        "height":      { "type": "string", "examples": ["5'7\"", "170 cm"] },
+        "weight":      { "type": "string", "examples": ["138 lbs", "62 kg"] },
+        "address": {
+          "type": "object",
+          "properties": {
+            "street":  { "type": "string" },
+            "city":    { "type": "string" },
+            "state":   { "type": "string" },
+            "zipCode": { "type": "string" },
+            "country": { "type": "string", "default": "US" }
+          }
+        },
+        "memberSince": { "type": "string", "format": "date" }
+      }
+    },
+
+    "users__security_settings": {
+      "description": "users.security_settings — Profile Security tab form",
+      "type": "object",
+      "properties": {
+        "twoFactorEnabled":     { "type": "boolean", "default": false },
+        "lastPasswordChange":   { "type": "string", "format": "date-time" },
+        "activeSessions":       { "type": "integer", "minimum": 0 },
+        "dataPrivacy": {
+          "type": "object",
+          "properties": {
+            "shareWithProviders": { "type": "boolean", "default": true },
+            "anonymousAnalytics": { "type": "boolean", "default": false }
+          }
+        }
+      }
+    },
+
+    "users__preferences": {
+      "description": "users.preferences — Profile Preferences tab form (ToggleRow)",
+      "type": "object",
+      "properties": {
+        "language": { "type": "string", "default": "en" },
+        "theme":    { "type": "string", "enum": ["light", "dark", "system"], "default": "light" },
+        "notifications": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "boolean", "default": true },
+            "push":  { "type": "boolean", "default": true },
+            "sms":   { "type": "boolean", "default": false }
+          }
+        },
+        "accessibility": {
+          "type": "object",
+          "properties": {
+            "highContrast": { "type": "boolean", "default": false },
+            "fontSize":     { "type": "string", "enum": ["small", "medium", "large"], "default": "medium" }
+          }
+        }
+      }
+    },
+
+    "family_members__health_snapshot": {
+      "description": "family_members.health_snapshot — Health data synced from family dashboard",
+      "type": "object",
+      "properties": {
+        "bloodType":     { "type": "string" },
+        "heartRate":     { "type": "integer", "description": "BPM" },
+        "sleep":         { "type": "number", "description": "Hours" },
+        "steps":         { "type": "integer" },
+        "bloodPressure": { "type": "string", "pattern": "^\\d{2,3}/\\d{2,3}$" },
+        "wellness":      { "type": "integer", "minimum": 0, "maximum": 100 },
+        "lastSync":      { "type": "string", "format": "date-time" },
+        "status":        { "type": "string", "enum": ["Excellent", "Great", "Good", "Fair", "Poor"] },
+        "lastCheckup":   { "type": "string", "format": "date" },
+        "vaccination":   { "type": "string" }
+      }
+    },
+
+    "family_members__display_settings": {
+      "description": "family_members.display_settings — UI avatar/color configuration",
+      "type": "object",
+      "properties": {
+        "avatar":   { "type": "string", "description": "Material icon name, e.g. face_4" },
+        "color":    { "type": "string", "description": "Tailwind color class" },
+        "gradient": { "type": "string", "description": "Tailwind gradient class" }
+      }
+    },
+
+    "subscription_plans__plan_details": {
+      "description": "subscription_plans.plan_details — Plan features from Subscription page",
+      "type": "object",
+      "properties": {
+        "features":   { "type": "array", "items": { "type": "string" } },
+        "savingsNote": { "type": ["string", "null"] },
+        "tier":        { "type": "string", "enum": ["basic", "standard", "premium"] }
+      }
+    },
+
+    "payment_methods__method_data_card": {
+      "description": "payment_methods.method_data — AddPaymentMethod form (credit card)",
+      "type": "object",
+      "properties": {
+        "cardholderName": { "type": "string" },
+        "lastFourDigits": { "type": "string", "pattern": "^\\d{4}$" },
+        "cardNetwork":    { "type": "string", "enum": ["Visa", "Mastercard", "Amex", "Discover"] },
+        "expiryDate":     { "type": "string", "pattern": "^\\d{2}/\\d{2}$" },
+        "billingAddress": {
+          "type": "object",
+          "properties": {
+            "street":     { "type": "string" },
+            "city":       { "type": "string" },
+            "postalCode": { "type": "string" }
+          }
+        },
+        "tokenRef": { "type": "string", "description": "Payment processor token (never store raw card number)" }
+      },
+      "required": ["cardholderName", "lastFourDigits", "cardNetwork", "expiryDate", "tokenRef"]
+    },
+
+    "payment_methods__method_data_bank": {
+      "description": "payment_methods.method_data — AddBankAccount form (ACH)",
+      "type": "object",
+      "properties": {
+        "accountHolderName": { "type": "string" },
+        "lastFourDigits":    { "type": "string", "pattern": "^\\d{4}$" },
+        "bankName":          { "type": "string" },
+        "accountType":       { "type": "string", "enum": ["checking", "savings"] },
+        "routingLastFour":   { "type": "string", "pattern": "^\\d{4}$" },
+        "verified":          { "type": "boolean", "default": false },
+        "tokenRef":          { "type": "string" }
+      },
+      "required": ["accountHolderName", "lastFourDigits", "bankName", "accountType", "tokenRef"]
+    },
+
+    "invoices__invoice_data": {
+      "description": "invoices.invoice_data — Billing detail / BillingDetail page",
+      "type": "object",
+      "properties": {
+        "lineItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "amount":      { "type": "number" }
+            },
+            "required": ["description", "amount"]
+          }
+        },
+        "insuranceCoverage":      { "type": "number", "description": "Percentage" },
+        "insuranceAmount":        { "type": "number" },
+        "patientResponsibility":  { "type": "number" },
+        "provider": {
+          "type": "object",
+          "properties": {
+            "name":     { "type": "string" },
+            "facility": { "type": "string" },
+            "npi":      { "type": "string" }
+          }
+        },
+        "fiscalYear": { "type": "string" },
+        "icon":       { "type": "string" }
+      }
+    },
+
+    "payment_transactions__transaction_data": {
+      "description": "payment_transactions.transaction_data — PaymentHistory / InstallmentSchedule",
+      "type": "object",
+      "properties": {
+        "transactionRef":    { "type": "string" },
+        "processorResponse": { "type": "string" },
+        "failureReason":     { "type": ["string", "null"] },
+        "installmentInfo": {
+          "type": ["object", "null"],
+          "properties": {
+            "planTotal":          { "type": "number" },
+            "installmentNumber":  { "type": "integer" },
+            "totalInstallments":  { "type": "integer" }
+          }
+        }
+      }
+    },
+
+    "vital_readings__extended_data": {
+      "description": "vital_readings.extended_data — VitalsTracking + Dashboard vitals",
+      "type": "object",
+      "properties": {
+        "bloodOxygen": {
+          "type": "object",
+          "properties": {
+            "value":   { "type": "integer" },
+            "trend":   { "type": "string", "enum": ["stable", "improving", "declining"] },
+            "history": { "type": "array", "items": { "type": "integer" } }
+          }
+        },
+        "hrv": {
+          "type": "object",
+          "properties": {
+            "value": { "type": "integer" },
+            "trend": { "type": "string" }
+          }
+        },
+        "respiratoryRate": { "type": "integer" },
+        "source":          { "type": "string", "enum": ["apple_health", "fitbit", "google_fit", "manual"] }
+      }
+    },
+
+    "symptoms__symptom_data": {
+      "description": "symptoms.symptom_data — LogSymptomsModal form + Symptoms page",
+      "type": "object",
+      "properties": {
+        "description":       { "type": "string" },
+        "triggers":          { "type": "array", "items": { "type": "string" } },
+        "relatedConditions": { "type": "array", "items": { "type": "string" } },
+        "aiInsight":         { "type": ["string", "null"] },
+        "bodyArea":          { "type": "string" }
+      }
+    },
+
+    "medications__medication_data": {
+      "description": "medications.medication_data — MedicationDetail page",
+      "type": "object",
+      "properties": {
+        "interactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "medicationName": { "type": "string" },
+              "severity":       { "type": "string", "enum": ["high", "moderate", "safe"] },
+              "description":    { "type": "string" }
+            },
+            "required": ["medicationName", "severity"]
+          }
+        },
+        "sideEffects": {
+          "type": "object",
+          "properties": {
+            "common":  { "type": "array", "items": { "type": "string" } },
+            "serious": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date":     { "type": "string", "format": "date" },
+              "change":   { "type": "string" },
+              "provider": { "type": "string" },
+              "dosage":   { "type": "string" }
+            }
+          }
+        },
+        "nextRefill":    { "type": ["string", "null"], "format": "date" },
+        "adherenceRate": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    },
+
+    "health_plans__plan_data": {
+      "description": "health_plans.plan_data — HealthPlan page phases/goals/metrics",
+      "type": "object",
+      "properties": {
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "phase":    { "type": "integer" },
+              "title":    { "type": "string" },
+              "status":   { "type": "string", "enum": ["completed", "current", "upcoming"] },
+              "duration": { "type": "string" },
+              "goals": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title":     { "type": "string" },
+                    "completed": { "type": "boolean" }
+                  },
+                  "required": ["title", "completed"]
+                }
+              }
+            }
+          }
+        },
+        "weeklyFocus": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "day":   { "type": "string" },
+              "focus": { "type": "string" },
+              "icon":  { "type": "string" }
+            }
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label":  { "type": "string" },
+              "value":  { "type": "string" },
+              "change": { "type": "string" },
+              "trend":  { "type": "string", "enum": ["up", "down", "stable"] }
+            }
+          }
+        }
+      }
+    },
+
+    "activity_logs__activity_data": {
+      "description": "activity_logs.activity_data — ActivityTracking page",
+      "type": "object",
+      "properties": {
+        "icon": { "type": "string" },
+        "time": { "type": "string" },
+        "dailyStats": {
+          "type": "object",
+          "properties": {
+            "totalSteps":        { "type": "integer" },
+            "stepsGoal":         { "type": "integer" },
+            "caloriesBurned":    { "type": "integer" },
+            "caloriesGoal":      { "type": "integer" },
+            "activeMinutes":     { "type": "integer" },
+            "activeMinutesGoal": { "type": "integer" }
+          }
+        },
+        "weeklySteps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "day":   { "type": "string" },
+              "steps": { "type": "integer" }
+            }
+          }
+        },
+        "source": { "type": "string" }
+      }
+    },
+
+    "sleep_records__sleep_data": {
+      "description": "sleep_records.sleep_data — SleepData page + AI insights",
+      "type": "object",
+      "properties": {
+        "deepSleep":   { "type": "number", "description": "Hours" },
+        "remSleep":    { "type": "number" },
+        "lightSleep":  { "type": "number" },
+        "awake":       { "type": "number" },
+        "sleepScore":  { "type": "integer", "minimum": 0, "maximum": 100 },
+        "bedTime":     { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+        "wakeTime":    { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+        "efficiency":  { "type": "integer" },
+        "source":      { "type": "string" }
+      }
+    },
+
+    "documents__document_data": {
+      "description": "documents.document_data — Documents page categories/sharing",
+      "type": "object",
+      "properties": {
+        "category":    { "type": "string", "enum": ["Lab Results", "Prescriptions", "Imaging (X-Ray/MRI)", "Reports"] },
+        "description": { "type": "string" },
+        "sharedWith":  { "type": "array", "items": { "type": "string", "format": "uuid" } },
+        "isFavorite":  { "type": "boolean", "default": false },
+        "tags":        { "type": "array", "items": { "type": "string" } },
+        "ocrExtracted": {
+          "type": ["object", "null"],
+          "properties": {
+            "key_findings": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "conversations__conversation_data": {
+      "description": "conversations.conversation_data — Chat page metadata",
+      "type": "object",
+      "properties": {
+        "type":     { "type": "string", "enum": ["doctor_chat", "support", "group"] },
+        "category": { "type": "string", "enum": ["All", "Doctors", "Support"] },
+        "subject":  { "type": "string" }
+      }
+    },
+
+    "messages__message_data": {
+      "description": "messages.message_data — Chat message attachments",
+      "type": "object",
+      "properties": {
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type":     { "type": "string", "enum": ["file", "image"] },
+              "name":     { "type": "string" },
+              "size":     { "type": "string" },
+              "url":      { "type": "string", "format": "uri" },
+              "mimeType": { "type": "string" }
+            },
+            "required": ["type", "name", "url"]
+          }
+        }
+      }
+    },
+
+    "notifications__notification_data": {
+      "description": "notifications.notification_data — Notifications page action buttons",
+      "type": "object",
+      "properties": {
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label":   { "type": "string" },
+              "variant": { "type": "string", "enum": ["primary", "secondary"] },
+              "href":    { "type": "string" }
+            },
+            "required": ["label", "variant"]
+          }
+        },
+        "relatedEntity": {
+          "type": ["object", "null"],
+          "properties": {
+            "type": { "type": "string" },
+            "id":   { "type": "string" }
+          }
+        },
+        "expiresAt": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+
+    "connected_devices__device_data": {
+      "description": "connected_devices.device_data — DataSync page device cards",
+      "type": "object",
+      "properties": {
+        "icon":            { "type": "string" },
+        "iconColor":       { "type": "string" },
+        "syncProgress":    { "type": "integer", "minimum": 0, "maximum": 100 },
+        "syncLabel":       { "type": "string" },
+        "lastSyncAt":      { "type": "string", "format": "date-time" },
+        "dataTypes":       { "type": "array", "items": { "type": "string" } },
+        "tokenRef":        { "type": "string" },
+        "firmwareVersion": { "type": "string" }
+      }
+    },
+
+    "appointments__appointment_data": {
+      "description": "appointments.appointment_data — Appointments page detail",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["in_person", "telehealth", "phone"] },
+        "location": {
+          "type": ["object", "null"],
+          "properties": {
+            "facility": { "type": "string" },
+            "room":     { "type": "string" },
+            "address":  { "type": "string" }
+          }
+        },
+        "specialty":  { "type": "string" },
+        "notes":      { "type": "string" },
+        "reminders":  { "type": "array", "items": { "type": "string" } },
+        "videoLink":  { "type": ["string", "null"], "format": "uri" }
+      }
+    },
+
+    "habits__habit_data": {
+      "description": "habits.habit_data — HabitTracker page",
+      "type": "object",
+      "properties": {
+        "frequency":     { "type": "string", "enum": ["daily", "weekly", "custom"] },
+        "targetPerDay":  { "type": "integer", "minimum": 1 },
+        "currentStreak": { "type": "integer" },
+        "longestStreak": { "type": "integer" },
+        "category":      { "type": "string" },
+        "scheduleDays":  { "type": "array", "items": { "type": "string" } },
+        "completionLog": {
+          "type": "object",
+          "description": "Keys are ISO date strings, values are boolean",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+
+    "family_challenges__challenge_data": {
+      "description": "family_challenges.challenge_data — FamilyWellnessChallenge page",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "startDate":   { "type": "string", "format": "date" },
+        "endDate":     { "type": "string", "format": "date" },
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "memberId":  { "type": "string" },
+              "progress":  { "type": "integer", "minimum": 0, "maximum": 100 },
+              "completed": { "type": "boolean" }
+            }
+          }
+        },
+        "reward": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "name": { "type": "string" },
+            "icon": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "support_tickets__ticket_data": {
+      "description": "support_tickets.ticket_data — CustomerServiceDashboard",
+      "type": "object",
+      "properties": {
+        "category":     { "type": "string" },
+        "description":  { "type": "string" },
+        "sla":          { "type": "string" },
+        "responseTime": { "type": "string" },
+        "chatMessages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sender":    { "type": "string" },
+              "message":   { "type": "string" },
+              "timestamp": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+
+    "security_logs__log_data": {
+      "description": "security_logs.log_data — AdminDashboard security logs",
+      "type": "object",
+      "properties": {
+        "userAgent": { "type": "string" },
+        "device":    { "type": "string" },
+        "icon":      { "type": "string" },
+        "severity":  { "type": "string", "enum": ["info", "warning", "error", "critical"] },
+        "details":   { "type": "string" }
+      }
+    },
+
+    "system_alerts__alert_data": {
+      "description": "system_alerts.alert_data — AdminDashboard system alerts",
+      "type": "object",
+      "properties": {
+        "refId":             { "type": "string" },
+        "impact":            { "type": "string" },
+        "affectedServices":  { "type": "array", "items": { "type": "string" } },
+        "scheduledAt":       { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+
+    "access_requests__request_data": {
+      "description": "access_requests.request_data — AdminDashboard access requests",
+      "type": "object",
+      "properties": {
+        "justification": { "type": "string" },
+        "reviewNotes":   { "type": ["string", "null"] },
+        "approvedAt":    { "type": ["string", "null"], "format": "date-time" },
+        "expiresAt":     { "type": ["string", "null"], "format": "date-time" }
+      }
+    }
+  }
+}

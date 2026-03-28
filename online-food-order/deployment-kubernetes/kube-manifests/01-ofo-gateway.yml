@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ofo-gateway
+  labels:
+    app: ofo-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ofo-gateway
+  template:
+    metadata:
+      labels:
+        app: ofo-gateway
+    spec:
+      containers:
+        - name: ofo-gateway
+          image: satheeshkumart50/ofo-gateway:1.0.0
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ofo-gateway
+  labels:
+    app: ofo-gateway
+spec:
+  type: NodePort
+  selector:
+    app: ofo-gateway
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30001
+---
+
+

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: review-service
+  template:
+    metadata:
+      labels:
+        app: review-service
+    spec:
+      initContainers:
+        - name: wait-for-ofo-gateway
+          image: busybox:1.28
+          command: ['sh', '-c', 'until nslookup ofo-gateway; do echo waiting for ofo-gateway; sleep 2; done']
+      containers:
+        - name: review-service
+          image: satheeshkumart50/review-service:1.0.0
+          ports:
+            - containerPort: 8086
+          env:
+            - name: MONGODB_URI
+              value: 
+            - name: MONGODB_DB
+              value: "ofo"
+            - name: OFO_GATEWAY
+              value: "http://ofo-gateway:80"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: review-service
+spec:
+  type: NodePort
+  selector:
+    app: review-service
+  ports:
+    - protocol: TCP
+      port: 8086
+      targetPort: 8086
+      nodePort: 30008

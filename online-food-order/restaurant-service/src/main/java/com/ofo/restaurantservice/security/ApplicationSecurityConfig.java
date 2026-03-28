@@ -1,0 +1,36 @@
+package com.ofo.restaurantservice.security;
+
+import static com.ofo.restaurantservice.security.ApplicationPermission.OFO_ADMIN;
+import static com.ofo.restaurantservice.security.ApplicationPermission.OFO_USER;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
+public class ApplicationSecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterAfter(new JWTTokenVerifier(), JWTAuthenticationFilter.class)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/restaurant").hasAuthority(OFO_ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/restaurant/").hasAuthority(OFO_ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/restaurant/updatemenu").hasAuthority(OFO_ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/restaurant/{restaurantId}").hasAnyAuthority(OFO_USER.name(), OFO_ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/restaurant/rating").hasAnyAuthority(OFO_USER.name(), OFO_ADMIN.name())
+                        .anyRequest()
+                        .authenticated());
+
+        return http.build();
+    }
+}

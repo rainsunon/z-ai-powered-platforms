@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      initContainers:
+        - name: init-db
+          image: busybox:1.31
+          command: ['sh', '-c', 'until nslookup ofo-gateway; do echo waiting for postgres-externalname-service; sleep 2; done; echo -e "  >> PostgreSQL DB Server has started";']
+      containers:
+        - name: user-service
+          image: satheeshkumart50/user-service:1.0.0
+          ports:
+            - containerPort: 8083
+          env:
+            - name: POSTGRES_URL
+              value:
+            - name: POSTGRES_USER
+              value:
+            - name: POSTGRES_PASSWORD
+              value:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  type: NodePort
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083
+      nodePort: 30003

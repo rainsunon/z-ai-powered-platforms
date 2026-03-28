@@ -1,0 +1,66 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: outbox-publisher-demo
+
+  # LOCAL (run app on your host, use compose host ports)
+  datasource:
+    url: jdbc:postgresql://localhost:5453/outbox_demo
+    username: outbox
+    password: outbox
+    hikari:
+      maximum-pool-size: 10
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+
+  # LOCAL (host)
+  kafka:
+    bootstrap-servers: localhost:9096
+    producer:
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 30000
+        retries: 2147483647
+    consumer:
+      auto-offset-reset: earliest
+
+outbox:
+  kafka:
+    topic: domain-events
+  publisher:
+    batch-size: 50
+    max-attempts: 25
+    lock-ttl: PT30S
+    base-backoff: PT1S
+    max-backoff: PT5M
+    fixed-delay: 500ms
+    initial-delay: 2s
+    reaper-enabled: true
+    stuck-older-than: PT10M
+
+logging:
+  level:
+    com.github.dimitryivaniuta.gateway: INFO
+
+app:
+  web:
+    cors:
+      allow-credentials: false
+      allowed-origins:
+        - "http://localhost:5173"
+        - "http://localhost:3000"

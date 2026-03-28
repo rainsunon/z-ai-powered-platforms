@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: orders-service
+
+  data:
+    mongodb:
+      uri: mongodb://${ORDERS_MONGO_USER}:${ORDERS_MONGO_PASSWORD}@${ORDERS_MONGO_HOST}:${ORDERS_MONGO_PORT}/${ORDERS_MONGO_DB}?authSource=admin
+
+  rabbitmq:
+    host: ${ORDERS_RABBITMQ_HOST}
+    port: ${ORDERS_RABBITMQ_PORT}
+    username: ${ORDERS_RABBITMQ_USERNAME}
+    password: ${ORDERS_RABBITMQ_PASSWORD}
+    exchange-verify-payment: ${ORDERS_RABBITMQ_EXCHANGE_VERIFY_PAYMENT}
+    exchange-approved-payment: ${ORDERS_RABBITMQ_EXCHANGE_APPROVED_PAYMENT}
+    delivery-ready-update: ${ORDERS_RABBITMQ_DELIVERY_READY_UPDATE}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_URI}
+
+  output:
+    ansi:
+      enabled: ALWAYS
+
+logging:
+  pattern:
+    console: "%clr(%d{dd-MM-yyyy HH:mm:ss}){faint} %clr(%5p) %clr([%t]){faint} %clr(%-40.40logger){cyan} %clr(:){yellow} %m%n"
+
+server:
+  port: 0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_ZONE_URL}
+  instance:
+    instance-id: ${spring.application.name}:${random.value}
+

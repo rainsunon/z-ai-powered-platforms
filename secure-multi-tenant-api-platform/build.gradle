@@ -1,0 +1,70 @@
+plugins {
+    alias(libs.plugins.springBoot)
+    id 'java'
+}
+
+group = 'com.github.dimitryivaniuta.multitenant'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+repositories { mavenCentral() }
+
+dependencies {
+    implementation(platform(libs.springBootBom))
+
+    // Testcontainers BOM: pin Testcontainers consistently
+    testImplementation(enforcedPlatform(libs.testcontainersBom))
+
+    implementation(libs.springBootStarterWeb)
+    implementation(libs.springBootStarterValidation)
+    implementation(libs.springBootStarterSecurity)
+    implementation(libs.springBootStarterOauth2ResourceServer)
+
+    implementation(libs.springBootStarterDataJpa)
+    implementation(libs.springBootStarterCache)
+    implementation(libs.springBootStarterActuator)
+
+    implementation(libs.springBootStarterDataRedis)
+    implementation(libs.springBootStarterKafka)
+
+    implementation(libs.flywayCore)
+    runtimeOnly(libs.flywayDatabasePostgresql)
+    runtimeOnly(libs.postgres)
+
+    // Lombok pinned
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+    testCompileOnly(libs.lombok)
+    testAnnotationProcessor(libs.lombok)
+
+    // JWT signing for tests/Postman
+    implementation(libs.jjwtApi)
+    runtimeOnly(libs.jjwtImpl)
+    runtimeOnly(libs.jjwtJackson)
+
+    testImplementation(libs.springBootStarterTest)
+    testImplementation(libs.springSecurityTest)
+    testImplementation(libs.springKafkaTest)
+
+    testImplementation(libs.testcontainersJunit)
+    testImplementation(libs.testcontainersPostgres)
+    testImplementation(libs.testcontainersKafka)
+    testImplementation(libs.testcontainersRedis)
+
+    testImplementation(libs.awaitility)
+
+    constraints {
+        // Fix CVE-2024-25710 / CVE-2024-26308 via commons-compress >= 1.26
+        implementation(libs.commonsCompress)
+        testImplementation(libs.commonsCompress)
+        //CVE-2026-24400
+        testImplementation(libs.assertjCore)
+        //CVE-2025-48924
+        implementation(libs.commonsLang3)
+    }
+}
+
+tasks.withType(Test).configureEach { useJUnitPlatform() }

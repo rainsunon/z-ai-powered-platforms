@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: payments-service
+
+  data:
+    mongodb:
+      uri: mongodb://${PAYMENTS_MONGO_USER}:${PAYMENTS_MONGO_PASSWORD}@${PAYMENTS_MONGO_HOST}:${PAYMENTS_MONGO_PORT}/${PAYMENTS_MONGO_DB}?authSource=admin
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_URI}
+
+  rabbitmq:
+    host: ${PAYMENTS_RABBITMQ_HOST}
+    port: ${PAYMENTS_RABBITMQ_PORT}
+    username: ${PAYMENTS_RABBITMQ_USERNAME}
+    password: ${PAYMENTS_RABBITMQ_PASSWORD}
+    subscriber:
+      payment-queue: ${PAYMENTS_RABBITMQ_SUBSCRIBER_QUEUE}
+    publisher:
+      payment-exchange: ${PAYMENTS_RABBITMQ_PUBLISHER_EXCHANGE}
+
+  output:
+    ansi:
+      enabled: ALWAYS
+
+logging:
+  pattern:
+    console: "%clr(%d{dd-MM-yyyy HH:mm:ss}){faint} %clr(%5p) %clr([%t]){faint} %clr(%-40.40logger){cyan} %clr(:){yellow} %m%n"
+
+server:
+  port: 0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_ZONE_URL}
+  instance:
+    instance-id: ${spring.application.name}:${random.value}

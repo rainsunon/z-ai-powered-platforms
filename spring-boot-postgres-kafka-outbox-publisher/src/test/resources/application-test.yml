@@ -1,0 +1,18 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+outbox:
+  publisher:
+    batch-size: 50
+    max-attempts: 25
+    lock-ttl: PT10S
+    stuck-older-than: PT1M
+
+logging:
+  level:
+    root: INFO

@@ -1,0 +1,110 @@
+# docker-compose tailored for: outbox-publisher-demo (Postgres + Kafka KRaft)
+# Matches the project defaults:
+#   spring.datasource.url=jdbc:postgresql://localhost:5432/outbox_demo
+#   spring.kafka.bootstrap-servers=localhost:9092
+# Host ports (match your current application.yml):
+#   Postgres: localhost:5453
+#   Kafka:    localhost:9096
+#
+# Start:
+#   docker compose up -d
+#
+# If you previously started Kafka with a broken format step, reset once:
+#   docker compose down -v
+#   docker compose up -d
+
+name: outbox-publisher-demo
+
+services:
+  postgres:
+    image: postgres:17.7-alpine
+    environment:
+      POSTGRES_DB: outbox_demo
+      POSTGRES_USER: outbox
+      POSTGRES_PASSWORD: outbox
+    ports:
+      - "5453:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U outbox -d outbox_demo"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - pg-outbox:/var/lib/postgresql/data
+
+  # ---------- Kafka (KRaft, single-node, dual listeners) ----------
+  kafka:
+    image: confluentinc/cp-kafka:8.0.0.amd64
+    container_name: kafkaoutbox
+    hostname: kafka
+    restart: unless-stopped
+    ports:
+      - "9096:9092"   # EXTERNAL (host -> container)
+      - "29096:29092" # INTERNAL (optional host mapping; containers use kafka:29092)
+    environment:
+      # KRaft
+      CLUSTER_ID: "k8iw7ALCQ4GgieICuiz1eQ"
+
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: "1"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
+      # Controller quorum
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+
+      # ---- listeners (Confluent recommended pattern) ----
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_LISTENERS: "PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9096"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+
+      # Single-node defaults
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+
+      # Dev convenience: we create the topic via kafka-init
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - kafka-outbox:/var/lib/kafka/data
+
+  # ---------- One-shot topic creation ----------
+  kafka-init:
+    image: confluentinc/cp-kafka:8.0.0.amd64
+    container_name: kafkaoutbox-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint:
+      - bash
+      - -ec
+      - |
+        bs="kafka:29092"   # INTERNAL listener inside the Docker network
+        topic="domain-events"
+        echo "Ensuring topic: $topic"
+        kafka-topics --bootstrap-server "$$bs" --create --if-not-exists           --topic "$$topic" --partitions 3 --replication-factor 1
+        echo "Topic ensured."
+    restart: "no"
+
+  # ---------- Optional UI ----------
+  kafka-ui:
+    profiles: ["ui"]
+    image: provectuslabs/kafka-ui:latest
+    restart: unless-stopped
+    ports:
+      - "8085:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "local"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:29092"
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+volumes:
+  pg-outbox:
+  kafka-outbox:

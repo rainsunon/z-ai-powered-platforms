@@ -1,0 +1,13 @@
+package com.xrs.buildingblocks.mediator.abstractions.requests;
+
+
+/**
+ * @author Rui S.
+ * @date 2026-02-02
+ * @apiNote
+ */
+public class Unit {
+    public static final Unit VALUE = new Unit();
+
+    private Unit() {}
+}

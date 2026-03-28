@@ -1,0 +1,45 @@
+{
+  "name": "Local - Secure Multi-tenant API Platform",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "enabled": true
+    },
+    {
+      "key": "tenantAId",
+      "value": "c216b197-b6f9-4eff-82b5-bdb1ee7a40c4",
+      "enabled": true
+    },
+    {
+      "key": "tenantBId",
+      "value": "d42f4855-0e7a-484f-ae06-c9328954e245",
+      "enabled": true
+    },
+    {
+      "key": "tokenTenantA",
+      "value": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImsxIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2F1dGgubG9jYWwiLCJhdWQiOiJhcGkiLCJzdWIiOiJkZW1vLXVzZXIiLCJpYXQiOjE3NzA2NTQzMjMsImV4cCI6MTg2NTI2MjMyMywic2NvcGUiOiJ1c2VyczpyZWFkIHVzZXJzOndyaXRlIiwidGVuYW50SWQiOiJjMjE2YjE5Ny1iNmY5LTRlZmYtODJiNS1iZGIxZWU3YTQwYzQifQ.qiegg9Ygh3K7kWSWNb_w_ykX8UN1PysVNVcWUos9Dp4Nck923jF_t0LC1BS2NU61eeQxZm2I-0GfVI1PVj2HjuAF_TDbtyJTrz--eTJdBN6Z0db_1zojPKc5fwlfB7gmZrxurUIH9UUURy5vqYbPlixx-knwl0RrtF_5UDHhIjPCDPMJSBmMilplIZEmvRiYiDci_v02EXD0G0T599VgxnoWCSOOeNasVuQM8DE7eiyR8gnJVh3kfG-x1L3DvteOD8wdI-3qW3ZmvSRfRyHso6nAtCHJmUlggafhBjg8gC21K35rC6B8m1GD7NLoXTxgJzNxgVFjaMQqEb45DHGpsA",
+      "enabled": true
+    },
+    {
+      "key": "tokenTenantB",
+      "value": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImsxIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2F1dGgubG9jYWwiLCJhdWQiOiJhcGkiLCJzdWIiOiJkZW1vLXVzZXIiLCJpYXQiOjE3NzA2NTQzMjMsImV4cCI6MTg2NTI2MjMyMywic2NvcGUiOiJ1c2VyczpyZWFkIHVzZXJzOndyaXRlIiwidGVuYW50SWQiOiJkNDJmNDg1NS0wZTdhLTQ4NGYtYWUwNi1jOTMyODk1NGUyNDUifQ.ZDvlAWWLUGXFpGYGfrXdeqEGf98H1_UzeBr9-_J1YVTGFPtOYWlmBGglUFUyO9PZh05a9NTH7Vt6W3Z6YFlZsIsFGzVUsnVmZ5EVP7wmIJV1m1TMQNglz0z_zAKBEJfbQNwl1D7B8NgU5uP6yR1bCwcoDC46CjY_nQEO_vc3ddvwDdL7ebn7N7RkAVFQbRl4DD-KQPLeKMKSoCFjxX8Zy5cvv3ExDuOGb4pH1AcsCkVu7niSEsSiYriB9IWYTJwZ_lbgiCnUcNmXnffjimWgVPr5YOgTqo5nMDgPC6EZAjrIkzgGUMk0ffl0pNS7AqICKuTZoD1CDOcYpOwlS96J6g",
+      "enabled": true
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "tokenTenantA_k2",
+      "value": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImsyIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2F1dGgubG9jYWwiLCJhdWQiOiJhcGkiLCJzdWIiOiJkZW1vLXVzZXIiLCJpYXQiOjE3NzA2NTQzMjMsImV4cCI6MTg2NTI2MjMyMywic2NvcGUiOiJ1c2VyczpyZWFkIHVzZXJzOndyaXRlIiwidGVuYW50SWQiOiJjMjE2YjE5Ny1iNmY5LTRlZmYtODJiNS1iZGIxZWU3YTQwYzQifQ.SE7wXPsFJFPe2cIneR952DT8WAIfN0EKzdTpAZTHFv0E-8TKzhJqH7iJuEEeqVkyIo4gMU3ZgEAzQtK-ijQsvxq9hMG7NqvTF6k_tiazjduCG70ui-s2K3__S1GgzVvA8QEfkUcA6GaaZkE_0odo8RGbOwNfxuvZ8isyBP-DdxO-etk9YGF4nOehIVIR17EyjaAkjN52ThpTU0EBn-qCUForWhMikmU_JRWB2L1ESD_l4TkdKuA8a9LYzAkqjcSwPlodIgQhK077fyYfEUEzNVITznMM3LDZjSH8kLUkprJdu3yhChg6DGsMcbIT76irfWzJDTujbOklIMeqku2mqw",
+      "enabled": true
+    },
+    {
+      "key": "tokenMissingTenant",
+      "value": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImsxIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2F1dGgubG9jYWwiLCJhdWQiOiJhcGkiLCJzdWIiOiJkZW1vLXVzZXIiLCJpYXQiOjE3NzA2NTQzMjMsImV4cCI6MTg2NTI2MjMyMywic2NvcGUiOiJ1c2VyczpyZWFkIHVzZXJzOndyaXRlIn0.pfdzitblpH3GGuYKfnw8dPf0EcaiT-Eh8ebQ7a88TnXdSbcI_eWKMBGpNEKoj4XvRmkfQOhnQfhOa1zwT4Gi9nkc4ZVY2AxMbp3MNPexzJBIPdVZdAwvzVSz70sxMzHfHU7F4WJNmAiJ0N1_-jDhm5JQDSzpYNp52Nw1fmvtgBw5WsY3mXWvRoZs4MKOZEW8xIAFml841zNr-uRnCkJjBi8xYoeXRv3r_Yq7hoItOiBewGKK1du2ZLXtbjRDKHi2nFA33b4G5Rpis4ow6qOkxA6rDGmNlhrHxVer_JHhReYWuFO9tNxvNfrgI7SMkTF6WPFlrikLeT5cE6HhcJndGg",
+      "enabled": true
+    }
+  ]
+}

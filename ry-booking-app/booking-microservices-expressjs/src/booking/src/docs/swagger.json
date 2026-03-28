@@ -1,0 +1,150 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"BookingDto": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"flightNumber": {
+						"type": "string"
+					},
+					"aircraftId": {
+						"type": "number",
+						"format": "double"
+					},
+					"departureAirportId": {
+						"type": "number",
+						"format": "double"
+					},
+					"arriveAirportId": {
+						"type": "number",
+						"format": "double"
+					},
+					"flightDate": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					},
+					"seatNumber": {
+						"type": "string"
+					},
+					"passengerName": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"flightNumber",
+					"aircraftId",
+					"departureAirportId",
+					"arriveAirportId",
+					"flightDate",
+					"price",
+					"description",
+					"seatNumber",
+					"passengerName",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateBookingRequestDto": {
+				"properties": {
+					"passengerId": {
+						"type": "number",
+						"format": "double"
+					},
+					"flightId": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"passengerId",
+					"flightId",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "booking",
+		"version": "1.0.0",
+		"description": "booking service",
+		"license": {
+			"name": "MIT"
+		},
+		"contact": {
+			"name": "Meysam Hadeli"
+		}
+	},
+	"paths": {
+		"/api/v1/booking/create": {
+			"post": {
+				"operationId": "CreateBooking",
+				"responses": {
+					"201": {
+						"description": "CREATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BookingDto"
+								}
+							}
+						}
+					}
+				},
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateBookingRequestDto"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
