@@ -1,5 +1,24 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ConfirmedSummaryGrid, type SummaryItem } from './components/ConfirmedSummaryGrid';
+import { ScheduleTable, type ScheduleRow } from './components/ScheduleTable';
+import { PaymentMethodBanner } from './components/PaymentMethodBanner';
+
+const SUMMARY_ITEMS: SummaryItem[] = [
+  { label: 'Total Balance', value: '$694.50', subtitle: 'Fully amortized', variant: 'default' },
+  { label: 'Installments', value: '4 Parts', subtitle: 'Monthly intervals', variant: 'accent' },
+  { label: 'Interest Rate', value: '0% APR', subtitle: 'No hidden fees', variant: 'highlight' },
+];
+
+const SCHEDULE_ROWS: ScheduleRow[] = [
+  { label: 'Payment 1', amount: '$173.63', dueDate: 'Today', status: 'paid' },
+  { label: 'Payment 2', amount: '$173.63', dueDate: 'Nov 24, 2024', status: 'upcoming' },
+  { label: 'Payment 3', amount: '$173.63', dueDate: 'Dec 24, 2024', status: 'upcoming' },
+  { label: 'Payment 4', amount: '$173.61', dueDate: 'Jan 24, 2025', status: 'upcoming' },
+];
+
+const VISA_LOGO =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuCAG2yCFiEtMWr6pjVqoZTX6BZiaJqjwyopbCbYydGIznXzKTyErd168PgMaRIIWOUssVikUDfBSRDVfYg1i0IBilrLEsKWTKEHV6NXTGlcGXTFBJN3A6jThrKQds5H6JN_b1NyM1teYhevC1B0fVWHTi1mpqOP9727KPByspsqLEb94FDBlAWFV-3k1w06ptjzr6AHCPWXi5BbouMveR546ZeqsAP10KykszpvkTn6KjG0eQq866RA164J-3SW6_6OXeicFVQEZGY';
 
 export function PaymentPlanConfirmed() {
   const navigate = useNavigate();
@@ -17,119 +36,18 @@ export function PaymentPlanConfirmed() {
           </p>
         </section>
 
-        {/* Bento Grid Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {/* Total Amount */}
-          <div className="bg-surface-container-low p-8 rounded-3xl flex flex-col justify-between transition-colors hover:bg-surface-container duration-300">
-            <span className="font-label text-on-surface-variant font-medium uppercase tracking-widest text-xs mb-4">Total Balance</span>
-            <div>
-              <span className="text-4xl font-headline font-bold text-on-surface">$694.50</span>
-              <p className="text-sm text-on-surface-variant mt-2">Fully amortized</p>
-            </div>
-          </div>
+        <ConfirmedSummaryGrid items={SUMMARY_ITEMS} />
 
-          {/* Installment Count */}
-          <div className="bg-secondary-container p-8 rounded-3xl flex flex-col justify-between transition-colors hover:bg-surface-container-highest duration-300">
-            <span className="font-label text-on-secondary-container font-medium uppercase tracking-widest text-xs mb-4">Installments</span>
-            <div>
-              <span className="text-4xl font-headline font-bold text-on-secondary-container">4 Parts</span>
-              <p className="text-sm text-on-secondary-container/80 mt-2">Monthly intervals</p>
-            </div>
-          </div>
-
-          {/* Interest Rate */}
-          <div className="bg-surface-container-lowest p-8 rounded-3xl flex flex-col justify-between shadow-sm transition-colors hover:bg-white duration-300">
-            <span className="font-label text-primary font-medium uppercase tracking-widest text-xs mb-4">Interest Rate</span>
-            <div>
-              <span className="text-4xl font-headline font-bold text-primary">0% APR</span>
-              <p className="text-sm text-on-surface-variant mt-2">No hidden fees</p>
-            </div>
-          </div>
+        <div className="mb-12">
+          <ScheduleTable rows={SCHEDULE_ROWS} />
         </div>
 
-        {/* Schedule Table */}
-        <div className="bg-surface-container p-1 rounded-[2rem] mb-12 overflow-hidden shadow-sm">
-          <div className="bg-surface-container-lowest rounded-[1.8rem] overflow-hidden">
-            <div className="px-8 py-6 bg-surface-container-high/30 border-b border-outline-variant/10">
-              <h3 className="font-headline text-xl font-bold text-on-surface">Installment Schedule</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="font-label text-on-surface-variant text-xs uppercase tracking-wider">
-                    <th className="px-8 py-4 font-semibold">Payment</th>
-                    <th className="px-8 py-4 font-semibold">Amount</th>
-                    <th className="px-8 py-4 font-semibold">Due Date</th>
-                    <th className="px-8 py-4 font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/5">
-                  <tr className="group hover:bg-surface-container-low transition-colors">
-                    <td className="px-8 py-5 font-medium">Payment 1</td>
-                    <td className="px-8 py-5">$173.63</td>
-                    <td className="px-8 py-5">Today</td>
-                    <td className="px-8 py-5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold">
-                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                        PAID
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="group hover:bg-surface-container-low transition-colors">
-                    <td className="px-8 py-5 font-medium">Payment 2</td>
-                    <td className="px-8 py-5">$173.63</td>
-                    <td className="px-8 py-5">Nov 24, 2024</td>
-                    <td className="px-8 py-5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">
-                        UPCOMING
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="group hover:bg-surface-container-low transition-colors">
-                    <td className="px-8 py-5 font-medium">Payment 3</td>
-                    <td className="px-8 py-5">$173.63</td>
-                    <td className="px-8 py-5">Dec 24, 2024</td>
-                    <td className="px-8 py-5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">
-                        UPCOMING
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="group hover:bg-surface-container-low transition-colors">
-                    <td className="px-8 py-5 font-medium">Payment 4</td>
-                    <td className="px-8 py-5">$173.61</td>
-                    <td className="px-8 py-5">Jan 24, 2025</td>
-                    <td className="px-8 py-5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">
-                        UPCOMING
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        {/* Payment Method & CTA */}
-        <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between bg-surface-container-low/50 p-10 rounded-[2.5rem]">
-          <div className="flex items-center gap-6">
-            <div className="w-16 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center p-2">
-              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAG2yCFiEtMWr6pjVqoZTX6BZiaJqjwyopbCbYydGIznXzKTyErd168PgMaRIIWOUssVikUDfBSRDVfYg1i0IBilrLEsKWTKEHV6NXTGlcGXTFBJN3A6jThrKQds5H6JN_b1NyM1teYhevC1B0fVWHTi1mpqOP9727KPByspsqLEb94FDBlAWFV-3k1w06ptjzr6AHCPWXi5BbouMveR546ZeqsAP10KykszpvkTn6KjG0eQq866RA164J-3SW6_6OXeicFVQEZGY" alt="Visa Logo" className="w-full h-auto" />
-            </div>
-            <div>
-              <h4 className="font-headline font-bold text-on-surface">Payment Method</h4>
-              <p className="text-on-surface-variant">Visa ending in 4242</p>
-            </div>
-          </div>
-          <button 
-            onClick={() => navigate('/billing')}
-            className="primary-gradient text-white px-10 py-5 rounded-full font-headline font-bold text-lg shadow-xl shadow-primary/30 transition-all hover:scale-105 active:scale-95 inline-flex items-center gap-3"
-          >
-            View My Dashboard
-            <span className="material-symbols-outlined">arrow_forward</span>
-          </button>
-        </div>
+        <PaymentMethodBanner
+          brand="Visa"
+          lastFour="4242"
+          logoSrc={VISA_LOGO}
+          onDashboard={() => navigate('/billing')}
+        />
 
         {/* Trust/Reassurance Section */}
         <div className="mt-16 max-w-2xl mx-auto text-center">

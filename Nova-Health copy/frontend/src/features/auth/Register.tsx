@@ -1,4 +1,5 @@
 import React from 'react';
+import { Input } from '@/components/ui/input';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -100,11 +101,11 @@ export function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     person
                   </span>
-                  <input 
+                  <Input 
                     type="text" 
                     {...register('name')}
                     placeholder="Elena Vance" 
-                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 h-auto pl-12 pr-4 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                   />
                 </div>
                 {errors.name && <p className="text-error text-xs mt-1">{errors.name.message}</p>}
@@ -116,11 +117,11 @@ export function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     mail
                   </span>
-                  <input 
+                  <Input 
                     type="email" 
                     {...register('email')}
                     placeholder="elena@example.com" 
-                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 h-auto pl-12 pr-4 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                   />
                 </div>
                 {errors.email && <p className="text-error text-xs mt-1">{errors.email.message}</p>}
@@ -132,10 +133,10 @@ export function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     calendar_today
                   </span>
-                  <input 
+                  <Input 
                     type="date" 
                     {...register('dateOfBirth')}
-                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 h-auto pl-12 pr-4 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                   />
                 </div>
                 {errors.dateOfBirth && <p className="text-error text-xs mt-1">{errors.dateOfBirth.message}</p>}
@@ -147,11 +148,11 @@ export function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     lock
                   </span>
-                  <input 
+                  <Input 
                     type="password" 
                     {...register('password')}
                     placeholder="••••••••" 
-                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 pl-12 pr-12 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 h-auto pl-12 pr-12 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                   />
                   <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors">
                     <span className="material-symbols-outlined">visibility_off</span>

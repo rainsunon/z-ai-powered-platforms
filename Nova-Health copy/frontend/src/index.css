@@ -186,3 +186,30 @@
     @apply font-sans;
   }
 }
+
+/* Dark mode overrides for Material Design 3 tokens */
+.dark {
+  --color-primary: #7cdf6e;
+  --color-primary-container: #034f00;
+  --color-on-primary: #003d00;
+  --color-on-primary-container: #9ff888;
+  --color-secondary: #9ff888;
+  --color-secondary-container: #1f7414;
+  --color-on-secondary: #003d00;
+  --color-on-secondary-container: #b2ffaa;
+  --color-surface: #0e1b0b;
+  --color-on-surface: #dbe6d3;
+  --color-surface-variant: #3d4b37;
+  --color-on-surface-variant: #bccbb2;
+  --color-surface-container-lowest: #090f07;
+  --color-surface-container-low: #151e12;
+  --color-surface-container: #1a2616;
+  --color-surface-container-high: #222e1e;
+  --color-surface-container-highest: #2d3929;
+  --color-outline: #87957f;
+  --color-outline-variant: #3d4b37;
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-on-error-container: #ffdad6;
+}

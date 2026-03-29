@@ -1,5 +1,9 @@
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { type Invoice } from '@/store/useBillingStore';
+import { InvoiceIcon } from './InvoiceIcon';
+import { InvoiceActions } from './InvoiceActions';
 
 interface InvoiceItemProps {
   invoice: Invoice;
@@ -36,36 +40,25 @@ export function InvoiceItem({ invoice }: InvoiceItemProps) {
   const style = statusStyles[invoice.status];
 
   return (
-    <div className={`bg-surface-container-low p-6 rounded-[1.5rem] flex flex-wrap items-center justify-between gap-4 ${style.rowBorder} ${style.opacity} transition-all`}>
-      <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-xl ${style.iconBg} flex items-center justify-center`}>
-          <span className="material-symbols-outlined">{invoice.icon}</span>
+    <Card className={`bg-surface-container-low rounded-[1.5rem] ${style.rowBorder} ${style.opacity} transition-all border-0`}>
+      <CardContent className="p-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <InvoiceIcon icon={invoice.icon} className={style.iconBg} />
+          <div>
+            <p className="font-bold">{invoice.title}</p>
+            <p className="text-xs text-on-surface-variant">Inv #{invoice.id} • {invoice.date}</p>
+          </div>
         </div>
-        <div>
-          <p className="font-bold">{invoice.title}</p>
-          <p className="text-xs text-on-surface-variant">Inv #{invoice.id} • {invoice.date}</p>
+        <div className="flex items-center gap-8">
+          <div className="text-right">
+            <p className="font-bold text-lg">${invoice.amount.toFixed(2)}</p>
+            <Badge variant="outline" className={`${style.label} text-[10px] font-extrabold uppercase tracking-widest border-0 px-0`}>
+              {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+            </Badge>
+          </div>
+          <InvoiceActions btnClass={style.btnClass} btnLabel={style.btnLabel} />
         </div>
-      </div>
-      <div className="flex items-center gap-8">
-        <div className="text-right">
-          <p className="font-bold text-lg">${invoice.amount.toFixed(2)}</p>
-          <span className={`text-[10px] font-extrabold ${style.label} uppercase tracking-widest`}>
-            {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-          </span>
-        </div>
-        <button className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors">
-          <span className="material-symbols-outlined">download</span>
-        </button>
-        {style.btnLabel ? (
-          <button className={`${style.btnClass} font-bold px-6 py-2 rounded-full text-sm transition-opacity`}>
-            {style.btnLabel}
-          </button>
-        ) : (
-          <button className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors">
-            <span className="material-symbols-outlined">receipt_long</span>
-          </button>
-        )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

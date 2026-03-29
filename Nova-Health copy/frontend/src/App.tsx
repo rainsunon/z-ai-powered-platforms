@@ -61,6 +61,10 @@ const RewardRedeemed = lazy(() => import('./features/family/RewardRedeemed').the
 const Medications = lazy(() => import('./features/medications/Medications').then(m => ({ default: m.Medications })));
 const MedicationDetail = lazy(() => import('./features/medications/MedicationDetail').then(m => ({ default: m.MedicationDetail })));
 
+// Appointments
+const Appointments = lazy(() => import('./features/appointments/Appointments').then(m => ({ default: m.Appointments })));
+const CalendarView = lazy(() => import('./features/appointments/CalendarView').then(m => ({ default: m.CalendarView })));
+
 // Communication
 const Chat = lazy(() => import('./features/communication/Chat').then(m => ({ default: m.Chat })));
 const Consultation = lazy(() => import('./features/communication/Consultation').then(m => ({ default: m.Consultation })));
@@ -163,7 +167,8 @@ export default function App() {
             <Route path="profile" element={<Profile />} />
 
             {/* Misc */}
-            <Route path="appointments" element={<PlaceholderPage title="Appointments" />} />
+            <Route path="appointments" element={<Appointments />} />
+            <Route path="calendar" element={<CalendarView />} />
             <Route path="sync" element={<DataSync />} />
             <Route path="upgrade" element={<PlaceholderPage title="Upgrade Plan" />} />
             <Route path="settings" element={<PlaceholderPage title="Settings" />} />

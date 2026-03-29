@@ -1,9 +1,43 @@
-import React from 'react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { DocumentRow } from './components/DocumentRow';
+import React, { useRef, useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { DocumentSidebar } from './components/DocumentSidebar';
+import { DocumentListPanel } from './components/DocumentListPanel';
+import { SecureSharingBanner } from './components/SecureSharingBanner';
+import { toast } from 'sonner';
 
-const documents = [
+interface DocRecord {
+  title: string; source: string; date: string;
+  icon: string; iconBgClass: string; iconColorClass: string;
+  typeLabel: string; typeBadgeClass: string;
+  statusLabel?: string; statusDot?: string;
+  metaLabel?: string; metaValue?: string;
+}
+
+const ACCEPTED_TYPES = [
+  'application/pdf', 'image/png', 'image/jpeg', 'image/webp',
+  'application/dicom', 'text/csv', 'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
+
+function detectCategory(file: File): Pick<DocRecord, 'icon' | 'iconBgClass' | 'iconColorClass' | 'typeLabel' | 'typeBadgeClass'> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+  if (['dcm', 'dicom'].includes(ext) || file.type === 'application/dicom')
+    return { icon: 'radiology', iconBgClass: 'bg-orange-100', iconColorClass: 'text-orange-700', typeLabel: 'Imaging', typeBadgeClass: 'bg-orange-100 text-orange-700' };
+  if (['png', 'jpg', 'jpeg', 'webp'].includes(ext))
+    return { icon: 'image', iconBgClass: 'bg-indigo-100', iconColorClass: 'text-indigo-700', typeLabel: 'Image', typeBadgeClass: 'bg-indigo-100 text-indigo-700' };
+  if (ext === 'csv')
+    return { icon: 'biotech', iconBgClass: 'bg-emerald-100', iconColorClass: 'text-emerald-700', typeLabel: 'Labs', typeBadgeClass: 'bg-blue-100 text-blue-700' };
+  return { icon: 'description', iconBgClass: 'bg-blue-100', iconColorClass: 'text-blue-700', typeLabel: 'Document', typeBadgeClass: 'bg-blue-100 text-blue-700' };
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const DEFAULT_DOCUMENTS: DocRecord[] = [
   {
     title: 'Full Blood Count Analysis', source: 'St. Jude Medical Center', date: 'Oct 24, 2024',
     icon: 'biotech', iconBgClass: 'bg-emerald-100', iconColorClass: 'text-emerald-700',
@@ -31,6 +65,58 @@ const documents = [
 ];
 
 export function Documents() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropzoneInputRef = useRef<HTMLInputElement>(null);
+  const [documents, setDocuments] = useState<DocRecord[]>(DEFAULT_DOCUMENTS);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const processFiles = useCallback((files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    const newDocs: DocRecord[] = [];
+    let rejected = 0;
+
+    for (const file of fileArray) {
+      if (file.size > MAX_FILE_SIZE) {
+        rejected++;
+        continue;
+      }
+      const cat = detectCategory(file);
+      const now = new Date();
+      newDocs.push({
+        ...cat,
+        title: file.name.replace(/\.[^/.]+$/, ''),
+        source: 'Uploaded by You',
+        date: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        metaLabel: 'Size',
+        metaValue: formatFileSize(file.size),
+      });
+    }
+
+    if (newDocs.length > 0) {
+      setDocuments((prev) => [...newDocs, ...prev]);
+      toast.success(`${newDocs.length} document${newDocs.length > 1 ? 's' : ''} uploaded`);
+    }
+    if (rejected > 0) {
+      toast.error(`${rejected} file${rejected > 1 ? 's' : ''} rejected (max ${MAX_FILE_SIZE / 1024 / 1024} MB)`);
+    }
+  }, []);
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processFiles(e.target.files);
+      e.target.value = '';
+    }
+  };
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files.length > 0) processFiles(e.dataTransfer.files);
+  }, [processFiles]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); }, []);
+  const handleDragLeave = useCallback(() => setIsDragging(false), []);
+
   return (
     <div className="space-y-12">
       {/* Hero Section / Header */}
@@ -42,151 +128,39 @@ export function Documents() {
           <p className="text-on-surface-variant text-lg max-w-lg">Your health journey, organized and secure in one sanctuary.</p>
         </div>
         <div className="flex items-center gap-4">
-          <button className="bg-surface-container-high text-primary px-7 py-3.5 rounded-xl font-headline font-extrabold text-sm hover:bg-surface-container-highest hover:shadow-md transition-all flex items-center gap-2.5">
+          <Button
+            variant="secondary"
+            className="bg-surface-container-high text-primary px-7 py-3.5 rounded-xl font-headline font-extrabold text-sm hover:bg-surface-container-highest hover:shadow-md gap-2.5"
+          >
             <span className="material-symbols-outlined text-xl">download</span>
             Export All
-          </button>
-          <button className="primary-gradient text-white px-7 py-3.5 rounded-xl font-headline font-extrabold text-sm shadow-[0_10px_20px_-5px_rgba(29,204,13,0.3)] hover:shadow-[0_15px_25px_-5px_rgba(29,204,13,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2.5">
+          </Button>
+          <Button
+            className="primary-gradient text-white px-7 py-3.5 rounded-xl font-headline font-extrabold text-sm shadow-[0_10px_20px_-5px_rgba(29,204,13,0.3)] hover:shadow-[0_15px_25px_-5px_rgba(29,204,13,0.4)] hover:-translate-y-0.5 active:translate-y-0 gap-2.5"
+            onClick={() => fileInputRef.current?.click()}
+          >
             <span className="material-symbols-outlined text-xl">add_circle</span>
             Upload New Document
-          </button>
+          </Button>
+          <input ref={fileInputRef} type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.dcm,.csv,.doc,.docx" className="hidden" onChange={handleFileInputChange} />
         </div>
       </section>
 
-      {/* Bento-ish Grid Layout */}
+      {/* Bento Grid Layout */}
       <div className="grid grid-cols-12 gap-8">
-        {/* Sidebar Navigation Folders */}
-        <div className="col-span-12 lg:col-span-3 space-y-8">
-          <div className="bg-surface-container-low rounded-[2rem] p-6 space-y-6">
-            <h3 className="px-4 text-[10px] uppercase tracking-[0.2em] font-extrabold text-on-surface-variant/60">Library</h3>
-            <nav className="space-y-1">
-              <button className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl bg-white shadow-sm text-primary font-bold transition-all">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>folder</span>
-                <span className="text-sm">All Documents</span>
-              </button>
-              <button className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-on-surface-variant hover:bg-white/50 transition-all group">
-                <span className="material-symbols-outlined group-hover:text-primary transition-colors">history</span>
-                <span className="text-sm">Recent</span>
-              </button>
-              <button className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-on-surface-variant hover:bg-white/50 transition-all group">
-                <span className="material-symbols-outlined group-hover:text-primary transition-colors">star</span>
-                <span className="text-sm">Favorites</span>
-              </button>
-              <button className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-on-surface-variant hover:bg-white/50 transition-all group">
-                <span className="material-symbols-outlined group-hover:text-primary transition-colors">groups</span>
-                <span className="text-sm">Shared with Doctors</span>
-              </button>
-            </nav>
-
-            <hr className="border-outline-variant/20 mx-4" />
-
-            <h3 className="px-4 text-[10px] uppercase tracking-[0.2em] font-extrabold text-on-surface-variant/60">Categories</h3>
-            <div className="space-y-1">
-              <button className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary transition-all text-sm">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  <span>Lab Results</span>
-                </div>
-                <span className="text-[10px] bg-surface-container px-2 py-0.5 rounded-full">12</span>
-              </button>
-              <button className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary transition-all text-sm">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                  <span>Prescriptions</span>
-                </div>
-                <span className="text-[10px] bg-surface-container px-2 py-0.5 rounded-full">8</span>
-              </button>
-              <button className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary transition-all text-sm">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                  <span>Imaging (X-Ray/MRI)</span>
-                </div>
-                <span className="text-[10px] bg-surface-container px-2 py-0.5 rounded-full">4</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Mini Dropzone */}
-          <div className="relative overflow-hidden group rounded-[2.5rem] p-10 border-2 border-dashed border-primary/20 hover:border-primary bg-primary/5 hover:bg-primary/[0.08] transition-all cursor-pointer flex flex-col items-center text-center space-y-5">
-            <div className="w-16 h-16 bg-white text-primary rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-              <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>cloud_upload</span>
-            </div>
-            <div className="space-y-1">
-              <p className="text-base font-extrabold text-on-surface font-headline">Quick Upload</p>
-              <p className="text-sm text-on-surface-variant">Drag and drop medical files here or click to browse</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Record List */}
-        <div className="col-span-12 lg:col-span-9 space-y-8">
-          {/* Filters and Stats */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-on-surface-variant/70 mr-2 uppercase tracking-wider">Filter by:</span>
-              <Tabs defaultValue="all">
-                <TabsList className="bg-transparent h-auto gap-2 p-0">
-                  <TabsTrigger value="all" className="px-4 py-1.5 rounded-full text-xs font-bold data-active:bg-secondary-fixed data-active:text-on-secondary-fixed data-active:shadow-sm bg-surface-container-highest text-on-surface-variant">All Types</TabsTrigger>
-                  <TabsTrigger value="labs" className="px-4 py-1.5 rounded-full text-xs font-medium data-active:bg-secondary-fixed data-active:text-on-secondary-fixed data-active:shadow-sm bg-surface-container-highest text-on-surface-variant">Labs</TabsTrigger>
-                  <TabsTrigger value="prescriptions" className="px-4 py-1.5 rounded-full text-xs font-medium data-active:bg-secondary-fixed data-active:text-on-secondary-fixed data-active:shadow-sm bg-surface-container-highest text-on-surface-variant">Prescriptions</TabsTrigger>
-                  <TabsTrigger value="imaging" className="px-4 py-1.5 rounded-full text-xs font-medium data-active:bg-secondary-fixed data-active:text-on-secondary-fixed data-active:shadow-sm bg-surface-container-highest text-on-surface-variant">Imaging</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-            <div className="flex items-center gap-4 text-xs font-medium text-on-surface-variant">
-              <span>Sorted by: <span className="text-on-surface font-bold">Newest First</span></span>
-              <span className="material-symbols-outlined text-lg cursor-pointer">filter_list</span>
-            </div>
-          </div>
-
-          {/* Documents List */}
-          <div className="space-y-4">
-            {documents.map((doc) => (
-              <DocumentRow key={doc.title} {...doc} />
-            ))}
-          </div>
-
-          {/* Pagination-like Footer */}
-          <div className="pt-6 flex items-center justify-center gap-4">
-            <button className="p-2 text-on-surface-variant hover:text-primary transition-all disabled:opacity-30" disabled>
-              <span className="material-symbols-outlined">chevron_left</span>
-            </button>
-            <div className="flex items-center gap-2">
-              <button className="w-8 h-8 rounded-full bg-primary text-white text-xs font-bold">1</button>
-              <button className="w-8 h-8 rounded-full hover:bg-surface-container text-on-surface-variant text-xs font-medium transition-all">2</button>
-              <button className="w-8 h-8 rounded-full hover:bg-surface-container text-on-surface-variant text-xs font-medium transition-all">3</button>
-            </div>
-            <button className="p-2 text-on-surface-variant hover:text-primary transition-all">
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
-        </div>
+        <DocumentSidebar
+          isDragging={isDragging}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDropzoneClick={() => dropzoneInputRef.current?.click()}
+          dropzoneInputRef={dropzoneInputRef}
+          onFileChange={handleFileInputChange}
+        />
+        <DocumentListPanel documents={documents} />
       </div>
 
-      {/* Featured Section: Insights */}
-      <section className="primary-gradient rounded-[3rem] p-10 md:p-14 relative overflow-hidden text-white shadow-2xl shadow-primary/30">
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-          <div className="max-w-xl space-y-6">
-            <h3 className="text-3xl md:text-4xl font-extrabold font-headline leading-tight italic">Secure Sharing Made Simple</h3>
-            <p className="text-emerald-50 text-lg">Need to share your records with a specialist? Generate a one-time secure link or add your doctor directly to your circle.</p>
-            <div className="flex flex-wrap gap-4">
-              <button className="px-8 py-4 bg-white text-primary rounded-2xl font-bold font-headline shadow-xl shadow-black/10 hover:scale-105 transition-transform">Invite Doctor</button>
-              <button className="px-8 py-4 bg-emerald-800/20 text-white border border-emerald-400/30 backdrop-blur-md rounded-2xl font-bold font-headline hover:bg-emerald-800/40 transition-all">Learn About Security</button>
-            </div>
-          </div>
-          <div className="hidden lg:block relative shrink-0">
-            <div className="w-64 h-64 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
-              <span className="material-symbols-outlined text-[8rem] text-emerald-200/40">lock_person</span>
-            </div>
-            <div className="absolute -top-4 -right-4 bg-secondary-fixed text-on-secondary-fixed p-4 rounded-3xl shadow-xl">
-              <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-            </div>
-          </div>
-        </div>
-        {/* Decorative blobs */}
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -top-12 right-1/4 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl"></div>
-      </section>
+      <SecureSharingBanner />
     </div>
   );
 }

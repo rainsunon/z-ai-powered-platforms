@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { Input } from '@/components/ui/input';
 import { useNavigate, Link } from 'react-router-dom';
 
 export function VerifyCode() {
@@ -59,9 +60,9 @@ export function VerifyCode() {
             {/* 6-Digit Input Grid */}
             <div className="flex justify-between gap-2 md:gap-4">
               {code.map((digit, index) => (
-                <input
+                <Input
                   key={index}
-                  ref={(el) => (inputRefs.current[index] = el)}
+                  ref={(el: HTMLInputElement | null) => { if (el) inputRefs.current[index] = el; }}
                   type="text"
                   maxLength={1}
                   value={digit}

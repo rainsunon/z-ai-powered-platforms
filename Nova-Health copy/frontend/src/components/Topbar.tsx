@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { useTheme } from 'next-themes';
 import { cn } from '../lib/utils';
 
 const topNavLinks = [
@@ -12,6 +13,11 @@ const topNavLinks = [
 export function Topbar() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
     <header className="h-16 px-8 flex justify-between items-center sticky top-0 z-40 bg-surface transition-all duration-300 ease-in-out">
@@ -41,6 +47,15 @@ export function Topbar() {
         </nav>
         <div className="flex items-center gap-4">
           <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full hover:bg-surface-container/50 transition-all"
+            aria-label="Toggle dark mode"
+          >
+            <span className="material-symbols-outlined text-primary">
+              {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
+          <button
             onClick={() => navigate('/notifications')}
             className="p-2 rounded-full hover:bg-surface-container/50 transition-all relative"
           >
@@ -62,6 +77,15 @@ export function Topbar() {
 
       {/* Mobile: notification + avatar only */}
       <div className="flex md:hidden items-center gap-3">
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-full hover:bg-surface-container/50 transition-all"
+          aria-label="Toggle dark mode"
+        >
+          <span className="material-symbols-outlined text-primary">
+            {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+          </span>
+        </button>
         <button
           onClick={() => navigate('/notifications')}
           className="p-2 rounded-full hover:bg-surface-container/50 transition-all relative"

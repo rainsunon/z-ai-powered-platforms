@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true,
+    "composite": true,
+    "incremental": true,
+    "types": ["node"]
+  },
+  "references": [
+    { "path": "./apps/web" },
+    { "path": "./apps/services/admin-service" },
+    { "path": "./apps/services/auth-service" },
+    { "path": "./apps/services/billing-service" },
+    { "path": "./apps/services/customer-service" },
+    { "path": "./apps/services/notification-service" },
+    { "path": "./apps/services/order-service" },
+    { "path": "./apps/services/payment-service" },
+    { "path": "./apps/services/sync-service" },
+    { "path": "./apps/services/analytics-service" },
+    { "path": "./apps/services/symptom-service" },
+    { "path": "./packages/types" },
+    { "path": "./packages/config" },
+    { "path": "./packages/utils" },
+    { "path": "./packages/database" },
+    { "path": "./packages/kafka" },
+    { "path": "./packages/middleware" }
+  ]
+}

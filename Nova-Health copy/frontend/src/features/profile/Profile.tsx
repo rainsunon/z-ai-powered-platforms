@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { AddEmergencyContactModal } from '@/components/AddEmergencyContactModal';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { useProfileStore } from '@/store/useProfileStore';
+import { useProfileActions } from '@/store/useProfileStore';
 import { ProfileHero } from './components/ProfileHero';
 import { PersonalInfoCard } from './components/PersonalInfoCard';
 import { EmergencyContactsCard } from './components/EmergencyContactsCard';
@@ -13,18 +13,27 @@ import { HealthScoreCard } from './components/HealthScoreCard';
 import { SecurityStatusWidget } from './components/SecurityStatusWidget';
 import { SecurityTab } from './components/SecurityTab';
 import { PreferencesTab } from './components/PreferencesTab';
+import { DataPrivacySection } from './components/DataPrivacySection';
 
 export function Profile() {
   const navigate = useNavigate();
-  const { addEmergencyContact } = useProfileStore();
+  const { addEmergencyContact } = useProfileActions();
   const [addContactOpen, setAddContactOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   usePageTitle('User Profile');
 
-  const tabs = [
+  const tabs = React.useMemo(() => [
     { key: 'personal', label: 'Personal', icon: 'person' },
     { key: 'security', label: 'Security', icon: 'shield' },
     { key: 'preferences', label: 'Preferences', icon: 'tune' },
-  ];
+  ], []);
+
+  const handleAddContact = React.useCallback((data: any) => {
+    startTransition(() => {
+      addEmergencyContact({ ...data, isPrimary: false });
+      setAddContactOpen(false);
+    });
+  }, [addEmergencyContact]);
 
   return (
     <div className="space-y-12 max-w-6xl mx-auto pb-20">
@@ -69,32 +78,12 @@ export function Profile() {
         </TabsContent>
       </Tabs>
 
-      {/* Data Privacy & Portability */}
-      <section className="bg-surface-container-low p-8 rounded-[2rem]">
-        <h3 className="font-headline font-bold text-xl flex items-center gap-2 mb-6">
-          <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>privacy_tip</span>
-          Data Privacy & Portability
-        </h3>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button className="flex-1 bg-surface-container-lowest text-on-surface font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-surface-container-high transition-colors shadow-sm">
-            <span className="material-symbols-outlined text-primary">download</span>
-            Download My Records
-          </button>
-          <button className="flex-1 bg-error/10 text-error font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-error/15 transition-colors">
-            <span className="material-symbols-outlined">delete_forever</span>
-            Request Account Deletion
-          </button>
-        </div>
-        <p className="text-xs text-on-surface-variant mt-4 text-center">Your data is protected under HIPAA regulations. Account deletion requests are processed within 30 days.</p>
-      </section>
+      <DataPrivacySection />
 
       <AddEmergencyContactModal
         open={addContactOpen}
         onClose={() => setAddContactOpen(false)}
-        onSubmit={(data) => {
-          addEmergencyContact({ ...data, isPrimary: false });
-          setAddContactOpen(false);
-        }}
+        onSubmit={handleAddContact}
       />
     </div>
   );

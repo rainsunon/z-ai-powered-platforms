@@ -1,7 +1,6 @@
 import React from 'react';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 
-interface MedicationHistoryEntry {
+interface HistoryEntry {
   date: string;
   change: string;
   provider: string;
@@ -9,40 +8,39 @@ interface MedicationHistoryEntry {
 }
 
 interface MedicationHistoryTableProps {
-  entries: MedicationHistoryEntry[];
+  entries: HistoryEntry[];
 }
 
 export function MedicationHistoryTable({ entries }: MedicationHistoryTableProps) {
   return (
-    <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="font-headline font-bold text-xl flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary">history</span>
-          Medication History
-        </h3>
-        <button className="text-xs font-bold text-primary hover:underline">View All</button>
-      </div>
+    <div className="bg-surface rounded-2xl p-6">
+      <h2 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-2">
+        <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+          history
+        </span>
+        Medication History
+      </h2>
       <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b border-outline-variant/15">
-              <TableHead className="font-bold text-on-surface-variant">Date</TableHead>
-              <TableHead className="font-bold text-on-surface-variant">Change</TableHead>
-              <TableHead className="font-bold text-on-surface-variant">Provider</TableHead>
-              <TableHead className="font-bold text-on-surface-variant text-right">Dosage</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {entries.map((entry, i) => (
-              <TableRow key={i} className="hover:bg-surface-container/50 border-b border-outline-variant/10">
-                <TableCell className="text-on-surface font-medium">{entry.date}</TableCell>
-                <TableCell className="text-on-surface-variant">{entry.change}</TableCell>
-                <TableCell className="text-on-surface-variant">{entry.provider}</TableCell>
-                <TableCell className="text-right font-bold text-on-surface">{entry.dosage}</TableCell>
-              </TableRow>
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-outline-variant/50">
+              <th className="text-left py-3 px-4 font-semibold text-on-surface-variant">Date</th>
+              <th className="text-left py-3 px-4 font-semibold text-on-surface-variant">Change</th>
+              <th className="text-left py-3 px-4 font-semibold text-on-surface-variant">Provider</th>
+              <th className="text-left py-3 px-4 font-semibold text-on-surface-variant">Dosage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {entries.map((entry, index) => (
+              <tr key={index} className="border-b border-outline-variant/30 last:border-0 hover:bg-surface-container-low/50 transition-colors">
+                <td className="py-3 px-4 text-on-surface">{entry.date}</td>
+                <td className="py-3 px-4 text-on-surface">{entry.change}</td>
+                <td className="py-3 px-4 text-on-surface">{entry.provider}</td>
+                <td className="py-3 px-4 text-on-surface font-medium">{entry.dosage}</td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
     </div>
   );

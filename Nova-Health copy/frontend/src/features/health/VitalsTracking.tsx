@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const vitalReadings = [
   { date: 'Oct 25', heartRate: 72, systolic: 118, diastolic: 76, spo2: 98, temp: 98.4 },
@@ -100,24 +101,26 @@ export function VitalsTracking() {
               </div>
             </div>
           </div>
-          {/* Mock Chart */}
-          <div className="relative h-48 w-full">
-            <div className="absolute inset-0 flex flex-col justify-between">
-              <div className="w-full border-t border-outline-variant/10"></div>
-              <div className="w-full border-t border-outline-variant/10"></div>
-              <div className="w-full border-t border-outline-variant/10"></div>
-              <div className="w-full border-t border-outline-variant/10"></div>
-              <div className="w-full border-t border-outline-variant/10"></div>
-            </div>
-            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 700 200" preserveAspectRatio="none">
-              <path d="M0 120 L100 140 L200 100 L300 130 L400 110 L500 150 L600 125 L700 120" fill="none" stroke="#066e00" strokeWidth="3" strokeLinecap="round" />
-              <path d="M0 60 L100 50 L200 70 L300 45 L400 55 L500 65 L600 50 L700 58" fill="none" stroke="#1dcc0d" strokeWidth="2" strokeDasharray="6 3" strokeLinecap="round" opacity="0.6" />
-            </svg>
-            <div className="absolute -bottom-6 w-full flex justify-between text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">
-              {vitalReadings.slice().reverse().map(r => (
-                <span key={r.date}>{r.date}</span>
-              ))}
-            </div>
+          {/* Interactive Chart */}
+          <div className="h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={[...vitalReadings].reverse()}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-outline-variant)" opacity={0.2} />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--color-outline)' }} axisLine={false} tickLine={false} />
+                <YAxis domain={[50, 140]} tick={{ fontSize: 11, fill: 'var(--color-outline)' }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--color-surface-container-lowest)',
+                    border: '1px solid var(--color-outline-variant)',
+                    borderRadius: '12px',
+                    fontSize: 12,
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Line type="monotone" dataKey="heartRate" name="Heart Rate" stroke="var(--color-primary)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="systolic" name="Systolic BP" stroke="var(--color-primary-container)" strokeWidth={2} strokeDasharray="6 3" dot={{ r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 

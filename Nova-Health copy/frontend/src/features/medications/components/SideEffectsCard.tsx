@@ -1,5 +1,4 @@
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 
 interface SideEffectsCardProps {
   common: string[];
@@ -8,29 +7,33 @@ interface SideEffectsCardProps {
 
 export function SideEffectsCard({ common, serious }: SideEffectsCardProps) {
   return (
-    <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm">
-      <h3 className="font-headline font-bold text-xl mb-6 flex items-center gap-2">
-        <span className="material-symbols-outlined text-primary">health_and_safety</span>
+    <div className="bg-surface rounded-2xl p-6">
+      <h2 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-2">
+        <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+          warning
+        </span>
         Side Effects
-      </h3>
-      <div className="space-y-4">
+      </h2>
+      <div className="space-y-6">
         <div>
-          <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Common</p>
-          <div className="flex flex-wrap gap-2">
-            {common.map((effect) => (
-              <Badge key={effect} variant="ghost" className="bg-surface-container text-on-surface-variant text-xs font-bold px-3 py-1.5 rounded-full">
+          <h3 className="text-sm font-bold text-on-surface mb-3">Common</h3>
+          <div className="space-y-2">
+            {common.map((effect, index) => (
+              <div key={index} className="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[16px] text-tertiary">fiber_manual_record</span>
                 {effect}
-              </Badge>
+              </div>
             ))}
           </div>
         </div>
         <div>
-          <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Serious (Contact Doctor)</p>
-          <div className="flex flex-wrap gap-2">
-            {serious.map((effect) => (
-              <Badge key={effect} variant="destructive" className="bg-error-container/50 text-error text-xs font-bold px-3 py-1.5 rounded-full border-none">
+          <h3 className="text-sm font-bold text-error mb-3">Serious</h3>
+          <div className="space-y-2">
+            {serious.map((effect, index) => (
+              <div key={index} className="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[16px] text-error">error</span>
                 {effect}
-              </Badge>
+              </div>
             ))}
           </div>
         </div>

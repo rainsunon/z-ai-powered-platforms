@@ -2,6 +2,7 @@ import React, { Suspense, useState } from 'react';
 import { Outlet, Navigate, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { cn } from '../lib/utils';
+import { Input } from '@/components/ui/input';
 
 const enterpriseNavItems = [
   { icon: 'dashboard', label: 'Overview', path: '/enterprise' },
@@ -21,7 +22,7 @@ export function EnterpriseLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  if (user?.role === 'patient') {
+  if (user?.role === 'client') {
     return <Navigate to="/" replace />;
   }
 
@@ -87,11 +88,11 @@ export function EnterpriseLayout() {
           <div className="flex items-center gap-6 w-1/3">
             <div className="relative w-full max-w-sm">
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50">search</span>
-              <input
+              <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-surface-container-low border-none rounded-full pl-12 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 placeholder:text-on-surface-variant/40"
+                className="w-full bg-surface-container-low border-none rounded-full pl-12 pr-4 py-2.5 h-auto text-sm focus:ring-2 focus:ring-primary/20 placeholder:text-on-surface-variant/40"
                 placeholder="Search records or tickets..."
               />
             </div>

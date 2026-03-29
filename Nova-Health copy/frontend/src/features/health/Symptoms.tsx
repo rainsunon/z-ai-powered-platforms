@@ -3,6 +3,24 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SymptomCard } from './components/SymptomCard';
 import { CategoryCard } from './components/CategoryCard';
 import { ResourceItem } from './components/ResourceItem';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
+const MOODS = [
+  { emoji: '😄', label: 'Great', value: 5, color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+  { emoji: '🙂', label: 'Good', value: 4, color: 'bg-teal-100 text-teal-700 border-teal-300' },
+  { emoji: '😐', label: 'Okay', value: 3, color: 'bg-amber-100 text-amber-700 border-amber-300' },
+  { emoji: '😔', label: 'Low', value: 2, color: 'bg-orange-100 text-orange-700 border-orange-300' },
+  { emoji: '😞', label: 'Bad', value: 1, color: 'bg-red-100 text-red-700 border-red-300' },
+] as const;
+
+interface MoodEntry {
+  id: number;
+  mood: number;
+  note: string;
+  date: string;
+  time: string;
+}
 
 const categories = [
   { icon: 'psychology', title: 'Neurological', description: 'Headaches, dizziness, memory clarity, and focus concerns.' },
@@ -42,6 +60,37 @@ export function Symptoms() {
   const toggleSymptomResolved = (id: number) => {
     setLoggedSymptoms(prev => prev.map(s => s.id === id ? { ...s, resolved: !s.resolved } : s));
   };
+
+  // Mood tracking state
+  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([
+    { id: 1, mood: 4, note: 'Feeling rested after good sleep.', date: 'Oct 24, 2024', time: '8:15 AM' },
+    { id: 2, mood: 3, note: 'Mild headache midday.', date: 'Oct 23, 2024', time: '1:30 PM' },
+    { id: 3, mood: 5, note: 'Great workout, good energy all day.', date: 'Oct 22, 2024', time: '7:00 PM' },
+    { id: 4, mood: 2, note: 'Stress from work deadlines.', date: 'Oct 21, 2024', time: '9:45 PM' },
+  ]);
+  const [selectedMood, setSelectedMood] = useState<number | null>(null);
+  const [moodNote, setMoodNote] = useState('');
+
+  const logMood = () => {
+    if (selectedMood === null) return;
+    const now = new Date();
+    setMoodEntries(prev => [{
+      id: Date.now(),
+      mood: selectedMood,
+      note: moodNote,
+      date: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+    }, ...prev]);
+    setSelectedMood(null);
+    setMoodNote('');
+    toast.success('Mood logged');
+  };
+
+  const getMoodInfo = (value: number) => MOODS.find(m => m.value === value) || MOODS[2];
+
+  const avgMood = moodEntries.length > 0
+    ? (moodEntries.reduce((sum, e) => sum + e.mood, 0) / moodEntries.length).toFixed(1)
+    : '—';
 
   return (
     <div className="space-y-12">
@@ -122,6 +171,101 @@ export function Symptoms() {
         </div>
 
         {/* Featured Symptom Categories */}
+        <div className="col-span-12 py-4">
+          <div className="flex items-center justify-between mb-8">
+            <h4 className="text-2xl font-bold font-headline">Mood & Wellbeing Tracker</h4>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Log Mood Card */}
+            <div className="bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm border border-surface-variant/30 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary-container/30 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-primary">mood</span>
+                </div>
+                <div>
+                  <h5 className="font-headline font-bold text-lg text-on-surface">How are you feeling?</h5>
+                  <p className="text-xs text-on-surface-variant">Log your mood to track patterns over time.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center gap-3">
+                {MOODS.map((m) => (
+                  <button
+                    key={m.value}
+                    onClick={() => setSelectedMood(m.value)}
+                    className={cn(
+                      'flex flex-col items-center gap-1 p-3 rounded-2xl border-2 transition-all hover:scale-105',
+                      selectedMood === m.value ? `${m.color} border-current shadow-md scale-105` : 'border-transparent bg-surface-container hover:bg-surface-container-high',
+                    )}
+                  >
+                    <span className="text-2xl">{m.emoji}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">{m.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                value={moodNote}
+                onChange={(e) => setMoodNote(e.target.value)}
+                placeholder="Add a note about how you're feeling..."
+                rows={2}
+                className="w-full bg-surface border border-outline-variant/50 rounded-xl py-3 px-4 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+              />
+
+              <button
+                onClick={logMood}
+                disabled={selectedMood === null}
+                className="w-full py-3 rounded-xl primary-gradient text-on-primary font-bold shadow-md shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg"
+              >
+                Log Mood
+              </button>
+            </div>
+
+            {/* Mood Summary + History */}
+            <div className="space-y-6">
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-surface-container-lowest rounded-2xl p-4 text-center border border-surface-variant/30">
+                  <p className="text-2xl font-bold font-headline text-primary">{avgMood}</p>
+                  <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider mt-1">Avg Mood</p>
+                </div>
+                <div className="bg-surface-container-lowest rounded-2xl p-4 text-center border border-surface-variant/30">
+                  <p className="text-2xl font-bold font-headline text-on-surface">{moodEntries.length}</p>
+                  <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider mt-1">Entries</p>
+                </div>
+                <div className="bg-surface-container-lowest rounded-2xl p-4 text-center border border-surface-variant/30">
+                  <p className="text-2xl">{moodEntries.length > 0 ? getMoodInfo(moodEntries[0].mood).emoji : '—'}</p>
+                  <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider mt-1">Latest</p>
+                </div>
+              </div>
+
+              {/* Recent Entries */}
+              <div className="bg-surface-container-lowest rounded-[2rem] p-6 shadow-sm border border-surface-variant/30">
+                <h5 className="font-headline font-bold text-sm text-on-surface mb-4">Recent Entries</h5>
+                <div className="space-y-3 max-h-[240px] overflow-y-auto">
+                  {moodEntries.slice(0, 7).map((entry) => {
+                    const info = getMoodInfo(entry.mood);
+                    return (
+                      <div key={entry.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-surface-container/50 transition-colors">
+                        <span className="text-xl shrink-0">{info.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={cn('text-xs px-2 py-0.5 rounded-full font-bold', info.color)}>{info.label}</span>
+                            <span className="text-[10px] text-outline shrink-0">{entry.date} · {entry.time}</span>
+                          </div>
+                          {entry.note && <p className="text-xs text-on-surface-variant mt-1 truncate">{entry.note}</p>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Symptom Categories */}
         <div className="col-span-12 py-4">
           <div className="flex items-center justify-between mb-8">
             <h4 className="text-2xl font-bold font-headline">Symptom Categories</h4>

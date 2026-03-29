@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 interface LogSymptomsModalProps {
   isOpen: boolean;
@@ -99,12 +100,12 @@ export function LogSymptomsModal({ isOpen, onClose }: LogSymptomsModalProps) {
               </div>
               <div className="pt-4">
                 <label className="font-headline font-semibold text-sm text-on-surface-variant block mb-2">Other symptoms</label>
-                <input 
+                <Input 
                   type="text" 
                   value={otherSymptom}
                   onChange={(e) => setOtherSymptom(e.target.value)}
                   placeholder="Type to add..." 
-                  className="w-full bg-surface border border-outline-variant/50 rounded-xl py-3 px-4 font-body text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full bg-surface border border-outline-variant/50 rounded-xl py-3 h-auto px-4 font-body text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
             </div>

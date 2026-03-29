@@ -67,3 +67,32 @@ export const useProfileStore = create<ProfileState>((set) => ({
       emergencyContacts: state.emergencyContacts.filter((c) => c.id !== id),
     })),
 }));
+
+// Optimized selectors - components only re-render when selected values change
+export const useProfile = () => useProfileStore((state) => state.profile);
+export const useEmergencyContacts = () => useProfileStore((state) => state.emergencyContacts);
+
+// Memoized action selectors - functions are stable and won't cause re-renders
+export const useProfileActions = () => {
+  const store = useProfileStore();
+  return {
+    updateProfile: store.updateProfile,
+    addEmergencyContact: store.addEmergencyContact,
+    removeEmergencyContact: store.removeEmergencyContact,
+  };
+};
+
+// Combined selector for components that need both profile and actions
+export const useProfileWithActions = () => {
+  const profile = useProfileStore((state) => state.profile);
+  const updateProfile = useProfileStore((state) => state.updateProfile);
+  return { profile, updateProfile };
+};
+
+// Combined selector for emergency contacts with actions
+export const useEmergencyContactsWithActions = () => {
+  const emergencyContacts = useProfileStore((state) => state.emergencyContacts);
+  const addEmergencyContact = useProfileStore((state) => state.addEmergencyContact);
+  const removeEmergencyContact = useProfileStore((state) => state.removeEmergencyContact);
+  return { emergencyContacts, addEmergencyContact, removeEmergencyContact };
+};

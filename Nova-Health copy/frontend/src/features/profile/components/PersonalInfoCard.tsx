@@ -1,16 +1,16 @@
 import React from 'react';
-import { useProfileStore } from '@/store/useProfileStore';
+import { useProfile } from '@/store/useProfileStore';
 import { InfoCard } from '@/components/InfoCard';
 
 export function PersonalInfoCard() {
-  const { profile } = useProfileStore();
+  const profile = useProfile();
 
-  const fields = [
+  const fields = React.useMemo(() => [
     { label: 'Full Name', value: profile.fullName, icon: 'person' },
     { label: 'Date of Birth', value: profile.dateOfBirth, icon: 'cake' },
     { label: 'Gender', value: profile.gender, icon: 'wc' },
     { label: 'Blood Type', value: profile.bloodType, icon: 'bloodtype' },
-  ];
+  ], [profile.fullName, profile.dateOfBirth, profile.gender, profile.bloodType]);
 
   return (
     <InfoCard icon="badge" iconStyle="filled" title="Personal Information">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Input } from '@/components/ui/input';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,7 +23,7 @@ const roleOptions: { value: UserRole; label: string; icon: string }[] = [
 export function Login() {
   const navigate = useNavigate();
   const { login } = useAuthStore();
-  const [selectedRole, setSelectedRole] = useState<UserRole>('patient');
+  const [selectedRole, setSelectedRole] = useState<UserRole>('client');
   
   const {
     register,
@@ -36,7 +37,7 @@ export function Login() {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
     login(data.email, selectedRole);
-    if (selectedRole === 'patient') {
+    if (selectedRole === 'client') {
       navigate('/verify-method');
     } else {
       navigate('/enterprise');
@@ -45,7 +46,7 @@ export function Login() {
 
   const handleSocialLogin = (provider: string) => {
     login(`${provider.toLowerCase()}@example.com`, selectedRole);
-    if (selectedRole === 'patient') {
+    if (selectedRole === 'client') {
       navigate('/verify-method');
     } else {
       navigate('/enterprise');
@@ -128,11 +129,11 @@ export function Login() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     mail
                   </span>
-                  <input 
+                  <Input 
                     type="email" 
                     {...register('email')}
                     placeholder="elena@example.com" 
-                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 h-auto pl-12 pr-4 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                   />
                 </div>
                 {errors.email && <p className="text-error text-xs mt-1">{errors.email.message}</p>}
@@ -147,11 +148,11 @@ export function Login() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     lock
                   </span>
-                  <input 
+                  <Input 
                     type="password" 
                     {...register('password')}
                     placeholder="••••••••" 
-                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 pl-12 pr-12 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    className="w-full bg-surface border border-outline-variant/50 rounded-2xl py-4 h-auto pl-12 pr-12 font-body text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                   />
                   <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors">
                     <span className="material-symbols-outlined">visibility_off</span>

@@ -5,32 +5,26 @@ interface DrugInteractionItemProps {
   icon: string;
   iconColor: string;
   name: string;
+  severity: string;
   description: string;
-  severity: 'High' | 'Moderate' | 'Safe';
   borderClass: string;
   bgClass: string;
 }
 
-const severityConfig = {
-  High: { variant: 'destructive' as const, className: 'bg-error-container text-error' },
-  Moderate: { variant: 'outline' as const, className: 'bg-tertiary-container text-on-tertiary-container border-none' },
-  Safe: { variant: 'secondary' as const, className: 'bg-secondary-container text-secondary' },
-};
-
-export function DrugInteractionItem({ icon, iconColor, name, description, severity, borderClass, bgClass }: DrugInteractionItemProps) {
-  const config = severityConfig[severity];
-
+export function DrugInteractionItem({ icon, iconColor, name, severity, description, borderClass, bgClass }: DrugInteractionItemProps) {
   return (
-    <div className={`p-4 rounded-2xl border ${borderClass} ${bgClass}`}>
-      <div className="flex items-start gap-3">
-        <span className={`material-symbols-outlined ${iconColor} mt-0.5`}>{icon}</span>
-        <div>
-          <p className="font-bold text-on-surface text-sm">{name}</p>
-          <p className="text-xs text-on-surface-variant mt-1">{description}</p>
+    <div className={`flex items-start gap-4 p-4 rounded-xl border ${borderClass} ${bgClass}`}>
+      <span className={`material-symbols-outlined text-2xl mt-0.5 ${iconColor}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+        {icon}
+      </span>
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="font-bold text-on-surface">{name}</h3>
+          <Badge variant="secondary" className="text-xs font-medium px-2.5 py-0.5">
+            {severity}
+          </Badge>
         </div>
-        <Badge variant={config.variant} className={`${config.className} text-[10px] font-black uppercase tracking-tighter ml-auto shrink-0`}>
-          {severity}
-        </Badge>
+        <p className="text-sm text-on-surface-variant">{description}</p>
       </div>
     </div>
   );

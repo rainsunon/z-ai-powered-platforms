@@ -1,5 +1,4 @@
 import React from 'react';
-import { Separator } from '@/components/ui/separator';
 
 interface PrescriptionField {
   label: string;
@@ -13,16 +12,21 @@ interface PrescriptionInfoCardProps {
 
 export function PrescriptionInfoCard({ fields }: PrescriptionInfoCardProps) {
   return (
-    <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm">
-      <h3 className="font-headline font-bold text-xl mb-6 flex items-center gap-2">
-        <span className="material-symbols-outlined text-primary">clinical_notes</span>
+    <div className="bg-surface rounded-2xl p-6">
+      <h2 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-2">
+        <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+          description
+        </span>
         Prescription Info
-      </h3>
+      </h2>
       <div className="space-y-4">
-        {fields.map((field) => (
-          <div key={field.label} className="flex justify-between items-center">
-            <span className="text-sm text-on-surface-variant">{field.label}</span>
-            <span className={`text-sm font-bold ${field.valueClass || 'text-on-surface'}`}>{field.value}</span>
+        {fields.map((field, index) => (
+          <div key={index} className="flex items-start gap-3">
+            <span className="material-symbols-outlined text-on-surface-variant mt-0.5">label</span>
+            <div>
+              <p className="text-sm text-on-surface-variant">{field.label}</p>
+              <p className={`text-on-surface font-medium ${field.valueClass || ''}`}>{field.value}</p>
+            </div>
           </div>
         ))}
       </div>

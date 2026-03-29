@@ -20,7 +20,7 @@ const roleProfiles: Record<UserRole, { name: string; avatar: string; title: stri
 export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   user: null,
-  login: (email, role = 'patient') => {
+  login: (email, role = 'client') => {
     const profile = roleProfiles[role];
     set({
       isAuthenticated: true,

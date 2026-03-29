@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 interface AddEmergencyContactModalProps {
   open: boolean;
@@ -56,12 +57,12 @@ export function AddEmergencyContactModal({ open, onClose, onSubmit }: AddEmergen
             <label className="font-headline font-semibold text-sm text-on-surface-variant block mb-2">Full Name</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-lg">person</span>
-              <input
+              <Input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter full name"
-                className="w-full bg-surface border border-outline-variant/50 rounded-xl py-3 pl-11 pr-4 font-body text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                className="w-full bg-surface border border-outline-variant/50 rounded-xl py-3 h-auto pl-11 pr-4 font-body text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
           </div>
@@ -90,12 +91,12 @@ export function AddEmergencyContactModal({ open, onClose, onSubmit }: AddEmergen
             <label className="font-headline font-semibold text-sm text-on-surface-variant block mb-2">Phone Number</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-lg">phone</span>
-              <input
+              <Input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 (555) 000-0000"
-                className="w-full bg-surface border border-outline-variant/50 rounded-xl py-3 pl-11 pr-4 font-body text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                className="w-full bg-surface border border-outline-variant/50 rounded-xl py-3 h-auto pl-11 pr-4 font-body text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
           </div>
