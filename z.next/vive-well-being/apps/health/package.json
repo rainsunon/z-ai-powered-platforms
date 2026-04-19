@@ -1,0 +1,52 @@
+{
+  "name": "@vive/health-app",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./pages/DashboardPage": "./src/pages/DashboardPage.tsx",
+    "./pages/CalendarPage": "./src/pages/CalendarPage.tsx",
+    "./pages/DocumentsPage": "./src/pages/DocumentsPage.tsx",
+    "./stores": "./src/stores/index.ts",
+    "./api": "./src/api/index.ts",
+    "./types": "./src/types/index.ts",
+    "./lib/utils": "./src/lib/utils.ts",
+    "./components/ui/button": "./src/components/ui/button.tsx",
+    "./components/ui/dialog": "./src/components/ui/dialog.tsx",
+    "./components/shared/MedicationForm": "./src/components/shared/MedicationForm.tsx",
+    "./components/shared/AppointmentForm": "./src/components/shared/AppointmentForm.tsx",
+    "./components/shared/HealthLogForm": "./src/components/shared/HealthLogForm.tsx"
+  },
+  "scripts": {
+    "dev": "vite --port=3001 --host=0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.3.0",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@tailwindcss/vite": "^4.1.14",
+    "@vitejs/plugin-react": "^5.0.4",
+    "better-auth": "^1.6.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router": "^7.6.0",
+    "recharts": "^3.8.1",
+    "tailwind-merge": "^3.5.0",
+    "tw-animate-css": "^1.4.0",
+    "vite": "^6.2.0",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.2.3",
+    "tailwindcss": "^4.1.14",
+    "typescript": "~5.8.2"
+  }
+}

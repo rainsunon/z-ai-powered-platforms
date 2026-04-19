@@ -1,0 +1,36 @@
+{
+  "name": "@vive/notification-service",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:producer": "tsx watch src/producer/index.ts",
+    "dev:worker": "tsx watch src/worker/index.ts",
+    "build": "tsc",
+    "start:producer": "node dist/producer/index.js",
+    "start:worker": "node dist/worker/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "@hono/swagger-ui": "^0.5.1",
+    "@hono/zod-validator": "^0.4.3",
+    "@vive/notification-db": "*",
+    "amqplib": "^0.10.5",
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.39.3",
+    "hono": "^4.7.6",
+    "ioredis": "^5.6.0",
+    "nodemailer": "^6.10.1",
+    "pino": "^9.6.0",
+    "postgres": "^3.4.5",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.7",
+    "@types/node": "^22.15.3",
+    "@types/nodemailer": "^6.4.17",
+    "pino-pretty": "^13.0.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

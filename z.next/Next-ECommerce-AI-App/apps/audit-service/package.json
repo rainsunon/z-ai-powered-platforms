@@ -1,0 +1,28 @@
+{
+  "name": "audit-service",
+  "version": "1.0.0",
+  "description": "Audit trail service for tracking all system events",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "dev": "tsx --env-file=.env --watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["audit", "logging", "compliance"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@repo/kafka": "workspace:*",
+    "@repo/types": "workspace:*",
+    "fastify": "^4.25.2",
+    "mongoose": "^8.0.3"
+  }
+}

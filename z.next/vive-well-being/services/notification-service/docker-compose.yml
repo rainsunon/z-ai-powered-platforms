@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: vive_notifications
+      POSTGRES_USER: ${POSTGRES_USER:-vive_notif}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"   # Management dashboard
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-vive_rmq}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-change_me_in_production}
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD:-change_me_in_production}
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  rabbitmqdata:
+  redisdata:

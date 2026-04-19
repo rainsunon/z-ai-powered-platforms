@@ -1,0 +1,7 @@
+{
+  "name": "Vive Well-being",
+  "description": "A premium health and wealth ecosystem for peak performance, powered by Gemini AI.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

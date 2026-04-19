@@ -1,0 +1,27 @@
+{
+  "name": "vive-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "packageManager": "npm@10.9.7",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "preview": "turbo preview",
+    "clean": "turbo clean",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.9.6"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  }
+}

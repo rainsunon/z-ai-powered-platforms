@@ -1,0 +1,43 @@
+{
+  "name": "@vive/auth",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./hono": "./src/hono.ts",
+    "./express": "./src/express.ts",
+    "./fastify": "./src/fastify.ts"
+  },
+  "scripts": {
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vive/database": "*",
+    "better-auth": "^1.2.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.39.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "fastify": "^5.0.0",
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "express": ">=4.0.0",
+    "fastify": ">=4.0.0",
+    "hono": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "express": {
+      "optional": true
+    },
+    "fastify": {
+      "optional": true
+    },
+    "hono": {
+      "optional": true
+    }
+  }
+}

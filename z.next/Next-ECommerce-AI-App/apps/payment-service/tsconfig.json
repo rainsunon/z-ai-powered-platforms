@@ -1,0 +1,4 @@
+{
+  // "extends":"@repo/packages/typescript-config/base.json"
+  "extends": "./../../packages/typescript-config/base.json"
+}

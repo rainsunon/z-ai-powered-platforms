@@ -1,0 +1,4705 @@
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  CircularProgress,
+  LinearProgress,
+  Snackbar,
+  IconButton,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Modal,
+  Fade,
+} from "@mui/material";
+import MuiLink from "@mui/material/Link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
+import UploadModal from "../components/UploadModal";
+import ChatModal from "../components/ChatModal";
+import axios from "axios";
+import { useErrorToast } from "../components/useErrorToast";
+import { useLocation } from "react-router-dom";
+import CloseIcon from "@mui/icons-material/Close";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
+import TranslateIcon from "@mui/icons-material/Translate";
+import TuneIcon from "@mui/icons-material/Tune";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+import MicRecorder from "mic-recorder-to-mp3";
+
+const Home = ({ theme }) => {
+  const { showErrorToast, ErrorToastComponent } = useErrorToast();
+  const keyIdeasRef = useRef(null);
+  const discussionPointsRef = useRef(null);
+  const languageRef = useRef(null);
+  const rewriteRef = useRef(null);
+  const [summary, setSummary] = useState("");
+  const [originalText, setOriginalText] = useState("");
+  const [keyIdeas, setKeyIdeas] = useState("");
+  const [discussionPoints, setDiscussionPoints] = useState("");
+  const [loadingKeyIdeas, setLoadingKeyIdeas] = useState(false);
+  const [loadingDiscussionPoints, setLoadingDiscussionPoints] = useState(false);
+  const [showRefineModal, setShowRefineModal] = useState(false);
+  const [refinementInstructions, setRefinementInstructions] = useState("");
+  const [refinedSummary, setRefinedSummary] = useState("");
+  const refinedRef = useRef(null);
+  const [loadingRefinement, setLoadingRefinement] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [documentFile, setDocumentFile] = useState(null);
+  const [sentiment, setSentiment] = useState({ score: 0, description: "" });
+  const [hasFetchedSentiment, setHasFetchedSentiment] = useState(false);
+  const [loadingSentiment, setLoadingSentiment] = useState(false);
+  const location = useLocation();
+  const [bulletSummary, setBulletSummary] = useState("");
+  const [loadingBulletSummary, setLoadingBulletSummary] = useState(false);
+  const bulletSummaryRef = useRef(null);
+  const [languageModalOpen, setLanguageModalOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  // eslint-disable-next-line no-unused-vars
+  const [loadingLanguageSummary, setLoadingLanguageSummary] = useState(false);
+  const [languageSummary, setLanguageSummary] = useState("");
+  const languages = [
+    "Arabic",
+    "Bengali",
+    "Bulgarian",
+    "Chinese (Simplified / Traditional)",
+    "Croatian",
+    "Czech",
+    "Danish",
+    "Dutch",
+    "English",
+    "Estonian",
+    "Farsi",
+    "Finnish",
+    "French",
+    "German",
+    "Greek",
+    "Gujarati",
+    "Hebrew",
+    "Hindi",
+    "Hungarian",
+    "Indonesian",
+    "Italian",
+    "Japanese",
+    "Kannada",
+    "Korean",
+    "Latvian",
+    "Lithuanian",
+    "Malayalam",
+    "Marathi",
+    "Norwegian",
+    "Polish",
+    "Portuguese",
+    "Romanian",
+    "Russian",
+    "Serbian",
+    "Slovak",
+    "Slovenian",
+    "Spanish",
+    "Swahili",
+    "Swedish",
+    "Tamil",
+    "Telugu",
+    "Thai",
+    "Turkish",
+    "Ukrainian",
+    "Urdu",
+    "Vietnamese",
+    "Welsh",
+    "Zulu",
+  ];
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [loadingLanguage, setLoadingLanguage] = useState(false);
+  const [showRewriteModal, setShowRewriteModal] = useState(false);
+  const [desiredStyle, setDesiredStyle] = useState("");
+  const [rewrittenContent, setRewrittenContent] = useState("");
+  const [loadingRewrite, setLoadingRewrite] = useState(false);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+  const [recommendations, setRecommendations] = useState("");
+  const recommendationsRef = useRef(null);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [loadingAudio, setLoadingAudio] = useState(false);
+  const [audioResponse, setAudioResponse] = useState("");
+  const [showAudioModal, setShowAudioModal] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [file, setFile] = useState(null);
+  const [recordingMessage, setRecordingMessage] = useState("Recording Audio");
+  const [audioBlob, setAudioBlob] = useState(null);
+  const recorder = useRef(new MicRecorder({ bitRate: 128 }));
+  const audioRef = useRef(null);
+
+  // Text highlight feature states
+  const [selectedText, setSelectedText] = useState("");
+  const [highlightMenuOpen, setHighlightMenuOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [chatModalOpen, setChatModalOpen] = useState(false);
+  const [chatInitialMessage, setChatInitialMessage] = useState("");
+
+  // Analytics modal states
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+  const [analytics, setAnalytics] = useState(null);
+
+  // Loading snackbar for selected text operations
+  const [loadingSnackbarOpen, setLoadingSnackbarOpen] = useState(false);
+
+  // Update recording message dots animation
+  useEffect(() => {
+    let dots = 0;
+    if (recording) {
+      const interval = setInterval(() => {
+        setRecordingMessage(`Recording Audio${".".repeat(dots)}`);
+        dots = (dots + 1) % 4;
+      }, 500);
+      return () => clearInterval(interval);
+    }
+  }, [recording]);
+
+  const handleUploadFile = (event) => {
+    const uploadedFile = event.target.files[0];
+    setFile(uploadedFile);
+    setAudioBlob(null);
+  };
+
+  const handleRecordStart = () => {
+    setFile(null);
+    setAudioBlob(null);
+    recorder.current
+      .start()
+      .then(() => {
+        setRecording(true);
+      })
+      .catch((error) => {
+        console.error("Record start failed:", error);
+        showErrorToast("Record start failed: " + error.message);
+      });
+  };
+
+  const handleRecordStop = () => {
+    recorder.current
+      .stop()
+      .getMp3()
+      .then(([buffer, blob]) => {
+        const recordingFile = new File(buffer, "recording.wav", {
+          type: "audio/wav",
+          lastModified: Date.now(),
+        });
+        setFile(recordingFile);
+        setAudioBlob(blob);
+        setRecording(false);
+      })
+      .catch((error) => {
+        console.error("Record stop failed:", error);
+        showErrorToast("Record stop failed: " + error.message);
+      });
+  };
+
+  const handleRefineSummary = async () => {
+    setLoadingRefinement(true);
+    try {
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/refine-summary",
+        {
+          summary,
+          refinementInstructions,
+        },
+      );
+      setRefinedSummary(response.data.refinedSummary);
+      setShowRefineModal(false);
+      refinedRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      showErrorToast(error.message + ". Please try again.");
+      console.error("Failed to refine summary:", error);
+    } finally {
+      setLoadingRefinement(false);
+    }
+  };
+
+  const handleSendAudio = async () => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("File", file);
+
+    // Adding context to FormData if the `summary` variable is defined
+    if (summary) {
+      formData.append("context", summary);
+    }
+
+    try {
+      setLoadingAudio(true);
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/process-audio",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      setAudioResponse(response.data.summary);
+      audioRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      showErrorToast(
+        "Cannot process audio. Please ensure the audio is clear and audible, and try again.",
+      );
+      console.error("Error processing audio:", error);
+    } finally {
+      setLoadingAudio(false);
+      setShowAudioModal(false);
+    }
+  };
+
+  const handleGenerateRecommendations = async () => {
+    setLoadingRecommendations(true);
+    try {
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/actionable-recommendations",
+        {
+          documentText: originalText,
+        },
+      );
+
+      const formattedRecommendations = formatAsMarkdown(
+        response.data.recommendations,
+      );
+      setRecommendations(formattedRecommendations);
+      recommendationsRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      showErrorToast(error.message + ". Please try again.");
+      console.error("Failed to generate recommendations:", error);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
+
+  const handleRewriteContent = async () => {
+    setLoadingRewrite(true);
+    try {
+      // Use selected text if available, otherwise use original text
+      const textToRewrite = window.tempSelectedText || originalText;
+
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/content-rewriting",
+        {
+          documentText: textToRewrite,
+          style: desiredStyle,
+        },
+      );
+
+      setRewrittenContent(response.data.rewrittenContent);
+      setShowRewriteModal(false);
+      // Clear temp selected text
+      window.tempSelectedText = null;
+      rewriteRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      showErrorToast(error.message + ". Please try again.");
+      console.error("Failed to rewrite content:", error);
+    } finally {
+      setLoadingRewrite(false);
+    }
+  };
+
+  // Handle text selection for highlight feature
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    const text = selection.toString().trim();
+
+    if (text.length > 0) {
+      setSelectedText(text);
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      setMenuPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top + window.scrollY - 10,
+      });
+      setHighlightMenuOpen(true);
+    } else {
+      setHighlightMenuOpen(false);
+    }
+  };
+
+  // Handle summarize selected text
+  const handleSummarizeSelected = async () => {
+    setHighlightMenuOpen(false);
+    setLoadingRefinement(true);
+    setLoadingSnackbarOpen(true); // Show loading notification
+
+    try {
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/upload",
+        {
+          title: "Selected Text",
+          text: selectedText,
+        },
+      );
+
+      setRefinedSummary(response.data.summary);
+      setLoadingSnackbarOpen(false); // Hide loading notification
+      refinedRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      setLoadingSnackbarOpen(false); // Hide loading notification
+      showErrorToast(error.message + ". Please try again.");
+      console.error("Failed to summarize selected text:", error);
+    } finally {
+      setLoadingRefinement(false);
+    }
+  };
+
+  // Handle rewrite selected text
+  const handleRewriteSelected = () => {
+    setHighlightMenuOpen(false);
+    setDesiredStyle("");
+    setShowRewriteModal(true);
+    // Temporarily store selected text for rewriting
+    window.tempSelectedText = selectedText;
+  };
+
+  // Handle chat with selected text
+  const handleChatWithSelected = () => {
+    setHighlightMenuOpen(false);
+    setChatInitialMessage(selectedText);
+    setChatModalOpen(true);
+  };
+
+  // Calculate document analytics
+  const calculateAnalytics = () => {
+    if (!originalText) return null;
+
+    const text = originalText.trim();
+    const words = text.split(/\s+/).filter((word) => word.length > 0);
+    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+    const paragraphs = text.split(/\n\n+/).filter((p) => p.trim().length > 0);
+    const characters = text.length;
+    const charactersNoSpaces = text.replace(/\s/g, "").length;
+    const lines = text.split(/\n/).filter((l) => l.trim().length > 0);
+
+    // Average word length
+    const avgWordLength =
+      words.reduce((sum, word) => sum + word.length, 0) / words.length || 0;
+
+    // Reading time (average 200 words per minute)
+    const readingTime = Math.ceil(words.length / 200);
+    const speakingTime = Math.ceil(words.length / 150); // Average speaking rate
+
+    // Most common words (excluding common stop words)
+    const stopWords = new Set([
+      "the",
+      "be",
+      "to",
+      "of",
+      "and",
+      "a",
+      "in",
+      "that",
+      "have",
+      "i",
+      "it",
+      "for",
+      "not",
+      "on",
+      "with",
+      "he",
+      "as",
+      "you",
+      "do",
+      "at",
+      "this",
+      "but",
+      "his",
+      "by",
+      "from",
+      "is",
+      "was",
+      "are",
+      "an",
+    ]);
+
+    const wordFreq = {};
+    const wordLengthDistribution = {
+      short: 0,
+      medium: 0,
+      long: 0,
+      veryLong: 0,
+    };
+    const uniqueWords = new Set();
+
+    words.forEach((word) => {
+      const w = word.toLowerCase().replace(/[^\w]/g, "");
+      if (w) {
+        uniqueWords.add(w);
+        if (w.length <= 4) wordLengthDistribution.short++;
+        else if (w.length <= 7) wordLengthDistribution.medium++;
+        else if (w.length <= 10) wordLengthDistribution.long++;
+        else wordLengthDistribution.veryLong++;
+
+        if (!stopWords.has(w) && w.length > 3) {
+          wordFreq[w] = (wordFreq[w] || 0) + 1;
+        }
+      }
+    });
+
+    const topWords = Object.entries(wordFreq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15)
+      .map(([word, count]) => ({ word, count }));
+
+    // Sentence length distribution
+    const sentenceLengths = sentences.map((s) => s.split(/\s+/).length);
+    const avgSentenceLength =
+      sentenceLengths.reduce((a, b) => a + b, 0) / sentenceLengths.length || 0;
+    const longestSentence = Math.max(...sentenceLengths, 0);
+    const shortestSentence = Math.min(...sentenceLengths, 0);
+
+    // Lexical diversity (unique words / total words)
+    const lexicalDiversity = ((uniqueWords.size / words.length) * 100).toFixed(
+      1,
+    );
+
+    // Punctuation analysis
+    const punctuationCounts = {
+      periods: (text.match(/\./g) || []).length,
+      commas: (text.match(/,/g) || []).length,
+      exclamations: (text.match(/!/g) || []).length,
+      questions: (text.match(/\?/g) || []).length,
+      quotes: (text.match(/["']/g) || []).length,
+      semicolons: (text.match(/;/g) || []).length,
+    };
+
+    // Syllable estimation (rough estimate based on vowel groups)
+    const estimateSyllables = (word) => {
+      word = word.toLowerCase();
+      if (word.length <= 3) return 1;
+      word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, "");
+      word = word.replace(/^y/, "");
+      const matches = word.match(/[aeiouy]{1,2}/g);
+      return matches ? matches.length : 1;
+    };
+
+    const totalSyllables = words.reduce(
+      (sum, word) => sum + estimateSyllables(word),
+      0,
+    );
+    const avgSyllablesPerWord = (totalSyllables / words.length || 0).toFixed(2);
+
+    // Readability scores
+    // Flesch Reading Ease: 206.835 - 1.015 * (words/sentences) - 84.6 * (syllables/words)
+    const fleschScore = (
+      206.835 -
+      1.015 * (words.length / sentences.length) -
+      84.6 * (totalSyllables / words.length)
+    ).toFixed(1);
+
+    // Complexity metrics
+    const complexWords = words.filter((w) => estimateSyllables(w) >= 3).length;
+    const complexityPercentage = ((complexWords / words.length) * 100).toFixed(
+      1,
+    );
+
+    return {
+      wordCount: words.length,
+      sentenceCount: sentences.length,
+      paragraphCount: paragraphs.length,
+      lineCount: lines.length,
+      characterCount: characters,
+      characterCountNoSpaces: charactersNoSpaces,
+      avgWordLength: avgWordLength.toFixed(2),
+      avgWordsPerSentence: avgSentenceLength.toFixed(2),
+      avgSentenceLength: avgSentenceLength.toFixed(1),
+      longestSentence,
+      shortestSentence,
+      readingTime,
+      speakingTime,
+      topWords,
+      uniqueWordCount: uniqueWords.size,
+      lexicalDiversity,
+      wordLengthDistribution,
+      punctuationCounts,
+      totalSyllables,
+      avgSyllablesPerWord,
+      fleschScore,
+      complexWords,
+      complexityPercentage,
+    };
+  };
+
+  // Handle open analytics modal
+  const handleShowAnalytics = () => {
+    const analyticsData = calculateAnalytics();
+    setAnalytics(analyticsData);
+    setShowAnalyticsModal(true);
+  };
+
+  // Animated counter component
+  const AnimatedNumber = ({ value, duration = 1500, isDecimal = false }) => {
+    const [displayValue, setDisplayValue] = useState(0);
+
+    useEffect(() => {
+      if (!showAnalyticsModal) {
+        setDisplayValue(0);
+        return;
+      }
+
+      const targetValue = parseFloat(value);
+      const startTime = Date.now();
+      const startValue = 0;
+
+      const animate = () => {
+        const now = Date.now();
+        const progress = Math.min((now - startTime) / duration, 1);
+
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const current = startValue + (targetValue - startValue) * easeOutQuart;
+
+        setDisplayValue(current);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          setDisplayValue(targetValue);
+        }
+      };
+
+      requestAnimationFrame(animate);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value, duration, showAnalyticsModal]);
+
+    if (isDecimal) {
+      return displayValue.toFixed(
+        value.toString().includes(".")
+          ? value.toString().split(".")[1].length
+          : 0,
+      );
+    }
+
+    return Math.floor(displayValue).toLocaleString();
+  };
+
+  const stripMarkdown = (markdownText) => {
+    return markdownText
+      .replace(/[#*_~`>+-]/g, "") // Remove Markdown symbols like #, *, _, ~, `, >, +, -.
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // Remove Markdown links but keep text.
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1") // Remove image Markdown.
+      .replace(/!\[\]\([^)]*\)/g, "") // Remove empty image Markdown.
+      .replace(/\n{2,}/g, "\n"); // Replace multiple line breaks with a single one.
+  };
+
+  const handleCopyToClipboard = (text) => {
+    // Strip markdown before copying
+    const plainText = stripMarkdown(text);
+    navigator.clipboard
+      .writeText(plainText)
+      .then(() => {
+        setSnackbarOpen(true);
+      })
+      .catch((error) => {
+        console.error("Failed to copy text: ", error);
+        showErrorToast(error.message + ". Please try again.");
+      });
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleLanguageSelection = async (language) => {
+    setSelectedLanguage(language);
+    setLoadingLanguageSummary(true);
+    setLoadingLanguage(true);
+    try {
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/summary-in-language",
+        {
+          documentText: originalText,
+          language,
+        },
+      );
+      const formattedLanguageSummary = formatAsMarkdown(response.data.summary);
+      setLanguageSummary(formattedLanguageSummary);
+      setLanguageModalOpen(false);
+      languageRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      showErrorToast(error.message + ". Please try again.");
+      console.error("Failed to generate summary in language:", error);
+    } finally {
+      setLoadingLanguageSummary(false);
+      setLoadingLanguage(false);
+    }
+  };
+
+  const fetchSentiment = async (text) => {
+    setLoadingSentiment(true); // Start loading
+    try {
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/sentiment-analysis",
+        {
+          documentText: text,
+        },
+      );
+
+      // Check if the response data contains the expected properties
+      if (
+        response.data &&
+        typeof response.data.sentimentScore === "number" &&
+        response.data.description
+      ) {
+        setSentiment({
+          score: response.data.sentimentScore,
+          description: response.data.description,
+        });
+        setHasFetchedSentiment(true);
+      } else {
+        console.error("Unexpected response format:", response.data);
+      }
+    } catch (error) {
+      showErrorToast(error.message + ". Please try again.");
+      console.error("Failed to fetch sentiment:", error);
+      showErrorToast(error.message + ". Please try again.");
+    } finally {
+      setLoadingSentiment(false);
+    }
+  };
+
+  useEffect(() => {
+    if (location.state) {
+      const { summary, originalText } = location.state;
+      setSummary(summary);
+      setOriginalText(originalText);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    if (originalText && !hasFetchedSentiment) {
+      setLoadingSentiment(true);
+      fetchSentiment(originalText).then(() => {
+        setLoadingSentiment(false);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [originalText, hasFetchedSentiment]);
+
+  const formatAsMarkdown = (text) => {
+    const paragraphs = text.split(/\n\s*\n/);
+    return paragraphs.map((para) => para.trim()).join("\n\n");
+  };
+
+  const handleGenerateIdeas = async () => {
+    setLoadingKeyIdeas(true);
+    try {
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/generate-key-ideas",
+        {
+          documentText: originalText,
+        },
+      );
+      const formattedKeyIdeas = formatAsMarkdown(response.data.keyIdeas);
+      setKeyIdeas(formattedKeyIdeas);
+      keyIdeasRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      showErrorToast(error.message + ". Please try again.");
+      console.error("Failed to generate key ideas:", error);
+    } finally {
+      setLoadingKeyIdeas(false);
+    }
+  };
+
+  const handleGenerateDiscussionPoints = async () => {
+    setLoadingDiscussionPoints(true);
+    try {
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/generate-discussion-points",
+        {
+          documentText: originalText,
+        },
+      );
+      const formattedDiscussionPoints = formatAsMarkdown(
+        response.data.discussionPoints,
+      );
+      setDiscussionPoints(formattedDiscussionPoints);
+      discussionPointsRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      showErrorToast(error.message + ". Please try again.");
+      console.error("Failed to generate discussion points:", error);
+    } finally {
+      setLoadingDiscussionPoints(false);
+    }
+  };
+
+  const handleGenerateBulletSummary = async () => {
+    setLoadingBulletSummary(true);
+    try {
+      const response = await axios.post(
+        "https://docuthinker-app-backend-api.vercel.app/bullet-summary",
+        {
+          documentText: originalText,
+        },
+      );
+      const formattedBulletSummary = formatAsMarkdown(response.data.summary);
+      setBulletSummary(formattedBulletSummary);
+      bulletSummaryRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      showErrorToast(error.message + ". Please try again.");
+      console.error("Failed to generate bullet-point summary:", error);
+    } finally {
+      setLoadingBulletSummary(false);
+    }
+  };
+
+  const handleUploadNewDocument = () => {
+    setOpenConfirmDialog(true);
+  };
+
+  const handleConfirmReload = () => {
+    window.location.reload();
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false);
+  };
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        padding: 4,
+        gap: 2,
+        alignItems: "flex-start",
+        transition: "background-color 0.3s ease, color 0.3s ease",
+      }}
+      onMouseUp={handleTextSelection}
+    >
+      {!summary && (
+        <UploadModal
+          setSummary={setSummary}
+          setOriginalText={setOriginalText}
+          theme={theme}
+          setDocumentFile={setDocumentFile}
+        />
+      )}
+      {summary && (
+        <>
+          <Box
+            sx={{
+              width: { xs: "100%", md: "30%" },
+              marginBottom: { xs: 2, md: 0 },
+              transition: "background-color 0.3s ease, color 0.3s ease",
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                font: "inherit",
+                fontWeight: "bold",
+                fontSize: "20px",
+                mb: 2,
+                color: theme === "dark" ? "white" : "black",
+              }}
+            >
+              Original Document
+            </Typography>
+            <Box
+              sx={{
+                border: "1px solid #f57c00",
+                padding: 2,
+                borderRadius: "12px",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                overflowY: "auto",
+              }}
+            >
+              <Typography
+                sx={{
+                  font: "inherit",
+                  color: theme === "dark" ? "white" : "black",
+                }}
+              >
+                {originalText}
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              width: { xs: "100%", md: "70%" },
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                font: "inherit",
+                fontWeight: "bold",
+                fontSize: "20px",
+                mb: 2,
+                color: theme === "dark" ? "white" : "black",
+              }}
+            >
+              Summary
+            </Typography>
+            <Box
+              sx={{
+                border: "1px solid #f57c00",
+                padding: 2,
+                marginBottom: 2,
+                borderRadius: "12px",
+              }}
+            >
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                  h1: ({ node, ...props }) => (
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        font: "inherit",
+                        color: theme === "dark" ? "white" : "black",
+                        fontWeight: "bold",
+                        mb: 2,
+                      }}
+                      {...props}
+                    />
+                  ),
+                  h2: ({ node, ...props }) => (
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        font: "inherit",
+                        color: theme === "dark" ? "white" : "black",
+                        fontWeight: "bold",
+                        mb: 2,
+                      }}
+                      {...props}
+                    />
+                  ),
+                  h3: ({ node, ...props }) => (
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        font: "inherit",
+                        color: theme === "dark" ? "white" : "black",
+                        fontWeight: "bold",
+                      }}
+                      {...props}
+                    />
+                  ),
+                  code: ({ node, inline, className, children, ...props }) => {
+                    return inline ? (
+                      <Box
+                        component="code"
+                        sx={{
+                          backgroundColor:
+                            theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                          color: theme === "dark" ? "#f8f8f2" : "#333",
+                          fontFamily: "monospace",
+                          fontSize: "0.875rem",
+                          borderRadius: "4px",
+                          px: "0.4em",
+                          py: "0.2em",
+                        }}
+                        {...props}
+                      >
+                        {children}
+                      </Box>
+                    ) : (
+                      <Box
+                        component="pre"
+                        sx={{
+                          backgroundColor:
+                            theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                          color: theme === "dark" ? "#f8f8f2" : "#333",
+                          fontFamily: "monospace",
+                          fontSize: "0.9rem",
+                          borderRadius: "8px",
+                          overflowX: "auto",
+                          p: "1rem",
+                          mb: "1rem",
+                        }}
+                        {...props}
+                      >
+                        <code className={className}>{children}</code>
+                      </Box>
+                    );
+                  },
+                  p: ({ node, ...props }) => (
+                    <Typography
+                      sx={{
+                        font: "inherit",
+                        color: theme === "dark" ? "white" : "black",
+                      }}
+                      {...props}
+                    />
+                  ),
+                  ul: ({ node, ...props }) => (
+                    <ul
+                      style={{
+                        color: theme === "dark" ? "white" : "black",
+                        font: "inherit",
+                      }}
+                      {...props}
+                    />
+                  ),
+                  ol: ({ node, ...props }) => (
+                    <ol
+                      style={{
+                        color: theme === "dark" ? "white" : "black",
+                        font: "inherit",
+                      }}
+                      {...props}
+                    />
+                  ),
+                  a: ({ ...props }) => (
+                    <MuiLink
+                      {...props}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{
+                        color: "inherit",
+                        textDecoration: "underline",
+                        "&:hover": {
+                          color: "#f57c00",
+                          cursor: "pointer",
+                        },
+                      }}
+                    />
+                  ),
+                  table: ({ node, children, ...props }) => (
+                    <Box sx={{ overflowX: "auto", width: "100%", mb: "1rem" }}>
+                      <Box
+                        component="table"
+                        sx={{
+                          width: "100%",
+                          borderCollapse: "collapse",
+                          border: "1px solid",
+                          borderColor: theme === "dark" ? "white" : "black",
+                        }}
+                        {...props}
+                      >
+                        {children}
+                      </Box>
+                    </Box>
+                  ),
+                  thead: ({ node, children, ...props }) => (
+                    <Box component="thead" {...props}>
+                      {children}
+                    </Box>
+                  ),
+                  tbody: ({ node, children, ...props }) => (
+                    <Box component="tbody" {...props}>
+                      {children}
+                    </Box>
+                  ),
+                  th: ({ node, children, ...props }) => (
+                    <Box
+                      component="th"
+                      sx={{
+                        border: "1px solid",
+                        borderColor: theme === "dark" ? "white" : "black",
+                        p: "0.5rem",
+                        backgroundColor: theme === "dark" ? "#333" : "#f5f5f5",
+                        textAlign: "left",
+                        fontWeight: "bold",
+                      }}
+                      {...props}
+                    >
+                      {children}
+                    </Box>
+                  ),
+                  td: ({ node, children, ...props }) => (
+                    <Box
+                      component="td"
+                      sx={{
+                        border: "1px solid",
+                        borderColor: theme === "dark" ? "white" : "black",
+                        p: "0.5rem",
+                        textAlign: "left",
+                      }}
+                      {...props}
+                    >
+                      {children}
+                    </Box>
+                  ),
+                }}
+              >
+                {summary}
+              </ReactMarkdown>
+            </Box>
+
+            {/* Sentiment Meter */}
+            <Box
+              sx={{
+                textAlign: "center",
+                marginBottom: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 1,
+                  font: "inherit",
+                  color: theme === "dark" ? "white" : "black",
+                  fontWeight: "bold",
+                  fontSize: "20px",
+                }}
+              >
+                Sentiment Analysis
+              </Typography>
+
+              {loadingSentiment ? (
+                <CircularProgress
+                  sx={{ color: theme === "dark" ? "white" : "black" }}
+                />
+              ) : (
+                <>
+                  <LinearProgress
+                    variant="determinate"
+                    value={(sentiment.score + 1) * 50}
+                    sx={{
+                      height: 10,
+                      borderRadius: 5,
+                      backgroundColor: "#ccc",
+                      "& .MuiLinearProgress-bar": {
+                        backgroundColor:
+                          sentiment.score > 0
+                            ? "#4caf50"
+                            : sentiment.score < 0
+                              ? "#f44336"
+                              : "#f57c00",
+                      },
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      mt: 1,
+                      font: "inherit",
+                      color: theme === "dark" ? "white" : "black",
+                    }}
+                  >
+                    Sentiment Score: <strong>{sentiment.score}</strong> -{" "}
+                    {sentiment.description}
+                  </Typography>
+                </>
+              )}
+            </Box>
+
+            {/* Button section aligned in a row or column based on screen size */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                flexWrap: { xs: "nowrap", md: "wrap" },
+                gap: 2,
+                marginBottom: 2,
+                "& .MuiButton-root": {
+                  paddingRight: "18px",
+                },
+                "& .MuiButton-startIcon": {
+                  marginLeft: "6px",
+                },
+              }}
+            >
+              <Button
+                onClick={handleGenerateIdeas}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                disabled={loadingKeyIdeas}
+                startIcon={!loadingKeyIdeas && <TipsAndUpdatesIcon />}
+              >
+                {loadingKeyIdeas ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Generate Key Ideas"
+                )}
+              </Button>
+              <Button
+                onClick={handleGenerateDiscussionPoints}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                disabled={loadingDiscussionPoints}
+                startIcon={!loadingDiscussionPoints && <ForumOutlinedIcon />}
+              >
+                {loadingDiscussionPoints ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Generate Discussion Points"
+                )}
+              </Button>
+              <Button
+                onClick={handleGenerateBulletSummary}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                disabled={loadingBulletSummary}
+                startIcon={!loadingBulletSummary && <FormatListBulletedIcon />}
+              >
+                {loadingBulletSummary ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Generate Bullet-Point Summary"
+                )}
+              </Button>
+              <ChatModal theme={theme} />
+              <Button
+                onClick={handleShowAnalytics}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                startIcon={<InsightsOutlinedIcon />}
+              >
+                Document Analytics
+              </Button>
+              <Button
+                onClick={() => setShowAudioModal(true)}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                startIcon={<RecordVoiceOverIcon />}
+              >
+                Voice Chat
+              </Button>
+              <Button
+                onClick={() => setLanguageModalOpen(true)}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                startIcon={<TranslateIcon />}
+              >
+                Change Language
+              </Button>
+              <Button
+                onClick={() => setShowRewriteModal(true)}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                startIcon={<EditOutlinedIcon />}
+              >
+                Rewrite Content
+              </Button>
+              <Button
+                onClick={handleGenerateRecommendations}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                disabled={loadingRecommendations}
+                startIcon={!loadingRecommendations && <AutoAwesomeIcon />}
+              >
+                {loadingRecommendations ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Generate Recommendations"
+                )}
+              </Button>
+              <Button
+                onClick={() => setShowRefineModal(true)}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                startIcon={<TuneIcon />}
+              >
+                Refine Summary
+              </Button>
+              <Button
+                onClick={handleUploadNewDocument}
+                sx={{
+                  bgcolor: "#f57c00",
+                  color: "white",
+                  font: "inherit",
+                  borderRadius: "12px",
+                }}
+                startIcon={<UploadFileIcon />}
+              >
+                Upload New Document
+              </Button>
+            </Box>
+
+            {/* Modal for Upload or Record */}
+            <Modal
+              open={showAudioModal}
+              onClose={() => setShowAudioModal(false)}
+            >
+              <Fade in={showAudioModal}>
+                <Box
+                  sx={{
+                    bgcolor: theme === "dark" ? "#222" : "white",
+                    color: theme === "dark" ? "white" : "black",
+                    borderRadius: "12px",
+                    width: "400px",
+                    maxWidth: "90%",
+                    p: 3,
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.4)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                  }}
+                >
+                  <IconButton
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      color: theme === "dark" ? "white" : "black",
+                      "&:hover": { color: "#f57c00" },
+                    }}
+                    onClick={() => setShowAudioModal(false)}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      font: "inherit",
+                      fontSize: "22px",
+                      fontWeight: "bold",
+                      color: theme === "dark" ? "white" : "black",
+                    }}
+                  >
+                    Upload or Record Audio
+                  </Typography>
+
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 2,
+                      font: "inherit",
+                      textAlign: "center",
+                      fontSize: "14px",
+                      color: theme === "dark" ? "white" : "black",
+                    }}
+                  >
+                    Record your audio or upload an audio file to talk to our AI
+                    with your voice. Our AI does not have access to your
+                    conversation history so please be specific with your
+                    queries!
+                  </Typography>
+
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{
+                      mb: 1,
+                      width: "100%",
+                      bgcolor: "#1976d2",
+                      "&:hover": { bgcolor: "#1565c0" },
+                      cursor: recording ? "not-allowed" : "pointer",
+                      font: "inherit",
+                    }}
+                    disabled={recording}
+                  >
+                    {file && !recording
+                      ? "Upload New Audio File"
+                      : "Upload Audio File"}
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      hidden
+                      onChange={handleUploadFile}
+                    />
+                  </Button>
+                  {file && !recording && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "gray",
+                        font: "inherit",
+                        textAlign: "center",
+                      }}
+                    >
+                      {file.name}
+                    </Typography>
+                  )}
+
+                  <Button
+                    variant="contained"
+                    onClick={recording ? handleRecordStop : handleRecordStart}
+                    sx={{
+                      width: "100%",
+                      bgcolor: recording ? "#d32f2f" : "#4caf50",
+                      "&:hover": { bgcolor: recording ? "#c62828" : "#388e3c" },
+                      font: "inherit",
+                    }}
+                  >
+                    {recording
+                      ? "Stop Recording"
+                      : file
+                        ? "Remove Audio and Record Again"
+                        : "Record Audio"}
+                  </Button>
+                  {recording && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "red",
+                        font: "inherit",
+                        textAlign: "center",
+                      }}
+                    >
+                      {recordingMessage}
+                    </Typography>
+                  )}
+
+                  {audioBlob && !recording && (
+                    <audio
+                      controls
+                      src={URL.createObjectURL(audioBlob)}
+                      style={{ width: "100%" }}
+                    />
+                  )}
+
+                  <Button
+                    variant="contained"
+                    disabled={!file || loadingAudio}
+                    onClick={handleSendAudio}
+                    sx={{
+                      mt: 2,
+                      width: "50%",
+                      alignSelf: "center",
+                      font: "inherit",
+                      bgcolor: "#f57c00",
+                      "&:hover": { bgcolor: "#ef6c00" },
+                    }}
+                  >
+                    {loadingAudio ? (
+                      <CircularProgress size={24} sx={{ color: "white" }} />
+                    ) : (
+                      "SEND"
+                    )}
+                  </Button>
+                </Box>
+              </Fade>
+            </Modal>
+
+            {/* Display key ideas and discussion points as Markdown */}
+            {keyIdeas && (
+              <Box ref={keyIdeasRef} sx={{ marginTop: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    font: "inherit",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                    mb: 2,
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  Key Ideas
+                </Typography>
+                <Box
+                  sx={{
+                    border: "1px solid #f57c00",
+                    padding: 2,
+                    paddingTop: 1,
+                    borderRadius: "12px",
+                    position: "relative",
+                  }}
+                >
+                  <Button
+                    onClick={() => handleCopyToClipboard(keyIdeas)}
+                    sx={{
+                      bgcolor: "#f57c00",
+                      color: "white",
+                      font: "inherit",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      padding: "2px 8px",
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <Box
+                    sx={{
+                      paddingTop: "24px",
+                    }}
+                  >
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeKatex]}
+                      components={{
+                        h1: ({ node, ...props }) => (
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h2: ({ node, ...props }) => (
+                          <Typography
+                            variant="h5"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h3: ({ node, ...props }) => (
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        code: ({
+                          node,
+                          inline,
+                          className,
+                          children,
+                          ...props
+                        }) => {
+                          return inline ? (
+                            <Box
+                              component="code"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.875rem",
+                                borderRadius: "4px",
+                                px: "0.4em",
+                                py: "0.2em",
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </Box>
+                          ) : (
+                            <Box
+                              component="pre"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.9rem",
+                                borderRadius: "8px",
+                                overflowX: "auto",
+                                p: "1rem",
+                                mb: "1rem",
+                              }}
+                              {...props}
+                            >
+                              <code className={className}>{children}</code>
+                            </Box>
+                          );
+                        },
+                        p: ({ node, ...props }) => (
+                          <Typography
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        ul: ({ node, ...props }) => (
+                          <ul
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        a: ({ node, ...props }) => (
+                          <MuiLink
+                            {...props}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{
+                              color: "#f57c00",
+                              textDecoration: "underline",
+                              "&:hover": {
+                                color: "#1976d2",
+                                cursor: "pointer",
+                              },
+                            }}
+                          />
+                        ),
+                        table: ({ node, children, ...props }) => (
+                          <div
+                            style={{
+                              overflowX: "auto",
+                              width: "100%",
+                              marginBottom: "1rem",
+                            }}
+                          >
+                            <table
+                              style={{
+                                width: "100%",
+                                borderCollapse: "collapse",
+                                border:
+                                  "1px solid " +
+                                  (theme === "dark" ? "white" : "black"),
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </table>
+                          </div>
+                        ),
+                        thead: ({ node, children, ...props }) => (
+                          <thead {...props}>{children}</thead>
+                        ),
+                        tbody: ({ node, children, ...props }) => (
+                          <tbody {...props}>{children}</tbody>
+                        ),
+                        th: ({ node, children, ...props }) => (
+                          <th
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              backgroundColor:
+                                theme === "dark" ? "#333" : "#f5f5f5",
+                              textAlign: "left",
+                              fontWeight: "bold",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </th>
+                        ),
+                        td: ({ node, children, ...props }) => (
+                          <td
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              textAlign: "left",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </td>
+                        ),
+                      }}
+                    >
+                      {keyIdeas}
+                    </ReactMarkdown>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+
+            {discussionPoints && (
+              <Box ref={discussionPointsRef} sx={{ marginTop: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    font: "inherit",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                    mb: 2,
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  Discussion Points
+                </Typography>
+                <Box
+                  sx={{
+                    border: "1px solid #f57c00",
+                    padding: 2,
+                    paddingTop: 1,
+                    borderRadius: "12px",
+                    position: "relative",
+                  }}
+                >
+                  <Button
+                    onClick={() => handleCopyToClipboard(discussionPoints)}
+                    sx={{
+                      bgcolor: "#f57c00",
+                      color: "white",
+                      font: "inherit",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      padding: "2px 8px",
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <Box
+                    sx={{
+                      paddingTop: "24px",
+                    }}
+                  >
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeKatex]}
+                      components={{
+                        h1: ({ node, ...props }) => (
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h2: ({ node, ...props }) => (
+                          <Typography
+                            variant="h5"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h3: ({ node, ...props }) => (
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        p: ({ node, ...props }) => (
+                          <Typography
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        code: ({
+                          node,
+                          inline,
+                          className,
+                          children,
+                          ...props
+                        }) => {
+                          return inline ? (
+                            <Box
+                              component="code"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.875rem",
+                                borderRadius: "4px",
+                                px: "0.4em",
+                                py: "0.2em",
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </Box>
+                          ) : (
+                            <Box
+                              component="pre"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.9rem",
+                                borderRadius: "8px",
+                                overflowX: "auto",
+                                p: "1rem",
+                                mb: "1rem",
+                              }}
+                              {...props}
+                            >
+                              <code className={className}>{children}</code>
+                            </Box>
+                          );
+                        },
+                        ul: ({ node, ...props }) => (
+                          <ul
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        table: ({ node, children, ...props }) => (
+                          <div
+                            style={{
+                              overflowX: "auto",
+                              width: "100%",
+                              marginBottom: "1rem",
+                            }}
+                          >
+                            <table
+                              style={{
+                                width: "100%",
+                                borderCollapse: "collapse",
+                                border:
+                                  "1px solid " +
+                                  (theme === "dark" ? "white" : "black"),
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </table>
+                          </div>
+                        ),
+                        thead: ({ node, children, ...props }) => (
+                          <thead {...props}>{children}</thead>
+                        ),
+                        tbody: ({ node, children, ...props }) => (
+                          <tbody {...props}>{children}</tbody>
+                        ),
+                        th: ({ node, children, ...props }) => (
+                          <th
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              backgroundColor:
+                                theme === "dark" ? "#333" : "#f5f5f5",
+                              textAlign: "left",
+                              fontWeight: "bold",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </th>
+                        ),
+                        td: ({ node, children, ...props }) => (
+                          <td
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              textAlign: "left",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </td>
+                        ),
+                        a: ({ node, ...props }) => (
+                          <MuiLink
+                            {...props}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{
+                              color: "#f57c00",
+                              textDecoration: "underline",
+                              "&:hover": {
+                                color: "#1976d2",
+                                cursor: "pointer",
+                              },
+                            }}
+                          />
+                        ),
+                      }}
+                    >
+                      {discussionPoints}
+                    </ReactMarkdown>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+
+            {bulletSummary && (
+              <Box ref={bulletSummaryRef} sx={{ marginTop: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    font: "inherit",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                    mb: 2,
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  Bullet-Point Summary
+                </Typography>
+                <Box
+                  sx={{
+                    border: "1px solid #f57c00",
+                    padding: 2,
+                    paddingTop: 1,
+                    borderRadius: "12px",
+                    position: "relative",
+                  }}
+                >
+                  <Button
+                    onClick={() => handleCopyToClipboard(bulletSummary)}
+                    sx={{
+                      bgcolor: "#f57c00",
+                      color: "white",
+                      font: "inherit",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      padding: "2px 8px",
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <Box
+                    sx={{
+                      paddingTop: "24px",
+                    }}
+                  >
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeKatex]}
+                      components={{
+                        h1: ({ node, ...props }) => (
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h2: ({ node, ...props }) => (
+                          <Typography
+                            variant="h5"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h3: ({ node, ...props }) => (
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        code: ({
+                          node,
+                          inline,
+                          className,
+                          children,
+                          ...props
+                        }) => {
+                          return inline ? (
+                            <Box
+                              component="code"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.875rem",
+                                borderRadius: "4px",
+                                px: "0.4em",
+                                py: "0.2em",
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </Box>
+                          ) : (
+                            <Box
+                              component="pre"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.9rem",
+                                borderRadius: "8px",
+                                overflowX: "auto",
+                                p: "1rem",
+                                mb: "1rem",
+                              }}
+                              {...props}
+                            >
+                              <code className={className}>{children}</code>
+                            </Box>
+                          );
+                        },
+                        p: ({ node, ...props }) => (
+                          <Typography
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        ul: ({ node, ...props }) => (
+                          <ul
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        table: ({ node, children, ...props }) => (
+                          <div
+                            style={{
+                              overflowX: "auto",
+                              width: "100%",
+                              marginBottom: "1rem",
+                            }}
+                          >
+                            <table
+                              style={{
+                                width: "100%",
+                                borderCollapse: "collapse",
+                                border:
+                                  "1px solid " +
+                                  (theme === "dark" ? "white" : "black"),
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </table>
+                          </div>
+                        ),
+                        thead: ({ node, children, ...props }) => (
+                          <thead {...props}>{children}</thead>
+                        ),
+                        tbody: ({ node, children, ...props }) => (
+                          <tbody {...props}>{children}</tbody>
+                        ),
+                        th: ({ node, children, ...props }) => (
+                          <th
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              backgroundColor:
+                                theme === "dark" ? "#333" : "#f5f5f5",
+                              textAlign: "left",
+                              fontWeight: "bold",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </th>
+                        ),
+                        td: ({ node, children, ...props }) => (
+                          <td
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              textAlign: "left",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </td>
+                        ),
+                      }}
+                    >
+                      {bulletSummary}
+                    </ReactMarkdown>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+
+            {/* Display AI Response */}
+            {audioResponse && (
+              <Box ref={audioRef} sx={{ marginTop: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    font: "inherit",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                    mb: 2,
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  Voice Chat Response
+                </Typography>
+                <Box
+                  sx={{
+                    border: "1px solid #f57c00",
+                    padding: 2,
+                    paddingTop: 4,
+                    borderRadius: "12px",
+                    position: "relative",
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  <Button
+                    onClick={() => handleCopyToClipboard(audioResponse)}
+                    sx={{
+                      bgcolor: "#f57c00",
+                      color: "white",
+                      font: "inherit",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      padding: "2px 8px",
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      h1: ({ node, ...props }) => (
+                        <Typography
+                          variant="h4"
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                            fontWeight: "bold",
+                            mb: 2,
+                          }}
+                          {...props}
+                        />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                            fontWeight: "bold",
+                            mb: 2,
+                          }}
+                          {...props}
+                        />
+                      ),
+                      h3: ({ node, ...props }) => (
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                            fontWeight: "bold",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      p: ({ node, ...props }) => (
+                        <Typography
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      code: ({
+                        node,
+                        inline,
+                        className,
+                        children,
+                        ...props
+                      }) => {
+                        return inline ? (
+                          <Box
+                            component="code"
+                            sx={{
+                              backgroundColor:
+                                theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                              color: theme === "dark" ? "#f8f8f2" : "#333",
+                              fontFamily: "monospace",
+                              fontSize: "0.875rem",
+                              borderRadius: "4px",
+                              px: "0.4em",
+                              py: "0.2em",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </Box>
+                        ) : (
+                          <Box
+                            component="pre"
+                            sx={{
+                              backgroundColor:
+                                theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                              color: theme === "dark" ? "#f8f8f2" : "#333",
+                              fontFamily: "monospace",
+                              fontSize: "0.9rem",
+                              borderRadius: "8px",
+                              overflowX: "auto",
+                              p: "1rem",
+                              mb: "1rem",
+                            }}
+                            {...props}
+                          >
+                            <code className={className}>{children}</code>
+                          </Box>
+                        );
+                      },
+                      ul: ({ node, ...props }) => (
+                        <ul
+                          style={{
+                            color: theme === "dark" ? "white" : "black",
+                            font: "inherit",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      ol: ({ node, ...props }) => (
+                        <ol
+                          style={{
+                            color: theme === "dark" ? "white" : "black",
+                            font: "inherit",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      a: ({ node, ...props }) => (
+                        <MuiLink
+                          {...props}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{
+                            color: "#f57c00",
+                            textDecoration: "underline",
+                            "&:hover": {
+                              color: "#1976d2",
+                              cursor: "pointer",
+                            },
+                          }}
+                        />
+                      ),
+                      table: ({ node, children, ...props }) => (
+                        <div
+                          style={{
+                            overflowX: "auto",
+                            width: "100%",
+                            marginBottom: "1rem",
+                          }}
+                        >
+                          <table
+                            style={{
+                              width: "100%",
+                              borderCollapse: "collapse",
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </table>
+                        </div>
+                      ),
+                      thead: ({ node, children, ...props }) => (
+                        <thead {...props}>{children}</thead>
+                      ),
+                      tbody: ({ node, children, ...props }) => (
+                        <tbody {...props}>{children}</tbody>
+                      ),
+                      th: ({ node, children, ...props }) => (
+                        <th
+                          style={{
+                            border:
+                              "1px solid " +
+                              (theme === "dark" ? "white" : "black"),
+                            padding: "0.5rem",
+                            backgroundColor:
+                              theme === "dark" ? "#333" : "#f5f5f5",
+                            textAlign: "left",
+                            fontWeight: "bold",
+                            color: theme === "dark" ? "white" : "black",
+                          }}
+                          {...props}
+                        >
+                          {children}
+                        </th>
+                      ),
+                      td: ({ node, children, ...props }) => (
+                        <td
+                          style={{
+                            border:
+                              "1px solid " +
+                              (theme === "dark" ? "white" : "black"),
+                            padding: "0.5rem",
+                            textAlign: "left",
+                            color: theme === "dark" ? "white" : "black",
+                          }}
+                          {...props}
+                        >
+                          {children}
+                        </td>
+                      ),
+                    }}
+                  >
+                    {audioResponse}
+                  </ReactMarkdown>
+                </Box>
+              </Box>
+            )}
+
+            {languageModalOpen && (
+              <Box
+                sx={{
+                  position: "fixed",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  bgcolor: theme === "dark" ? "#222" : "#fff",
+                  color: theme === "dark" ? "#fff" : "#000",
+                  borderRadius: "12px",
+                  padding: 4,
+                  boxShadow: "0 0 10px rgba(0, 0, 0, 0.4)",
+                  zIndex: 1000,
+                  maxHeight: "80vh",
+                  width: "80vw",
+                  maxWidth: { xs: "80vw", sm: "600px" },
+                  overflowY: "auto",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    font: "inherit",
+                    textAlign: "center",
+                    fontSize: "22px",
+                    fontWeight: "bold",
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  Select a Language
+                </Typography>
+                <IconButton
+                  onClick={() => setLanguageModalOpen(false)}
+                  sx={{ position: "absolute", top: 8, right: 8 }}
+                >
+                  <CloseIcon
+                    sx={{
+                      color: theme === "dark" ? "white" : "black",
+                      "&:hover": { color: "#f57c00" },
+                    }}
+                  />
+                </IconButton>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gap: 2,
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(150px, 1fr))",
+                  }}
+                >
+                  {languages.map((lang) => (
+                    <Button
+                      key={lang}
+                      onClick={() => handleLanguageSelection(lang)}
+                      sx={{
+                        bgcolor: "#f57c00",
+                        color: "white",
+                        font: "inherit",
+                        borderRadius: "12px",
+                        fontSize: "14px",
+                        marginBottom: 2,
+                      }}
+                      disabled={loadingLanguage && selectedLanguage === lang}
+                    >
+                      {loadingLanguage && selectedLanguage === lang ? (
+                        <CircularProgress size={20} sx={{ color: "white" }} />
+                      ) : (
+                        lang
+                      )}
+                    </Button>
+                  ))}
+                </Box>
+                <Button
+                  onClick={() => setLanguageModalOpen(false)}
+                  sx={{
+                    mt: 2,
+                    display: "block",
+                    marginLeft: "auto",
+                    bgcolor: "gray",
+                    color: "white",
+                    font: "inherit",
+                    borderRadius: "12px",
+                  }}
+                  disabled={loadingLanguage}
+                >
+                  Close
+                </Button>
+              </Box>
+            )}
+
+            {languageSummary && (
+              <Box ref={languageRef} sx={{ marginTop: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    font: "inherit",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                    mb: 2,
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  Summary in {selectedLanguage}
+                </Typography>
+                <Box
+                  sx={{
+                    border: "1px solid #f57c00",
+                    padding: 2,
+                    paddingTop: 1,
+                    borderRadius: "12px",
+                    position: "relative",
+                  }}
+                >
+                  <Button
+                    onClick={() => handleCopyToClipboard(languageSummary)}
+                    sx={{
+                      bgcolor: "#f57c00",
+                      color: "white",
+                      font: "inherit",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      padding: "2px 8px",
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <Box sx={{ paddingTop: "24px" }}>
+                    {" "}
+                    {/* Padding to prevent overlap */}
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeKatex]}
+                      components={{
+                        h1: ({ node, ...props }) => (
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h2: ({ node, ...props }) => (
+                          <Typography
+                            variant="h5"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h3: ({ node, ...props }) => (
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        code: ({
+                          node,
+                          inline,
+                          className,
+                          children,
+                          ...props
+                        }) => {
+                          return inline ? (
+                            <Box
+                              component="code"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.875rem",
+                                borderRadius: "4px",
+                                px: "0.4em",
+                                py: "0.2em",
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </Box>
+                          ) : (
+                            <Box
+                              component="pre"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.9rem",
+                                borderRadius: "8px",
+                                overflowX: "auto",
+                                p: "1rem",
+                                mb: "1rem",
+                              }}
+                              {...props}
+                            >
+                              <code className={className}>{children}</code>
+                            </Box>
+                          );
+                        },
+                        p: ({ node, ...props }) => (
+                          <Typography
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        ul: ({ node, ...props }) => (
+                          <ul
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        table: ({ node, children, ...props }) => (
+                          <div
+                            style={{
+                              overflowX: "auto",
+                              width: "100%",
+                              marginBottom: "1rem",
+                            }}
+                          >
+                            <table
+                              style={{
+                                width: "100%",
+                                borderCollapse: "collapse",
+                                border:
+                                  "1px solid " +
+                                  (theme === "dark" ? "white" : "black"),
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </table>
+                          </div>
+                        ),
+                        thead: ({ node, children, ...props }) => (
+                          <thead {...props}>{children}</thead>
+                        ),
+                        tbody: ({ node, children, ...props }) => (
+                          <tbody {...props}>{children}</tbody>
+                        ),
+                        th: ({ node, children, ...props }) => (
+                          <th
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              backgroundColor:
+                                theme === "dark" ? "#333" : "#f5f5f5",
+                              textAlign: "left",
+                              fontWeight: "bold",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </th>
+                        ),
+                        td: ({ node, children, ...props }) => (
+                          <td
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              textAlign: "left",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </td>
+                        ),
+                      }}
+                    >
+                      {languageSummary}
+                    </ReactMarkdown>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+
+            {rewrittenContent && (
+              <Box ref={rewriteRef} sx={{ marginTop: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    font: "inherit",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                    mb: 2,
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  Rewritten Content
+                </Typography>
+                <Box
+                  sx={{
+                    border: "1px solid #f57c00",
+                    padding: 2,
+                    paddingTop: 4,
+                    borderRadius: "12px",
+                    position: "relative",
+                  }}
+                >
+                  <Button
+                    onClick={() => handleCopyToClipboard(rewrittenContent)}
+                    sx={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      bgcolor: "#f57c00",
+                      color: "white",
+                      font: "inherit",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      padding: "2px 8px",
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      h1: ({ node, ...props }) => (
+                        <Typography
+                          variant="h4"
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                            fontWeight: "bold",
+                            mb: 2,
+                          }}
+                          {...props}
+                        />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                            fontWeight: "bold",
+                            mb: 2,
+                          }}
+                          {...props}
+                        />
+                      ),
+                      h3: ({ node, ...props }) => (
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                            fontWeight: "bold",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      code: ({
+                        node,
+                        inline,
+                        className,
+                        children,
+                        ...props
+                      }) => {
+                        return inline ? (
+                          <Box
+                            component="code"
+                            sx={{
+                              backgroundColor:
+                                theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                              color: theme === "dark" ? "#f8f8f2" : "#333",
+                              fontFamily: "monospace",
+                              fontSize: "0.875rem",
+                              borderRadius: "4px",
+                              px: "0.4em",
+                              py: "0.2em",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </Box>
+                        ) : (
+                          <Box
+                            component="pre"
+                            sx={{
+                              backgroundColor:
+                                theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                              color: theme === "dark" ? "#f8f8f2" : "#333",
+                              fontFamily: "monospace",
+                              fontSize: "0.9rem",
+                              borderRadius: "8px",
+                              overflowX: "auto",
+                              p: "1rem",
+                              mb: "1rem",
+                            }}
+                            {...props}
+                          >
+                            <code className={className}>{children}</code>
+                          </Box>
+                        );
+                      },
+                      p: ({ node, ...props }) => (
+                        <Typography
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      ul: ({ node, ...props }) => (
+                        <ul
+                          style={{
+                            color: theme === "dark" ? "white" : "black",
+                            font: "inherit",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      ol: ({ node, ...props }) => (
+                        <ol
+                          style={{
+                            color: theme === "dark" ? "white" : "black",
+                            font: "inherit",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      table: ({ node, children, ...props }) => (
+                        <div
+                          style={{
+                            overflowX: "auto",
+                            width: "100%",
+                            marginBottom: "1rem",
+                          }}
+                        >
+                          <table
+                            style={{
+                              width: "100%",
+                              borderCollapse: "collapse",
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </table>
+                        </div>
+                      ),
+                      thead: ({ node, children, ...props }) => (
+                        <thead {...props}>{children}</thead>
+                      ),
+                      tbody: ({ node, children, ...props }) => (
+                        <tbody {...props}>{children}</tbody>
+                      ),
+                      th: ({ node, children, ...props }) => (
+                        <th
+                          style={{
+                            border:
+                              "1px solid " +
+                              (theme === "dark" ? "white" : "black"),
+                            padding: "0.5rem",
+                            backgroundColor:
+                              theme === "dark" ? "#333" : "#f5f5f5",
+                            textAlign: "left",
+                            fontWeight: "bold",
+                            color: theme === "dark" ? "white" : "black",
+                          }}
+                          {...props}
+                        >
+                          {children}
+                        </th>
+                      ),
+                      td: ({ node, children, ...props }) => (
+                        <td
+                          style={{
+                            border:
+                              "1px solid " +
+                              (theme === "dark" ? "white" : "black"),
+                            padding: "0.5rem",
+                            textAlign: "left",
+                            color: theme === "dark" ? "white" : "black",
+                          }}
+                          {...props}
+                        >
+                          {children}
+                        </td>
+                      ),
+                    }}
+                  >
+                    {rewrittenContent}
+                  </ReactMarkdown>
+                </Box>
+              </Box>
+            )}
+
+            {refinedSummary && (
+              <Box sx={{ marginTop: 2 }} ref={refinedRef}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    font: "inherit",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                    mb: 2,
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  Refined Summary
+                </Typography>
+                <Box
+                  sx={{
+                    border: "1px solid #f57c00",
+                    padding: 2,
+                    paddingTop: 1,
+                    borderRadius: "12px",
+                    position: "relative",
+                  }}
+                >
+                  <Button
+                    onClick={() => handleCopyToClipboard(refinedSummary)}
+                    sx={{
+                      bgcolor: "#f57c00",
+                      color: "white",
+                      font: "inherit",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      padding: "2px 8px",
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <Box
+                    sx={{
+                      marginTop: 3,
+                      padding: 0,
+                      borderRadius: "12px",
+                    }}
+                  >
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeKatex]}
+                      components={{
+                        h1: ({ node, ...props }) => (
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h2: ({ node, ...props }) => (
+                          <Typography
+                            variant="h5"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                              mb: 2,
+                            }}
+                            {...props}
+                          />
+                        ),
+                        h3: ({ node, ...props }) => (
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                              fontWeight: "bold",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        code: ({
+                          node,
+                          inline,
+                          className,
+                          children,
+                          ...props
+                        }) => {
+                          return inline ? (
+                            <Box
+                              component="code"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.875rem",
+                                borderRadius: "4px",
+                                px: "0.4em",
+                                py: "0.2em",
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </Box>
+                          ) : (
+                            <Box
+                              component="pre"
+                              sx={{
+                                backgroundColor:
+                                  theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                                color: theme === "dark" ? "#f8f8f2" : "#333",
+                                fontFamily: "monospace",
+                                fontSize: "0.9rem",
+                                borderRadius: "8px",
+                                overflowX: "auto",
+                                p: "1rem",
+                                mb: "1rem",
+                              }}
+                              {...props}
+                            >
+                              <code className={className}>{children}</code>
+                            </Box>
+                          );
+                        },
+                        p: ({ node, ...props }) => (
+                          <Typography
+                            sx={{
+                              font: "inherit",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        ul: ({ node, ...props }) => (
+                          <ul
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol
+                            style={{
+                              color: theme === "dark" ? "white" : "black",
+                              font: "inherit",
+                            }}
+                            {...props}
+                          />
+                        ),
+                        a: ({ node, ...props }) => (
+                          <MuiLink
+                            {...props}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{
+                              color: "#f57c00",
+                              textDecoration: "underline",
+                              "&:hover": {
+                                color: "#1976d2",
+                                cursor: "pointer",
+                              },
+                            }}
+                          />
+                        ),
+                        table: ({ node, children, ...props }) => (
+                          <div
+                            style={{
+                              overflowX: "auto",
+                              width: "100%",
+                              marginBottom: "1rem",
+                            }}
+                          >
+                            <table
+                              style={{
+                                width: "100%",
+                                borderCollapse: "collapse",
+                                border:
+                                  "1px solid " +
+                                  (theme === "dark" ? "white" : "black"),
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </table>
+                          </div>
+                        ),
+                        thead: ({ node, children, ...props }) => (
+                          <thead {...props}>{children}</thead>
+                        ),
+                        tbody: ({ node, children, ...props }) => (
+                          <tbody {...props}>{children}</tbody>
+                        ),
+                        th: ({ node, children, ...props }) => (
+                          <th
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              backgroundColor:
+                                theme === "dark" ? "#333" : "#f5f5f5",
+                              textAlign: "left",
+                              fontWeight: "bold",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </th>
+                        ),
+                        td: ({ node, children, ...props }) => (
+                          <td
+                            style={{
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                              padding: "0.5rem",
+                              textAlign: "left",
+                              color: theme === "dark" ? "white" : "black",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </td>
+                        ),
+                      }}
+                    >
+                      {refinedSummary}
+                    </ReactMarkdown>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+
+            {recommendations && (
+              <Box ref={recommendationsRef} sx={{ marginTop: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    font: "inherit",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                    mb: 2,
+                    color: theme === "dark" ? "white" : "black",
+                  }}
+                >
+                  Actionable Recommendations
+                </Typography>
+                <Box
+                  sx={{
+                    border: "1px solid #f57c00",
+                    padding: 2,
+                    paddingTop: 4,
+                    borderRadius: "12px",
+                    position: "relative",
+                  }}
+                >
+                  <Button
+                    onClick={() => handleCopyToClipboard(recommendations)}
+                    sx={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      bgcolor: "#f57c00",
+                      color: "white",
+                      font: "inherit",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      padding: "2px 8px",
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      h1: ({ node, ...props }) => (
+                        <Typography
+                          variant="h4"
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                            fontWeight: "bold",
+                            mb: 2,
+                          }}
+                          {...props}
+                        />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                            fontWeight: "bold",
+                            mb: 2,
+                          }}
+                          {...props}
+                        />
+                      ),
+                      h3: ({ node, ...props }) => (
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                            fontWeight: "bold",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      code: ({
+                        node,
+                        inline,
+                        className,
+                        children,
+                        ...props
+                      }) => {
+                        return inline ? (
+                          <Box
+                            component="code"
+                            sx={{
+                              backgroundColor:
+                                theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                              color: theme === "dark" ? "#f8f8f2" : "#333",
+                              fontFamily: "monospace",
+                              fontSize: "0.875rem",
+                              borderRadius: "4px",
+                              px: "0.4em",
+                              py: "0.2em",
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </Box>
+                        ) : (
+                          <Box
+                            component="pre"
+                            sx={{
+                              backgroundColor:
+                                theme === "dark" ? "#2d2d2d" : "#f5f5f5",
+                              color: theme === "dark" ? "#f8f8f2" : "#333",
+                              fontFamily: "monospace",
+                              fontSize: "0.9rem",
+                              borderRadius: "8px",
+                              overflowX: "auto",
+                              p: "1rem",
+                              mb: "1rem",
+                            }}
+                            {...props}
+                          >
+                            <code className={className}>{children}</code>
+                          </Box>
+                        );
+                      },
+                      p: ({ node, ...props }) => (
+                        <Typography
+                          sx={{
+                            font: "inherit",
+                            color: theme === "dark" ? "white" : "black",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      ul: ({ node, ...props }) => (
+                        <ul
+                          style={{
+                            color: theme === "dark" ? "white" : "black",
+                            font: "inherit",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      ol: ({ node, ...props }) => (
+                        <ol
+                          style={{
+                            color: theme === "dark" ? "white" : "black",
+                            font: "inherit",
+                          }}
+                          {...props}
+                        />
+                      ),
+                      table: ({ node, children, ...props }) => (
+                        <div
+                          style={{
+                            overflowX: "auto",
+                            width: "100%",
+                            marginBottom: "1rem",
+                          }}
+                        >
+                          <table
+                            style={{
+                              width: "100%",
+                              borderCollapse: "collapse",
+                              border:
+                                "1px solid " +
+                                (theme === "dark" ? "white" : "black"),
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </table>
+                        </div>
+                      ),
+                      thead: ({ node, children, ...props }) => (
+                        <thead {...props}>{children}</thead>
+                      ),
+                      tbody: ({ node, children, ...props }) => (
+                        <tbody {...props}>{children}</tbody>
+                      ),
+                      th: ({ node, children, ...props }) => (
+                        <th
+                          style={{
+                            border:
+                              "1px solid " +
+                              (theme === "dark" ? "white" : "black"),
+                            padding: "0.5rem",
+                            backgroundColor:
+                              theme === "dark" ? "#333" : "#f5f5f5",
+                            textAlign: "left",
+                            fontWeight: "bold",
+                            color: theme === "dark" ? "white" : "black",
+                          }}
+                          {...props}
+                        >
+                          {children}
+                        </th>
+                      ),
+                      td: ({ node, children, ...props }) => (
+                        <td
+                          style={{
+                            border:
+                              "1px solid " +
+                              (theme === "dark" ? "white" : "black"),
+                            padding: "0.5rem",
+                            textAlign: "left",
+                            color: theme === "dark" ? "white" : "black",
+                          }}
+                          {...props}
+                        >
+                          {children}
+                        </td>
+                      ),
+                    }}
+                  >
+                    {recommendations}
+                  </ReactMarkdown>
+                </Box>
+              </Box>
+            )}
+          </Box>
+        </>
+      )}
+
+      {showRewriteModal && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            bgcolor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              width: { xs: "90%", sm: "400px" },
+              bgcolor: theme === "dark" ? "#222" : "#fff",
+              padding: 4,
+              borderRadius: 4,
+            }}
+          >
+            {/* Close Button */}
+            <IconButton
+              onClick={() => setShowRewriteModal(false)}
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                color: theme === "dark" ? "white" : "black",
+                "&:hover": { color: "#f57c00" },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+
+            <Typography
+              variant="h6"
+              sx={{
+                color: theme === "dark" ? "white" : "black",
+                mb: 2,
+                font: "inherit",
+                fontSize: "22px",
+                fontWeight: "bold",
+              }}
+            >
+              Enter Desired Style
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="Style (e.g., formal, casual)..."
+              value={desiredStyle}
+              onChange={(e) => setDesiredStyle(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleRewriteContent()}
+              sx={{ mb: 4 }}
+              inputProps={{
+                style: {
+                  fontFamily: "Poppins, sans-serif",
+                  color: theme === "dark" ? "white" : "black",
+                },
+              }}
+              InputLabelProps={{
+                style: {
+                  fontFamily: "Poppins, sans-serif",
+                  color: theme === "dark" ? "white" : "#000",
+                },
+              }}
+            />
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Button
+                onClick={() => setShowRewriteModal(false)}
+                sx={{ font: "inherit", color: "black", bgcolor: "lightgrey" }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRewriteContent}
+                disabled={loadingRewrite}
+                sx={{
+                  font: "inherit",
+                  bgcolor: "#f57c00",
+                  color: "white",
+                }}
+              >
+                {loadingRewrite ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Rewrite"
+                )}
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      )}
+
+      <Modal open={showRefineModal} onClose={() => setShowRefineModal(false)}>
+        <Fade in={showRefineModal}>
+          <Box
+            sx={{
+              bgcolor: theme === "dark" ? "#222" : "white",
+              color: theme === "dark" ? "white" : "black",
+              borderRadius: "12px",
+              width: "400px",
+              maxWidth: "90%",
+              p: 3,
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.4)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            {/* Close Button */}
+            <IconButton
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                color: theme === "dark" ? "white" : "black",
+                "&:hover": { color: "#f57c00" },
+              }}
+              onClick={() => setShowRefineModal(false)}
+            >
+              <CloseIcon />
+            </IconButton>
+
+            <Typography
+              variant="h6"
+              sx={{
+                font: "inherit",
+                fontSize: "22px",
+                fontWeight: "bold",
+                color: theme === "dark" ? "white" : "black",
+              }}
+            >
+              Refine Summary
+            </Typography>
+
+            <Typography
+              variant="body1"
+              sx={{
+                font: "inherit",
+                textAlign: "center",
+                fontSize: "14px",
+                color: theme === "dark" ? "white" : "black",
+              }}
+            >
+              Specify how you'd like the summary refined.
+            </Typography>
+
+            <TextField
+              label="Refinement Instructions..."
+              value={refinementInstructions}
+              onChange={(e) => setRefinementInstructions(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleRefineSummary()}
+              fullWidth
+              rows={2}
+              sx={{ mb: 2 }}
+              inputProps={{
+                style: {
+                  fontFamily: "Poppins, sans-serif",
+                  color: theme === "dark" ? "white" : "black",
+                },
+              }}
+              InputLabelProps={{
+                style: {
+                  fontFamily: "Poppins, sans-serif",
+                  color: theme === "dark" ? "white" : "#000",
+                  // Remove padding and transform to use default label behavior
+                },
+              }}
+            />
+
+            <Button
+              variant="contained"
+              onClick={handleRefineSummary}
+              disabled={loadingRefinement || !refinementInstructions.trim()}
+              sx={{
+                width: "100%",
+                bgcolor: "#f57c00",
+                "&:hover": { bgcolor: "#ef6c00" },
+                font: "inherit",
+              }}
+            >
+              {loadingRefinement ? (
+                <CircularProgress size={24} sx={{ color: "white" }} />
+              ) : (
+                "Refine Summary"
+              )}
+            </Button>
+          </Box>
+        </Fade>
+      </Modal>
+
+      <Dialog
+        open={openConfirmDialog}
+        onClose={handleCloseConfirmDialog}
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-description"
+        PaperProps={{
+          style: {
+            backgroundColor: theme === "dark" ? "#222" : "#fff",
+            color: theme === "dark" ? "#fff" : "#000",
+            borderRadius: "8px",
+          },
+        }}
+      >
+        <DialogTitle
+          id="confirm-dialog-title"
+          sx={{
+            backgroundColor: theme === "dark" ? "#222" : "#f5f5f5",
+            color: theme === "dark" ? "#fff" : "#000",
+            font: "inherit",
+            fontSize: "24px",
+            fontWeight: "bold",
+          }}
+        >
+          {"Confirm Leaving Page"}
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            backgroundColor: theme === "dark" ? "#222" : "#f5f5f5",
+            color: theme === "dark" ? "#ddd" : "#000",
+          }}
+        >
+          <DialogContentText
+            id="confirm-dialog-description"
+            sx={{
+              color: theme === "dark" ? "#ddd" : "#000",
+              font: "inherit",
+            }}
+          >
+            Are you sure you want to upload a new document? This will reload the
+            page and any unsaved changes will be lost.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            backgroundColor: theme === "dark" ? "#222" : "#f5f5f5",
+          }}
+        >
+          <Button
+            onClick={handleCloseConfirmDialog}
+            color="primary"
+            sx={{
+              color: theme === "dark" ? "#fff" : "#000",
+              font: "inherit",
+              "&:hover": {
+                backgroundColor: theme === "dark" ? "#333" : "#dcdcdc",
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmReload}
+            color="secondary"
+            autoFocus
+            sx={{
+              color: theme === "dark" ? "#f57c00" : "red",
+              font: "inherit",
+              "&:hover": {
+                backgroundColor: theme === "dark" ? "#333" : "#dcdcdc",
+              },
+            }}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={snackbarOpen}
+        onClose={handleSnackbarClose}
+        message="Copied to clipboard!"
+        autoHideDuration={2000}
+        ContentProps={{
+          sx: {
+            backgroundColor: "#f57c00",
+            color: "white",
+            font: "inherit",
+            fontSize: "16px",
+          },
+        }}
+        action={
+          <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={handleSnackbarClose}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
+
+      {/* Loading Snackbar for selected text operations */}
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={loadingSnackbarOpen}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            backgroundColor: "#f57c00",
+            color: "white",
+            padding: "12px 16px",
+            borderRadius: "4px",
+            font: "inherit",
+            fontSize: "16px",
+          }}
+        >
+          <CircularProgress size={20} sx={{ color: "white" }} />
+          <Typography sx={{ font: "inherit", color: "white" }}>
+            Summarizing selected text...
+          </Typography>
+        </Box>
+      </Snackbar>
+
+      {ErrorToastComponent}
+
+      {/* Text Highlight Menu */}
+      {highlightMenuOpen && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: menuPosition.y,
+            left: menuPosition.x,
+            transform: "translateX(-50%)",
+            backgroundColor: theme === "dark" ? "#333" : "#fff",
+            border: `2px solid ${theme === "dark" ? "#555" : "#f57c00"}`,
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            zIndex: 1000,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            p: 1,
+            minWidth: "200px",
+          }}
+        >
+          <Button
+            onClick={handleSummarizeSelected}
+            sx={{
+              color: theme === "dark" ? "#fff" : "#000",
+              font: "inherit",
+              textTransform: "none",
+              justifyContent: "flex-start",
+              "&:hover": {
+                backgroundColor: theme === "dark" ? "#444" : "#f5f5f5",
+              },
+            }}
+          >
+            Summarize This
+          </Button>
+          <Button
+            onClick={handleChatWithSelected}
+            sx={{
+              color: theme === "dark" ? "#fff" : "#000",
+              font: "inherit",
+              textTransform: "none",
+              justifyContent: "flex-start",
+              "&:hover": {
+                backgroundColor: theme === "dark" ? "#444" : "#f5f5f5",
+              },
+            }}
+          >
+            Ask Chat
+          </Button>
+          <Button
+            onClick={handleRewriteSelected}
+            sx={{
+              color: theme === "dark" ? "#fff" : "#000",
+              font: "inherit",
+              textTransform: "none",
+              justifyContent: "flex-start",
+              "&:hover": {
+                backgroundColor: theme === "dark" ? "#444" : "#f5f5f5",
+              },
+            }}
+          >
+            Rewrite
+          </Button>
+          <IconButton
+            size="small"
+            onClick={() => setHighlightMenuOpen(false)}
+            sx={{
+              position: "absolute",
+              top: 2,
+              right: 2,
+              color: theme === "dark" ? "#fff" : "#000",
+            }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      )}
+
+      {/* Chat Modal */}
+      {chatModalOpen && (
+        <ChatModal
+          theme={theme}
+          open={chatModalOpen}
+          onClose={() => setChatModalOpen(false)}
+          initialMessage={chatInitialMessage}
+        />
+      )}
+
+      {/* Analytics Modal */}
+      {showAnalyticsModal && analytics && (
+        <Modal
+          open={showAnalyticsModal}
+          onClose={() => setShowAnalyticsModal(false)}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: { xs: "95%", sm: "90%", md: "85%", lg: "80%" },
+              maxHeight: "95vh",
+              bgcolor: theme === "dark" ? "#1e1e1e" : "#fff",
+              boxShadow: 24,
+              p: { xs: 2, md: 4 },
+              borderRadius: "12px",
+              overflow: "auto",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  font: "inherit",
+                  fontWeight: "bold",
+                  color: theme === "dark" ? "#fff" : "#000",
+                }}
+              >
+                Document Analytics
+              </Typography>
+              <IconButton
+                onClick={() => setShowAnalyticsModal(false)}
+                sx={{ color: theme === "dark" ? "#fff" : "#000" }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
+            {/* Stats Grid */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "repeat(3, 1fr)",
+                },
+                gap: 2,
+                mb: 3,
+              }}
+            >
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.wordCount} />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Words
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.sentenceCount} />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Sentences
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.paragraphCount} />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Paragraphs
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.characterCount} />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Characters
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.readingTime} /> min
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Reading Time
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber
+                    value={analytics.avgWordLength}
+                    isDecimal={true}
+                  />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Avg Word Length
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber
+                    value={analytics.avgWordsPerSentence}
+                    isDecimal={true}
+                  />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Avg Words/Sentence
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.characterCountNoSpaces} />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Characters (no spaces)
+                </Typography>
+              </Box>
+
+              {/* More stats */}
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.uniqueWordCount} />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Unique Words
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.lineCount} />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Lines
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.speakingTime} /> min
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Speaking Time
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber
+                    value={analytics.lexicalDiversity}
+                    isDecimal={true}
+                  />
+                  %
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Lexical Diversity
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber
+                    value={analytics.fleschScore}
+                    isDecimal={true}
+                  />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Readability Score
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                  borderRadius: "12px",
+                  border: `3px solid #f57c00`,
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: "#f57c00",
+                    fontWeight: "bold",
+                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <AnimatedNumber value={analytics.totalSyllables} />
+                </Typography>
+                <Typography
+                  sx={{
+                    font: "inherit",
+                    color: theme === "dark" ? "#ddd" : "#666",
+                    fontSize: "1.1rem",
+                    mt: 1,
+                  }}
+                >
+                  Total Syllables
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Word Length Distribution Chart */}
+            <Box sx={{ mt: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  font: "inherit",
+                  fontWeight: "bold",
+                  color: theme === "dark" ? "#fff" : "#000",
+                  mb: 2,
+                  fontSize: "1.5rem",
+                }}
+              >
+                Word Length Distribution
+              </Typography>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "repeat(4, 1fr)" },
+                  gap: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                    borderRadius: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "150px",
+                      bgcolor: theme === "dark" ? "#333" : "#e0e0e0",
+                      borderRadius: "4px",
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "flex-end",
+                      justifyContent: "center",
+                      mb: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: "60%",
+                        height: `${(analytics.wordLengthDistribution.short / analytics.wordCount) * 100 * 1.5}%`,
+                        bgcolor: "#f57c00",
+                        borderRadius: "4px 4px 0 0",
+                      }}
+                    />
+                  </Box>
+                  <Typography
+                    sx={{
+                      color: theme === "dark" ? "#fff" : "#000",
+                      fontWeight: "bold",
+                      fontSize: "1.5rem",
+                      fontFamily: "Poppins, sans-serif",
+                    }}
+                  >
+                    {analytics.wordLengthDistribution.short}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: theme === "dark" ? "#ddd" : "#666",
+                      fontSize: "0.9rem",
+                      fontFamily: "Poppins, sans-serif",
+                    }}
+                  >
+                    Short (≤4)
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                    borderRadius: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "150px",
+                      bgcolor: theme === "dark" ? "#333" : "#e0e0e0",
+                      borderRadius: "4px",
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "flex-end",
+                      justifyContent: "center",
+                      mb: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: "60%",
+                        height: `${(analytics.wordLengthDistribution.medium / analytics.wordCount) * 100 * 1.5}%`,
+                        bgcolor: "#ff9800",
+                        borderRadius: "4px 4px 0 0",
+                      }}
+                    />
+                  </Box>
+                  <Typography
+                    sx={{
+                      color: theme === "dark" ? "#fff" : "#000",
+                      fontWeight: "bold",
+                      fontSize: "1.5rem",
+                      fontFamily: "Poppins, sans-serif",
+                    }}
+                  >
+                    {analytics.wordLengthDistribution.medium}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: theme === "dark" ? "#ddd" : "#666",
+                      fontSize: "0.9rem",
+                      fontFamily: "Poppins, sans-serif",
+                    }}
+                  >
+                    Medium (5-7)
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                    borderRadius: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "150px",
+                      bgcolor: theme === "dark" ? "#333" : "#e0e0e0",
+                      borderRadius: "4px",
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "flex-end",
+                      justifyContent: "center",
+                      mb: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: "60%",
+                        height: `${(analytics.wordLengthDistribution.long / analytics.wordCount) * 100 * 1.5}%`,
+                        bgcolor: "#fb8c00",
+                        borderRadius: "4px 4px 0 0",
+                      }}
+                    />
+                  </Box>
+                  <Typography
+                    sx={{
+                      color: theme === "dark" ? "#fff" : "#000",
+                      fontWeight: "bold",
+                      fontSize: "1.5rem",
+                      fontFamily: "Poppins, sans-serif",
+                    }}
+                  >
+                    {analytics.wordLengthDistribution.long}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: theme === "dark" ? "#ddd" : "#666",
+                      fontSize: "0.9rem",
+                      fontFamily: "Poppins, sans-serif",
+                    }}
+                  >
+                    Long (8-10)
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                    borderRadius: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "150px",
+                      bgcolor: theme === "dark" ? "#333" : "#e0e0e0",
+                      borderRadius: "4px",
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "flex-end",
+                      justifyContent: "center",
+                      mb: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: "60%",
+                        height: `${(analytics.wordLengthDistribution.veryLong / analytics.wordCount) * 100 * 1.5}%`,
+                        bgcolor: "#e65100",
+                        borderRadius: "4px 4px 0 0",
+                      }}
+                    />
+                  </Box>
+                  <Typography
+                    sx={{
+                      color: theme === "dark" ? "#fff" : "#000",
+                      fontWeight: "bold",
+                      fontSize: "1.5rem",
+                      fontFamily: "Poppins, sans-serif",
+                    }}
+                  >
+                    {analytics.wordLengthDistribution.veryLong}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: theme === "dark" ? "#ddd" : "#666",
+                      fontSize: "0.9rem",
+                      fontFamily: "Poppins, sans-serif",
+                    }}
+                  >
+                    Very Long (>10)
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Punctuation Chart */}
+            <Box sx={{ mt: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  font: "inherit",
+                  fontWeight: "bold",
+                  color: theme === "dark" ? "#fff" : "#000",
+                  mb: 2,
+                  fontSize: "1.5rem",
+                }}
+              >
+                Punctuation Usage
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                }}
+              >
+                {Object.entries(analytics.punctuationCounts).map(
+                  ([key, value]) => (
+                    <Box
+                      key={key}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                        p: 2,
+                        bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          font: "inherit",
+                          color: theme === "dark" ? "#fff" : "#000",
+                          fontWeight: "bold",
+                          minWidth: "120px",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {key}
+                      </Typography>
+                      <Box
+                        sx={{
+                          flex: 1,
+                          height: "32px",
+                          bgcolor: theme === "dark" ? "#333" : "#e0e0e0",
+                          borderRadius: "4px",
+                          overflow: "hidden",
+                          position: "relative",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            height: "100%",
+                            width: `${(value / Math.max(...Object.values(analytics.punctuationCounts))) * 100}%`,
+                            bgcolor: "#f57c00",
+                            transition: "width 0.3s ease",
+                          }}
+                        />
+                      </Box>
+                      <Typography
+                        sx={{
+                          font: "inherit",
+                          color: "#f57c00",
+                          fontWeight: "bold",
+                          minWidth: "60px",
+                          textAlign: "right",
+                          fontSize: "1.3rem",
+                        }}
+                      >
+                        {value}
+                      </Typography>
+                    </Box>
+                  ),
+                )}
+              </Box>
+            </Box>
+
+            {/* Top Words Section */}
+            <Box sx={{ mt: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  font: "inherit",
+                  fontWeight: "bold",
+                  color: theme === "dark" ? "#fff" : "#000",
+                  mb: 2,
+                  fontSize: "1.5rem",
+                }}
+              >
+                Most Common Words (Top 15)
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                }}
+              >
+                {analytics.topWords.map((item, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      p: 1.5,
+                      bgcolor: theme === "dark" ? "#2a2a2a" : "#f5f5f5",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        font: "inherit",
+                        color: theme === "dark" ? "#fff" : "#000",
+                        fontWeight: "bold",
+                        minWidth: "30px",
+                      }}
+                    >
+                      {index + 1}.
+                    </Typography>
+                    <Typography
+                      sx={{
+                        font: "inherit",
+                        color: theme === "dark" ? "#fff" : "#000",
+                        flex: 1,
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      {item.word}
+                    </Typography>
+                    <Box
+                      sx={{
+                        flex: 3,
+                        height: "24px",
+                        bgcolor: theme === "dark" ? "#333" : "#e0e0e0",
+                        borderRadius: "4px",
+                        overflow: "hidden",
+                        position: "relative",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          left: 0,
+                          top: 0,
+                          height: "100%",
+                          width: `${(item.count / analytics.topWords[0].count) * 100}%`,
+                          bgcolor: "#f57c00",
+                          transition: "width 0.3s ease",
+                        }}
+                      />
+                    </Box>
+                    <Typography
+                      sx={{
+                        font: "inherit",
+                        color: "#f57c00",
+                        fontWeight: "bold",
+                        minWidth: "40px",
+                        textAlign: "right",
+                      }}
+                    >
+                      {item.count}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        </Modal>
+      )}
+    </Box>
+  );
+};
+
+export default Home;

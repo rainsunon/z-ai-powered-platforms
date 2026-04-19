@@ -1,0 +1,114 @@
+services:
+  redpanda-1:
+    image: redpandadata/redpanda:latest
+    container_name: redpanda-1
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:9094
+      - --advertise-kafka-addr internal://redpanda-1:9092,external://localhost:9094
+      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr internal://redpanda-1:8082,external://localhost:18082
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+      - --rpc-addr redpanda-1:33145
+      - --advertise-rpc-addr redpanda-1:33145
+      - --mode dev-container
+      - --smp 1
+      - --default-log-level=info
+      - --seeds redpanda-1:33145,redpanda-2:33145,redpanda-3:33145
+    ports:
+      - "9094:9094"
+      - "18081:18081"
+      - "18082:18082"
+    networks:
+      - kafka-network
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  redpanda-2:
+    image: redpandadata/redpanda:latest
+    container_name: redpanda-2
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:9095
+      - --advertise-kafka-addr internal://redpanda-2:9092,external://localhost:9095
+      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:28082
+      - --advertise-pandaproxy-addr internal://redpanda-2:8082,external://localhost:28082
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:28081
+      - --rpc-addr redpanda-2:33145
+      - --advertise-rpc-addr redpanda-2:33145
+      - --mode dev-container
+      - --smp 1
+      - --default-log-level=info
+      - --seeds redpanda-1:33145,redpanda-2:33145,redpanda-3:33145
+    ports:
+      - "9095:9095"
+      - "28081:28081"
+      - "28082:28082"
+    networks:
+      - kafka-network
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  redpanda-3:
+    image: redpandadata/redpanda:latest
+    container_name: redpanda-3
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:9096
+      - --advertise-kafka-addr internal://redpanda-3:9092,external://localhost:9096
+      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:38082
+      - --advertise-pandaproxy-addr internal://redpanda-3:8082,external://localhost:38082
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:38081
+      - --rpc-addr redpanda-3:33145
+      - --advertise-rpc-addr redpanda-3:33145
+      - --mode dev-container
+      - --smp 1
+      - --default-log-level=info
+      - --seeds redpanda-1:33145,redpanda-2:33145,redpanda-3:33145
+    ports:
+      - "9096:9096"
+      - "38081:38081"
+      - "38082:38082"
+    networks:
+      - kafka-network
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: redpanda-1:9092,redpanda-2:9092,redpanda-3:9092
+      KAFKA_CLUSTERS_0_READONLY: false
+      KAFKA_CLUSTERS_0_TOPIC_AUTO_CREATE: true
+    ports:
+      - "8080:8080"
+    depends_on:
+      redpanda-1:
+        condition: service_healthy
+      redpanda-2:
+        condition: service_healthy
+      redpanda-3:
+        condition: service_healthy
+    networks:
+      - kafka-network
+
+networks:
+  kafka-network:
+    driver: bridge
