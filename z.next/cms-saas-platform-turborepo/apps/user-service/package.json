@@ -1,0 +1,14 @@
+{
+  "name": "@cms/user-service",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": { "build": "tsc", "dev": "tsx watch src/index.ts", "start": "node dist/index.js", "clean": "rimraf dist" },
+  "dependencies": {
+    "fastify": "^4.26.0", "@fastify/cors": "^9.0.0", "@fastify/helmet": "^11.0.0",
+    "@cms/config": "workspace:*", "@cms/database": "workspace:*", "@cms/logger": "workspace:*",
+    "@cms/errors": "workspace:*", "@cms/auth": "workspace:*", "@cms/validation": "workspace:*",
+    "@cms/messaging": "workspace:*", "@cms/observability": "workspace:*", "@cms/utils": "workspace:*",
+    "@cms/cache": "workspace:*"
+  },
+  "devDependencies": { "typescript": "^5.4.0", "tsx": "^4.7.0", "rimraf": "^5.0.0" }
+}

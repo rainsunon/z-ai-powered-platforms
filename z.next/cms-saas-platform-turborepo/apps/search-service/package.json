@@ -1,0 +1,29 @@
+{
+  "name": "@cms/search-service",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@cms/config": "workspace:*",
+    "@cms/database": "workspace:*",
+    "@cms/errors": "workspace:*",
+    "@cms/logger": "workspace:*",
+    "@cms/auth": "workspace:*",
+    "@cms/messaging": "workspace:*",
+    "@cms/cache": "workspace:*",
+    "@cms/utils": "workspace:*",
+    "@cms/observability": "workspace:*",
+    "fastify": "^4.24.0",
+    "@fastify/cors": "^8.4.0",
+    "@fastify/helmet": "^11.1.0",
+    "@elastic/elasticsearch": "^8.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "tsx": "^4.6.0"
+  }
+}
