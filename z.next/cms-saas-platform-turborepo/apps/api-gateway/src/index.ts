@@ -11,7 +11,6 @@ import { createErrorHandler } from '@cms/errors';
 import { createRateLimiter } from '@cms/rate-limit';
 import { initTracing, MetricsCollector } from '@cms/observability';
 
-// Service registry
 const SERVICES = {
   auth: { upstream: process.env.AUTH_SERVICE_URL || 'http://localhost:3001', prefix: '/api/v1/auth' },
   users: { upstream: process.env.USER_SERVICE_URL || 'http://localhost:3002', prefix: '/api/v1/users' },
@@ -30,11 +29,18 @@ const SERVICES = {
   ai: { upstream: process.env.AI_SERVICE_URL || 'http://localhost:3015', prefix: '/api/v1/ai' },
 };
 
+const SERVICE_ROUTE_MAP: Record<string, string> = {
+  auth: 'auth', users: 'users', tenants: 'tenants', content: 'content',
+  media: 'media', comments: 'comments', analytics: 'analytics', notifications: 'notifications',
+  search: 'search', workflows: 'workflows', plugins: 'plugins', features: 'features',
+  audit: 'audit', settings: 'settings', ai: 'ai',
+};
+
 async function main() {
   const config = getConfig();
   const logger = createServiceLogger('api-gateway');
 
-  initTracing({ serviceName: 'api-gateway', endpoint: config.observability?.otlpEndpoint });
+  initTracing({ serviceName: 'api-gateway' });
   const metrics = new MetricsCollector('api_gateway');
 
   await initCache(config.redis);
@@ -42,10 +48,9 @@ async function main() {
   const app = Fastify({
     logger: false,
     trustProxy: true,
-    bodyLimit: 100 * 1024 * 1024, // 100MB for media uploads
+    bodyLimit: 100 * 1024 * 1024,
   });
 
-  // Global middleware
   await app.register(cors, {
     origin: config.cors?.origins || true,
     credentials: true,
@@ -54,25 +59,19 @@ async function main() {
     exposedHeaders: ['X-Request-ID', 'X-RateLimit-Limit', 'X-RateLimit-Remaining'],
   });
 
-  await app.register(helmet, {
-    contentSecurityPolicy: false, // Handled by frontend
-  });
+  await app.register(helmet, { contentSecurityPolicy: false });
 
   app.setErrorHandler(createErrorHandler(logger));
 
-  // Global rate limiting
   const rateLimiter = createRateLimiter({
     windowMs: 60 * 1000,
     maxRequests: 100,
     keyGenerator: (request) => {
-      return request.headers['x-api-key'] as string
-        || request.ip
-        || 'unknown';
+      return request.headers['x-api-key'] as string || request.ip || 'unknown';
     },
   });
   app.addHook('preHandler', rateLimiter);
 
-  // Request ID injection
   app.addHook('onRequest', async (request, reply) => {
     const requestId = (request.headers['x-request-id'] as string)
       || `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -80,7 +79,10 @@ async function main() {
     metrics.recordRequest(request.method, request.url);
   });
 
-  // Swagger documentation
+  app.addHook('onResponse', async (request, reply) => {
+    metrics.incrementCounter('http_responses', { method: request.method, status: String(reply.statusCode) });
+  });
+
   await app.register(swagger, {
     openapi: {
       info: {
@@ -94,16 +96,8 @@ async function main() {
       ],
       components: {
         securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-          },
-          apiKey: {
-            type: 'apiKey',
-            in: 'header',
-            name: 'X-API-Key',
-          },
+          bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+          apiKey: { type: 'apiKey', in: 'header', name: 'X-API-Key' },
         },
       },
       security: [{ bearerAuth: [] }],
@@ -112,13 +106,9 @@ async function main() {
 
   await app.register(swaggerUi, {
     routePrefix: '/docs',
-    uiConfig: {
-      docExpansion: 'list',
-      deepLinking: true,
-    },
+    uiConfig: { docExpansion: 'list', deepLinking: true },
   });
 
-  // Health check
   app.get('/health', async () => {
     const checks: Record<string, string> = {};
     for (const [name, svc] of Object.entries(SERVICES)) {
@@ -132,20 +122,17 @@ async function main() {
     return { status: 'ok', service: 'api-gateway', services: checks };
   });
 
-  // Metrics endpoint
   app.get('/metrics', async () => metrics.getMetrics());
 
-  // Register proxy routes for each service
   for (const [name, svc] of Object.entries(SERVICES)) {
     await app.register(proxy, {
       upstream: svc.upstream,
       prefix: svc.prefix,
-      rewritePrefix: `/${name === 'auth' ? 'auth' : name === 'users' ? 'users' : name === 'tenants' ? 'tenants' : name === 'content' ? 'content' : name === 'media' ? 'media' : name === 'comments' ? 'comments' : name === 'analytics' ? 'analytics' : name === 'notifications' ? 'notifications' : name === 'search' ? 'search' : name === 'workflows' ? 'workflows' : name === 'plugins' ? 'plugins' : name === 'features' ? 'features' : name === 'audit' ? 'audit' : name === 'settings' ? 'settings' : 'ai'}`,
+      rewritePrefix: `/${SERVICE_ROUTE_MAP[name]}`,
       http2: false,
       httpMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
       proxyPayloads: true,
       preHandler: async (request) => {
-        // Forward request ID
         request.headers['x-request-id'] = request.headers['x-request-id']
           || `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       },

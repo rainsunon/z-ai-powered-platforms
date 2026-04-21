@@ -30,6 +30,10 @@ export class MetricsCollector {
     this.counters.set(key, (this.counters.get(key) ?? 0) + 1);
   }
 
+  recordRequest(method: string, url: string): void {
+    this.incrementCounter('http_requests', { method, url });
+  }
+
   recordHistogram(name: string, value: number, labels?: Record<string, string>): void {
     const key = this.buildKey(name, labels);
     const values = this.histograms.get(key) ?? [];
@@ -85,6 +89,10 @@ export class MetricsCollector {
     }
 
     return lines.join('\n');
+  }
+
+  getMetrics(): string {
+    return this.toPrometheus();
   }
 
   private buildKey(name: string, labels?: Record<string, string>): string {

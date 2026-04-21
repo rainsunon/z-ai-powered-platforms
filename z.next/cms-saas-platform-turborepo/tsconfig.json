@@ -29,7 +29,8 @@
       "@cms/plugin-sdk": ["packages/plugin-sdk/src"],
       "@cms/observability": ["packages/observability/src"],
       "@cms/rate-limit": ["packages/rate-limit/src"],
-      "@cms/feature-flags": ["packages/feature-flags/src"]
+      "@cms/feature-flags": ["packages/feature-flags/src"],
+      "@cms/server": ["packages/server/src"]
     },
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true

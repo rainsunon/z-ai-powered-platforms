@@ -22,7 +22,8 @@
     "@cms/messaging": "workspace:*",
     "@cms/validation": "workspace:*",
     "@cms/observability": "workspace:*",
-    "@cms/utils": "workspace:*"
+    "@cms/utils": "workspace:*",
+    "@cms/server": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

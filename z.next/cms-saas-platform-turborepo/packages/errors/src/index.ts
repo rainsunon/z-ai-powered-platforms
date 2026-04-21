@@ -121,3 +121,56 @@ export function isOperationalError(error: Error): boolean {
   }
   return false;
 }
+
+// ─── Zod Error Formatting ───────────────────────────────────
+
+export function formatZodErrors(zodError: { errors: Array<{ path: (string | number)[]; message: string }> }): Array<{ field: string; message: string }> {
+  return zodError.errors.map((e) => ({
+    field: e.path.join('.'),
+    message: e.message,
+  }));
+}
+
+// ─── Fastify Error Handler Factory ───────────────────────────
+
+export interface ErrorHandlerLogger {
+  warn: (obj: Record<string, unknown>, msg?: string) => void;
+  error: (obj: Record<string, unknown>, msg?: string) => void;
+}
+
+export function createErrorHandler(logger: ErrorHandlerLogger) {
+  return async (error: Error, _request: unknown, reply: any): Promise<void> => {
+    if (error instanceof AppError) {
+      logger.warn({ err: error, code: error.code }, error.message);
+      return reply.status(error.statusCode).send(serializeError(error));
+    }
+
+    if (isZodError(error)) {
+      const validationErrors = formatZodErrors((error as any).error ?? error);
+      logger.warn({ err: error }, 'Validation error');
+      return reply.status(400).send({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Request validation failed',
+          statusCode: 400,
+          details: { errors: validationErrors },
+        },
+      });
+    }
+
+    logger.error({ err: error }, 'Unhandled error');
+    return reply.status(500).send({
+      error: { code: 'INTERNAL_ERROR', message: 'Internal server error', statusCode: 500 },
+    });
+  };
+}
+
+function isZodError(error: unknown): boolean {
+  return (
+    error !== null &&
+    typeof error === 'object' &&
+    'name' in error &&
+    (error as any).name === 'ZodError' &&
+    'errors' in error
+  );
+}

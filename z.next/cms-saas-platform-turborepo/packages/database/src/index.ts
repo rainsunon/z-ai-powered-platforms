@@ -43,6 +43,8 @@ export function createDatabase(config: DatabaseConfig): Knex {
   return db;
 }
 
+export const initDatabase = createDatabase;
+
 export function getDatabase(): Knex {
   if (!_db) {
     throw new Error('Database not initialized. Call createDatabase() first.');

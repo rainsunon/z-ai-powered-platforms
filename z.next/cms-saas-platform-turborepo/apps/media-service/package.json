@@ -25,7 +25,8 @@
     "@aws-sdk/client-s3": "^3.450.0",
     "@aws-sdk/s3-request-presigner": "^3.450.0",
     "sharp": "^0.33.0",
-    "mime-types": "^2.1.35"
+    "mime-types": "^2.1.35",
+    "@cms/server": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.0",

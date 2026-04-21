@@ -29,6 +29,8 @@ export async function createCache(config: CacheConfig): Promise<RedisClientType>
   return _client;
 }
 
+export const initCache = createCache;
+
 export function getCache(): RedisClientType {
   if (!_client) {
     throw new Error('Cache not initialized. Call createCache() first.');
