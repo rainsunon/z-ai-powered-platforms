@@ -1,0 +1,36 @@
+{
+  "name": "UI-Butler-turborepo",
+  "private": true,
+  "scripts": {
+    "build:types": "turbo run build:types",
+    "bootstrap": "turbo run bootstrap",
+    "build": "turbo run build:types && turbo run bootstrap && turbo run build --parallel --concurrency=20",
+    "build:frontend": "turbo run build:types && turbo run build:frontend",
+    "clean:microservices": "turbo run clean:microservices",
+    "build:backend": "turbo run build:types && turbo run bootstrap && turbo run build:backend --concurrency=2",
+    "start": "turbo run start --parallel --concurrency=20",
+    "start:frontend": "turbo run start:frontend",
+    "start:backend": "turbo run start:backend",
+    "dev": "turbo run build:types && turbo run bootstrap && turbo run dev --parallel --concurrency=20",
+    "lint": "turbo run lint --concurrency=20",
+    "type-check": "turbo run type-check --concurrency=20",
+    "clean": "turbo run clean --concurrency=20 && rimraf node_modules",
+    "clean:cache": "rimraf .turbo",
+    "format": "prettier --write \"**/*.{js,jsx,json,ts,tsx,scss,css,md}\"",
+    "prepare": "husky",
+    "lint-staged": "lint-staged"
+  },
+  "devDependencies": {
+    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-import": "^2.31.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.5.0",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "turbo": "^2.4.0"
+  },
+  "packageManager": "pnpm@10.2.1",
+  "engines": {
+    "node": ">=22"
+  }
+}

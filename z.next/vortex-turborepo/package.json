@@ -1,0 +1,92 @@
+{
+  "name": "vortex",
+  "version": "1.6.1",
+  "private": true,
+  "description": "Vortex - A Event-Driven E-Commerce Ecosystem",
+  "packageManager": "pnpm@10.26.0",
+  "scripts": {
+    "dev": "dotenv -e .env -- turbo dev",
+    "build": "dotenv -e .env -- turbo build",
+    "start": "dotenv -e .env -- turbo start",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "format": "prettier --check . --ignore-path .prettierignore && turbo format",
+    "format:fix": "prettier --write . --ignore-path .prettierignore && turbo format:fix",
+    "ci:fix": "pnpm lint:fix && pnpm format:fix",
+    "ci:check": "pnpm lint && pnpm format && pnpm typecheck",
+    "clean": "turbo clean && rimraf node_modules",
+    "clean:turbo": "turbo clean:turbo && rimraf .turbo node_modules",
+    "prepare": "husky",
+    "commit": "cz",
+    "auth:dev": "dotenv -e .env -- pnpm --filter=auth-service dev",
+    "auth:seed": "dotenv -e .env -- pnpm --filter=auth-service seed",
+    "auth:build": "dotenv -e .env -- pnpm --filter=auth-service... build",
+    "order:dev": "dotenv -e .env -- pnpm --filter=order-service dev",
+    "order:build": "dotenv -e .env -- pnpm --filter=order-service... build",
+    "product:dev": "dotenv -e .env -- pnpm --filter=product-service dev",
+    "product:build": "dotenv -e .env -- pnpm --filter=product-service... build",
+    "notification:dev": "dotenv -e .env -- pnpm --filter=notification-service dev",
+    "notification:build": "dotenv -e .env -- pnpm --filter=notification-service... build",
+    "activity:dev": "dotenv -e .env -- pnpm --filter=activity-service dev",
+    "activity:build": "dotenv -e .env -- pnpm --filter=activity-service... build",
+    "payment:dev": "dotenv -e .env -- pnpm --filter=payment-service dev",
+    "payment:build": "dotenv -e .env -- pnpm --filter=payment-service... build",
+    "gateway:dev": "dotenv -e .env -- pnpm --filter=gateway dev",
+    "gateway:build": "dotenv -e .env -- pnpm --filter=gateway... build",
+    "analytics:dev": "dotenv -e .env -- pnpm --filter=analytics-service dev",
+    "analytics:build": "dotenv -e .env -- pnpm --filter=analytics-service... build",
+    "web:dev": "dotenv -e .env -- pnpm --filter=@vortex/web dev",
+    "web:build": "dotenv -e .env -- pnpm --filter=@vortex/web build",
+    "web:preview": "dotenv -e .env -- pnpm --filter=@vortex/web preview",
+    "release": "semantic-release"
+  },
+  "workspaces": [
+    "common",
+    "services/*",
+    "gateway",
+    "web"
+  ],
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
+  },
+  "keywords": [],
+  "author": "https://github.com/shahadathhs",
+  "license": "ISC",
+  "devDependencies": {
+    "@semantic-release/changelog": "catalog:",
+    "@semantic-release/commit-analyzer": "catalog:",
+    "@semantic-release/git": "catalog:",
+    "@semantic-release/github": "catalog:",
+    "@semantic-release/npm": "catalog:",
+    "@semantic-release/release-notes-generator": "catalog:",
+    "@systemix/eslint": "catalog:",
+    "@systemix/typescript": "catalog:",
+    "commitizen": "catalog:",
+    "cz-git": "catalog:",
+    "dotenv-cli": "catalog:",
+    "eslint": "catalog:",
+    "husky": "catalog:",
+    "lint-staged": "catalog:",
+    "prettier": "catalog:",
+    "rimraf": "catalog:",
+    "semantic-release": "catalog:",
+    "ts-node": "catalog:",
+    "tsconfig-paths": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.2.4",
+      "react-dom": "19.2.4"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "eslint": "10"
+      }
+    }
+  }
+}

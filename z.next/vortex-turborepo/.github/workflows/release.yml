@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    name: Semantic Release & Assets
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Project
+        run: pnpm build
+
+      - name: Create Release Zip (PM2 Ready)
+        run: |
+          zip -r release.zip . \
+            -x "*.git*" \
+            -x "*node_modules*" \
+            -x "*.turbo*" \
+            -x "*.vscode*" \
+            -x "*/src/*" \
+            -x "*/test/*" \
+            -x "*.env*" \
+            -x "*pnpm-store*" \
+            -x "*.log"
+
+      - name: Release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec semantic-release
+
+      - name: Get New Version
+        id: get_version
+        run: |
+          # Try to get the version from package.json after semantic-release
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  build-and-push:
+    name: Build & Push ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: gateway
+          - service: auth
+          - service: product
+          - service: order
+          - service: payment
+          - service: notification
+          - service: web
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: main # Target the latest main branch after semantic-release commit
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker images
+        env:
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_USERNAME }}
+          PACKAGE_NAME: vortex
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Processing service: ${{ matrix.service }} with version: $VERSION"
+
+          if [ "${{ matrix.service }}" = "gateway" ]; then
+            DOCKERFILE="gateway/Dockerfile"
+            IMAGE="$DOCKER_REGISTRY/${PACKAGE_NAME}-gateway"
+          elif [ "${{ matrix.service }}" = "web" ]; then
+            DOCKERFILE="web/Dockerfile"
+            IMAGE="$DOCKER_REGISTRY/${PACKAGE_NAME}-web"
+          else
+            DOCKERFILE="services/${{ matrix.service }}-service/Dockerfile"
+            IMAGE="$DOCKER_REGISTRY/${PACKAGE_NAME}-${{ matrix.service }}-service"
+          fi
+
+          docker build -f "$DOCKERFILE" -t "${IMAGE}:${VERSION}" .
+          docker push "${IMAGE}:${VERSION}"
+
+          docker build -f "$DOCKERFILE" -t "${IMAGE}:latest" .
+          docker push "${IMAGE}:latest"

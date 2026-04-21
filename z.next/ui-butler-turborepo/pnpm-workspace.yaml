@@ -1,0 +1,6 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "services/*"
+  - 'apps/api-v2/services/*'
+  - 'apps/api-v2/libs/*'
