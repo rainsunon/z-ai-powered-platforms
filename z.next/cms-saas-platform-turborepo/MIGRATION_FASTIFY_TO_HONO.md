@@ -19,12 +19,12 @@ Fastify uses its own proprietary `FastifyRequest`/`FastifyReply` abstraction. Ho
 
 Fastify is Node.js-only. Hono runs natively on:
 
-| Runtime | Fastify | Hono |
-|---|---|---|
-| Node.js | ✅ | ✅ |
-| Bun | ⚠️ Partial | ✅ |
-| Deno | ❌ | ✅ |
-| Cloudflare Workers | ❌ | ✅ |
+| Runtime    | Fastify | Hono |
+|------------|---------|------|
+| Node.js.   | ✅ -----| ✅ --|
+| Bun      --| ⚠️ Partial| ✅ |
+| Deno       | ❌      | ✅ |
+| Cloudflare | ❌      | ✅ |
 | AWS Lambda | ⚠️ Adapter needed | ✅ |
 | Vercel Edge | ❌ | ✅ |
 
