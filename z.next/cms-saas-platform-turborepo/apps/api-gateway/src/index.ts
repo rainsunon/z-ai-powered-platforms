@@ -1,15 +1,13 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
-import helmet from '@fastify/helmet';
-import proxy from '@fastify/http-proxy';
-import swagger from '@fastify/swagger';
-import swaggerUi from '@fastify/swagger-ui';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { secureHeaders } from 'hono/secure-headers';
+import { serve } from '@hono/node-server';
 import { getConfig } from '@cms/config';
 import { initCache } from '@cms/cache';
 import { createServiceLogger } from '@cms/logger';
-import { createErrorHandler } from '@cms/errors';
+import { AppError, serializeError } from '@cms/errors';
 import { createRateLimiter } from '@cms/rate-limit';
-import { initTracing, MetricsCollector } from '@cms/observability';
+import { MetricsCollector } from '@cms/observability';
 
 const SERVICES = {
   auth: { upstream: process.env.AUTH_SERVICE_URL || 'http://localhost:3001', prefix: '/api/v1/auth' },
@@ -36,80 +34,93 @@ const SERVICE_ROUTE_MAP: Record<string, string> = {
   audit: 'audit', settings: 'settings', ai: 'ai',
 };
 
+function createReply() {
+  const state = {
+    statusCode: 200,
+    headers: {} as Record<string, string>,
+    sentBody: undefined as unknown,
+    sent: false,
+    status(code: number) {
+      state.statusCode = code;
+      return state;
+    },
+    send(payload?: unknown) {
+      state.sentBody = payload;
+      state.sent = true;
+      return state;
+    },
+    header(name: string, value: string | number) {
+      state.headers[name] = String(value);
+      return state;
+    },
+  };
+
+  return state;
+}
+
 async function main() {
   const config = getConfig();
   const logger = createServiceLogger('api-gateway');
-
-  initTracing({ serviceName: 'api-gateway' });
   const metrics = new MetricsCollector('api_gateway');
 
   await initCache(config.redis);
 
-  const app = Fastify({
-    logger: false,
-    trustProxy: true,
-    bodyLimit: 100 * 1024 * 1024,
-  });
+  const app = new Hono();
 
-  await app.register(cors, {
+  app.use('*', cors({
     origin: config.cors?.origins || true,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID', 'X-API-Key', 'X-Request-ID'],
-    exposedHeaders: ['X-Request-ID', 'X-RateLimit-Limit', 'X-RateLimit-Remaining'],
-  });
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID', 'X-API-Key', 'X-Request-ID'],
+    exposeHeaders: ['X-Request-ID', 'X-RateLimit-Limit', 'X-RateLimit-Remaining'],
+  }));
 
-  await app.register(helmet, { contentSecurityPolicy: false });
-
-  app.setErrorHandler(createErrorHandler(logger));
+  app.use('*', secureHeaders({ contentSecurityPolicy: false }));
 
   const rateLimiter = createRateLimiter({
     windowMs: 60 * 1000,
     maxRequests: 100,
-    keyGenerator: (request) => {
-      return request.headers['x-api-key'] as string || request.ip || 'unknown';
-    },
+    keyGenerator: (request) => request.headers['x-api-key'] || request.ip || 'unknown',
   });
-  app.addHook('preHandler', rateLimiter);
 
-  app.addHook('onRequest', async (request, reply) => {
-    const requestId = (request.headers['x-request-id'] as string)
+  app.use('/api/v1/*', async (c, next) => {
+    const requestId = c.req.header('x-request-id')
       || `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    reply.header('X-Request-ID', requestId);
-    metrics.recordRequest(request.method, request.url);
+
+    const request = {
+      method: c.req.method,
+      url: c.req.url,
+      headers: Object.fromEntries(c.req.raw.headers.entries()) as Record<string, string>,
+      query: c.req.query(),
+      params: c.req.param(),
+      body: {},
+      id: requestId,
+      ip: c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || c.req.header('x-real-ip') || 'unknown',
+      file: async () => null,
+    };
+
+    const reply = createReply();
+    await rateLimiter(request, reply);
+
+    c.header('X-Request-ID', requestId);
+    for (const [key, value] of Object.entries(reply.headers)) {
+      c.header(key, value);
+    }
+
+    metrics.recordRequest(c.req.method, c.req.path);
+    await next();
   });
 
-  app.addHook('onResponse', async (request, reply) => {
-    metrics.incrementCounter('http_responses', { method: request.method, status: String(reply.statusCode) });
+  app.onError((err, c) => {
+    if (err instanceof AppError) {
+      return c.json(serializeError(err), err.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500 | 503);
+    }
+
+    logger.error({ err }, 'Unhandled gateway error');
+    return c.json({ error: { code: 'INTERNAL_ERROR', message: 'Internal server error', statusCode: 500 } }, 500);
   });
 
-  await app.register(swagger, {
-    openapi: {
-      info: {
-        title: 'CMS SaaS API',
-        description: 'Production-grade Content Management System API',
-        version: '1.0.0',
-      },
-      servers: [
-        { url: 'http://localhost:3000', description: 'Development' },
-        { url: 'https://api.cms.example.com', description: 'Production' },
-      ],
-      components: {
-        securitySchemes: {
-          bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-          apiKey: { type: 'apiKey', in: 'header', name: 'X-API-Key' },
-        },
-      },
-      security: [{ bearerAuth: [] }],
-    },
-  });
-
-  await app.register(swaggerUi, {
-    routePrefix: '/docs',
-    uiConfig: { docExpansion: 'list', deepLinking: true },
-  });
-
-  app.get('/health', async () => {
+  app.get('/health', async (c) => {
     const checks: Record<string, string> = {};
     for (const [name, svc] of Object.entries(SERVICES)) {
       try {
@@ -119,32 +130,55 @@ async function main() {
         checks[name] = 'unreachable';
       }
     }
-    return { status: 'ok', service: 'api-gateway', services: checks };
+
+    return c.json({ status: 'ok', service: 'api-gateway', services: checks });
   });
 
-  app.get('/metrics', async () => metrics.getMetrics());
+  app.get('/metrics', async (c) => {
+    return c.text(metrics.getMetrics());
+  });
 
   for (const [name, svc] of Object.entries(SERVICES)) {
-    await app.register(proxy, {
-      upstream: svc.upstream,
-      prefix: svc.prefix,
-      rewritePrefix: `/${SERVICE_ROUTE_MAP[name]}`,
-      http2: false,
-      httpMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-      proxyPayloads: true,
-      preHandler: async (request) => {
-        request.headers['x-request-id'] = request.headers['x-request-id']
-          || `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      },
-    });
+    const forward = async (c: any) => {
+      const requestId = c.req.header('x-request-id')
+        || `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const incoming = new URL(c.req.url);
+      const suffix = incoming.pathname.slice(svc.prefix.length);
+      const rewritePath = `/${SERVICE_ROUTE_MAP[name]}${suffix}`;
+
+      const target = new URL(svc.upstream);
+      target.pathname = rewritePath;
+      target.search = incoming.search;
+
+      const upstreamHeaders = new Headers(c.req.raw.headers);
+      upstreamHeaders.set('x-request-id', requestId);
+
+      const init: RequestInit = {
+        method: c.req.method,
+        headers: upstreamHeaders,
+      };
+
+      if (!['GET', 'HEAD'].includes(c.req.method)) {
+        init.body = await c.req.arrayBuffer();
+      }
+
+      const upstream = await fetch(target.toString(), init);
+      const responseHeaders = new Headers(upstream.headers);
+      responseHeaders.set('x-request-id', requestId);
+
+      metrics.incrementCounter('http_responses', { method: c.req.method, status: String(upstream.status) });
+      return new Response(upstream.body, { status: upstream.status, headers: responseHeaders });
+    };
+
+    app.all(`${svc.prefix}`, forward);
+    app.all(`${svc.prefix}/*`, forward);
 
     logger.info({ service: name, prefix: svc.prefix, upstream: svc.upstream }, 'Registered proxy route');
   }
 
   const port = Number(process.env.API_GATEWAY_PORT) || 3000;
-  await app.listen({ port, host: '0.0.0.0' });
-  logger.info(`API Gateway listening on port ${port}`);
-  logger.info(`API Documentation: http://localhost:${port}/docs`);
+  serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
+  logger.info({ port }, 'API Gateway listening');
 }
 
 main().catch((err) => {

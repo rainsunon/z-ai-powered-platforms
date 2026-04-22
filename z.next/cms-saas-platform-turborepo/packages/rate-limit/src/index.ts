@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import type { ServiceRequest, ServiceReply } from '@cms/server';
 import { RateLimitError } from '@cms/errors';
 import { getCache } from '@cms/cache';
 
@@ -6,12 +6,12 @@ export interface RateLimitConfig {
   windowMs: number;
   maxRequests: number;
   keyPrefix?: string;
-  keyGenerator?: (request: FastifyRequest) => string;
+  keyGenerator?: (request: ServiceRequest) => string;
   skipFailed?: boolean;
-  skip?: (request: FastifyRequest) => boolean;
+  skip?: (request: ServiceRequest) => boolean;
 }
 
-const defaultKeyGenerator = (request: FastifyRequest): string => {
+const defaultKeyGenerator = (request: ServiceRequest): string => {
   return request.ip ?? 'unknown';
 };
 
@@ -24,7 +24,7 @@ export function createRateLimiter(config: RateLimitConfig) {
     skip,
   } = config;
 
-  return async function rateLimitMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  return async function rateLimitMiddleware(request: ServiceRequest, reply: ServiceReply): Promise<void> {
     if (skip?.(request)) return;
 
     const key = `${keyPrefix}:${keyGenerator(request)}`;

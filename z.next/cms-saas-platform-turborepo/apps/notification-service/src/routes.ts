@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { ServiceApp as FastifyInstance } from '@cms/server';
 import { getConfig } from '@cms/config';
 import { getDatabase, paginate, PaginationParams } from '@cms/database';
 import { createAuthMiddleware, AuthenticatedRequest } from '@cms/auth';

@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { ServiceApp as FastifyInstance } from '@cms/server';
 import { getConfig } from '@cms/config';
 import { getDatabase, withTransaction } from '@cms/database';
 import { hashPassword, verifyPassword, generateSecureToken, sha256 } from '@cms/security';

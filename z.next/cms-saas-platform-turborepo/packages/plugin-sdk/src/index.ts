@@ -1,5 +1,5 @@
 import { EventType, EventHandler } from '@cms/messaging';
-import { FastifyInstance } from 'fastify';
+import type { ServiceApp } from '@cms/server';
 import { Knex } from 'knex';
 
 // ─── Plugin Manifest ───────────────────────────────────
@@ -62,7 +62,7 @@ export interface PluginHooks {
 
 export interface PluginApiExtension {
   prefix: string;
-  routes: (app: FastifyInstance, ctx: PluginContext) => Promise<void>;
+  routes: (app: ServiceApp, ctx: PluginContext) => Promise<void>;
 }
 
 // ─── Plugin Event Subscriptions ───────────────────────

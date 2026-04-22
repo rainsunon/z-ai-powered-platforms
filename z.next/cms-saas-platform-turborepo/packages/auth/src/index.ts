@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { UnauthorizedError, ForbiddenError } from '@cms/errors';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import type { ServiceRequest, ServiceReply } from '@cms/server';
 
 // ─── Types ───────────────────────────────────
 
@@ -13,7 +13,7 @@ export interface TokenPayload {
   type: 'access' | 'refresh';
 }
 
-export interface AuthenticatedRequest extends FastifyRequest {
+export interface AuthenticatedRequest extends ServiceRequest {
   user: TokenPayload;
 }
 
@@ -44,7 +44,7 @@ export function verifyToken(token: string, secret: string): TokenPayload {
 // ─── Middleware: Authenticate ───────────────────────────
 
 export function createAuthMiddleware(jwtSecret: string) {
-  return async function authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  return async function authenticate(request: ServiceRequest, reply: ServiceReply): Promise<void> {
     const authHeader = request.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
       throw new UnauthorizedError('Missing or invalid authorization header');
@@ -64,7 +64,7 @@ export function createAuthMiddleware(jwtSecret: string) {
 // ─── Middleware: API Key Authentication ───────────────────
 
 export function createApiKeyMiddleware(validateKey: (key: string) => Promise<TokenPayload | null>) {
-  return async function authenticateApiKey(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  return async function authenticateApiKey(request: ServiceRequest, reply: ServiceReply): Promise<void> {
     const apiKey = request.headers['x-api-key'] as string;
     if (!apiKey) {
       throw new UnauthorizedError('Missing API key');
@@ -82,7 +82,7 @@ export function createApiKeyMiddleware(validateKey: (key: string) => Promise<Tok
 // ─── Middleware: Require Permissions ───────────────────
 
 export function requirePermissions(...requiredPermissions: string[]) {
-  return async function checkPermissions(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
+  return async function checkPermissions(request: ServiceRequest, _reply: ServiceReply): Promise<void> {
     const user = (request as AuthenticatedRequest).user;
     if (!user) {
       throw new UnauthorizedError('Not authenticated');
@@ -98,7 +98,7 @@ export function requirePermissions(...requiredPermissions: string[]) {
 // ─── Middleware: Require Roles ───────────────────
 
 export function requireRoles(...requiredRoles: string[]) {
-  return async function checkRoles(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
+  return async function checkRoles(request: ServiceRequest, _reply: ServiceReply): Promise<void> {
     const user = (request as AuthenticatedRequest).user;
     if (!user) {
       throw new UnauthorizedError('Not authenticated');
@@ -114,7 +114,7 @@ export function requireRoles(...requiredRoles: string[]) {
 // ─── Middleware: Tenant Isolation ───────────────────
 
 export function requireTenant() {
-  return async function checkTenant(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
+  return async function checkTenant(request: ServiceRequest, _reply: ServiceReply): Promise<void> {
     const user = (request as AuthenticatedRequest).user;
     const tenantId = (request.params as Record<string, string>).tenantId ?? request.headers['x-tenant-id'];
 

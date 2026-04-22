@@ -9,9 +9,6 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "fastify": "^4.26.0",
-    "@fastify/cors": "^9.0.0",
-    "@fastify/helmet": "^11.0.0",
     "@cms/config": "workspace:*",
     "@cms/database": "workspace:*",
     "@cms/logger": "workspace:*",

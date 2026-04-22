@@ -19,9 +19,6 @@
     "@cms/utils": "workspace:*",
     "@cms/plugin-sdk": "workspace:*",
     "@cms/observability": "workspace:*",
-    "fastify": "^4.24.0",
-    "@fastify/cors": "^8.4.0",
-    "@fastify/helmet": "^11.1.0",
     "@cms/server": "workspace:*"
   },
   "devDependencies": {

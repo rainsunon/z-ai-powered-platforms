@@ -1,9 +1,12 @@
 import { createService, startService } from '@cms/server';
 import { createDatabase } from '@cms/database';
 import { initCache } from '@cms/cache';
+import { createServiceLogger } from '@cms/logger';
 import { getEventBus } from '@cms/messaging';
 import { auditRoutes } from './routes';
 import { recordAuditEvent } from './recorder';
+
+const logger = createServiceLogger('audit-service');
 
 startService({
   name: 'audit-service',
@@ -19,7 +22,7 @@ startService({
       try {
         await recordAuditEvent(event);
       } catch (err) {
-        console.error({ err, event: event.type }, 'Failed to record audit event');
+        logger.error({ err, event: event.type }, 'Failed to record audit event');
       }
     });
   },
