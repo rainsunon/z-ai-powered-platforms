@@ -1,0 +1,33 @@
+{
+  "name": "novastone-server",
+  "version": "1.0.0",
+  "description": "NovaStone backend API with Hono, Prisma, PostgreSQL, and Better Auth",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@hono/zod-openapi": "^0.18.4",
+    "@prisma/client": "^6.3.0",
+    "better-auth": "^1.6.6",
+    "dotenv": "^17.2.3",
+    "hono": "^4.7.11",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "prisma": "^6.3.0",
+    "tsx": "^4.21.0",
+    "typescript": "~5.8.2"
+  }
+}

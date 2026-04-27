@@ -1,0 +1,489 @@
+import React from "react";
+import { formatCurrency } from "@/src/lib/utils";
+import { motion } from "motion/react";
+import { toast } from "sonner";
+import {
+  ReportHeader,
+  ReportKPICard,
+  ReportNavigation,
+  ReportTable,
+  RevenueTrendChart,
+  NetWorthChart,
+  PurchaseChart,
+  ExpensePieChart,
+} from "../components";
+
+const revenueTrendData = [
+  { month: "Jan", revenue: 45000, expenses: 32000 },
+  { month: "Feb", revenue: 52000, expenses: 35000 },
+  { month: "Mar", revenue: 48000, expenses: 38000 },
+  { month: "Apr", revenue: 61000, expenses: 40000 },
+  { month: "May", revenue: 55000, expenses: 37000 },
+  { month: "Jun", revenue: 67000, expenses: 42000 },
+];
+
+const expenseCategoryData = [
+  { name: "Wages", value: 25000, color: "#0077c5" },
+  { name: "Rent", value: 8000, color: "#16a34a" },
+  { name: "Marketing", value: 5000, color: "#f59e0b" },
+  { name: "Software", value: 3500, color: "#ef4444" },
+  { name: "Utilities", value: 1200, color: "#6366f1" },
+];
+
+const netWorthTrendData = [
+  { month: "Jan", assets: 450000, liabilities: 210000, equity: 240000 },
+  { month: "Feb", assets: 462000, liabilities: 205000, equity: 257000 },
+  { month: "Mar", assets: 458000, liabilities: 200000, equity: 258000 },
+  { month: "Apr", assets: 485000, liabilities: 195000, equity: 290000 },
+  { month: "May", assets: 495000, liabilities: 190000, equity: 305000 },
+  { month: "Jun", assets: 520000, liabilities: 185000, equity: 335000 },
+];
+
+const purchaseTrendData = [
+  { month: "Jan", amount: 12500 },
+  { month: "Feb", amount: 15800 },
+  { month: "Mar", amount: 14200 },
+  { month: "Apr", amount: 21000 },
+  { month: "May", amount: 18500 },
+  { month: "Jun", amount: 24300 },
+];
+
+export function ReportsPage() {
+  const [reportType, setReportType] = React.useState("profit-loss");
+  const [dateRange, setDateRange] = React.useState({
+    start: "2026-01-01",
+    end: "2026-06-30"
+  });
+
+  const handleExport = () => {
+    let dataToExport: any[] = [];
+    const filename = `novastone-report-${reportType}-${dateRange.start}-to-${dateRange.end}.csv`;
+
+    if (reportType === "profit-loss") {
+      dataToExport = revenueTrendData.map(item => ({
+        Month: item.month,
+        Revenue: item.revenue,
+        Expenses: item.expenses,
+        NetProfit: item.revenue - item.expenses
+      }));
+    } else if (reportType === "net-worth") {
+      dataToExport = netWorthTrendData.map(item => ({
+        Month: item.month,
+        Assets: item.assets,
+        Liabilities: item.liabilities,
+        NetWorth: item.equity
+      }));
+    } else if (reportType === "purchases") {
+      dataToExport = purchaseTrendData.map(item => ({
+        Month: item.month,
+        PurchaseAmount: item.amount,
+      }));
+    } else {
+      toast.error("Export for this report type is not yet implemented.");
+      return;
+    }
+
+    try {
+      const headers = Object.keys(dataToExport[0]);
+      const csvContent = [
+        headers.join(","),
+        ...dataToExport.map(row => headers.map(header => row[header]).join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(`${reportType.replace("-", " ").toUpperCase()} exported successfully!`);
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.error("Failed to export report data.");
+    }
+  };
+
+  const handleExportTable = (title: string, items: { label: string, amount: number }[], total: number) => {
+    const filename = `novastone-${title.toLowerCase().replace(/\s+/g, '-')}-${dateRange.start}-to-${dateRange.end}.csv`;
+    
+    try {
+      const csvContent = [
+        "Category,Amount",
+        ...items.map(item => `"${item.label}",${item.amount}`),
+        `"Total ${title}",${total}`
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(`${title} exported successfully!`);
+    } catch (error) {
+      console.error("Table export failed:", error);
+      toast.error(`Failed to export ${title}.`);
+    }
+  };
+
+  const currentAssetItems = [
+    { label: "Cash on Hand", amount: 15400 },
+    { label: "Business Bank Accounts", amount: 109600 },
+    { label: "Accounts Receivable", amount: 45000 },
+    { label: "Inventory at Cost", amount: 85000 },
+    { label: "Prepaid Expenses", amount: 2400 },
+  ];
+  
+  const fixedAssetItems = [
+    { label: "Fixed Assets (Equipment)", amount: 85000 },
+    { label: "Real Estate Property", amount: 180000 },
+    { label: "Intangible Assets", amount: 20000 },
+  ];
+
+  const assetTotal = [...currentAssetItems, ...fixedAssetItems].reduce((acc, curr) => acc + curr.amount, 0);
+
+  const liabilityItems = [
+    { label: "Accounts Payable", amount: 32000 },
+    { label: "Credit Card Debt", amount: 8400 },
+    { label: "Accrued Expenses", amount: 4200 },
+    { label: "Sales Tax Payable", amount: 5600 },
+    { label: "Short-term Loans", amount: 15000 },
+    { label: "Equipment Financing", amount: 38000 },
+    { label: "Mortgage Payable", amount: 100000 },
+    { label: "Deferred Revenue", amount: 12000 },
+  ];
+  const liabilityTotal = liabilityItems.reduce((acc, curr) => acc + curr.amount, 0);
+
+  const purchaseItems = [
+    { label: "Inventory Stock (Standard)", amount: 45000 },
+    { label: "Hardware & Equipment", amount: 12500 },
+    { label: "Office Supplies", amount: 1200 },
+    { label: "Software Licensing", amount: 8400 },
+    { label: "Marketing Collateral", amount: 3500 },
+    { label: "Raw Materials", amount: 28000 },
+    { label: "Packaging Supplies", amount: 1500 },
+  ];
+  const purchaseTotal = purchaseItems.reduce((acc, curr) => acc + curr.amount, 0);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-8 space-y-8 bg-[#fcfcfc] min-h-screen"
+    >
+      <ReportHeader
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        onExport={handleExport}
+      />
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <ReportKPICard title="Total Revenue" amount={328000} trend="+15.2%" isPositive={true} />
+        <ReportKPICard title="Gross Profit" amount={184500} trend="+8.4%" isPositive={true} />
+        <ReportKPICard title="Total Expenses" amount={143500} trend="+4.1%" isPositive={false} />
+        <ReportKPICard title="Net Margin" amount={28.5} unit="%" trend="+2.3%" isPositive={true} />
+      </div>
+
+      <div className="grid grid-cols-12 gap-6">
+        {/* Navigation / Filter Sidebar (Inside main area) */}
+        <div className="col-span-12 lg:col-span-3 space-y-6 no-print">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500">Report Types</h3>
+            </div>
+            <nav className="p-2 space-y-1">
+              <ReportNavButton 
+                active={reportType === "profit-loss"} 
+                onClick={() => setReportType("profit-loss")}
+                label="Profit & Loss" 
+              />
+              <ReportNavButton 
+                active={reportType === "balance-sheet"} 
+                onClick={() => setReportType("balance-sheet")}
+                label="Balance Sheet" 
+              />
+              <ReportNavButton 
+                active={reportType === "cash-flow"} 
+                onClick={() => setReportType("cash-flow")}
+                label="Cash Flow Statement" 
+              />
+              <ReportNavButton 
+                active={reportType === "tax-summary"} 
+                onClick={() => setReportType("tax-summary")}
+                label="Tax Summary" 
+              />
+              <ReportNavButton 
+                active={reportType === "aged-receivables"} 
+                onClick={() => setReportType("aged-receivables")}
+                label="Aged Receivables" 
+              />
+              <ReportNavButton 
+                active={reportType === "net-worth"} 
+                onClick={() => setReportType("net-worth")}
+                label="Net Worth" 
+              />
+        <div className="col-span-12 lg:col-span-3 no-print">
+          <ReportNavigation
+            activeReport={reportType}
+            onReportChange={setReportType}
+          /         <Tooltip 
+                          contentStyle={{ border: 'none', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.1)' }}
+                        />
+                        <Legend iconType="circle" />
+                        <Line type="monotone" dataKey="assets" name="Assets" stroke="#0077c5" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6 }} />
+                        <Line type="monotone" dataKey="liabilities" name="Liabilities" stroke="#ef4444" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 3, strokeWidth: 1, fill: '#fff' }} />
+                        <Line type="monotone" dataKey="equity" name="Equity" stroke="#16a34a" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              ) : reportType === "purchases" ? (
+                <div className="bg-gray-50/50 p-6 rounded-xl border border-gray-100">
+                  <div className="flex items-center gap-2 mb-6">
+                    <Filter size={18} className="text-primary" />
+                    <h4 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Procurement Volume</h4>
+                  </div>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={purchaseTrendData}>
+                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11}} dy={10} />
+                         <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11}} />
+                         <Tooltip 
+                           contentStyle={{ border: 'none', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.1)' }}
+                           cursor={{fill: '#f1f5f9'}}
+                         />
+                         <Bar dataKey="amount" name="Purchase Amount" fill="#0077c5" radius={[4, 4, 0, 0]} barSize={40} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              ) : (
+                Charts */}
+            <div className="mb-10">
+              {reportType === "net-worth" ? (
+                <NetWorthChart data={netWorthTrendData} />
+              ) : reportType === "purchases" ? (
+                <PurchaseChart data={purchaseTrendData} />
+              ) : (
+                <RevenueTrendChart data={revenueTrendData} /             paddingAngle={5}
+                                  dataKey="value"
+                                >
+                                  {expenseCategoryData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                  ))}
+                                </Pie>
+                                <Tooltip />
+                              </PieChart>
+                           </ResponsiveContainer>
+                           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                              <span className="text-base font-black text-gray-900">$42.7k</span>
+                              <span className="text-[8px] text-gray-500 font-bold uppercase">Expenses</span>
+                           </div>
+                        </div>
+                        <div className="flex flex-col justify-center space-y-2">
+                          {expenseCategoryData.map((item) => (
+                            <div key={item.name} className="flex justify-between items-center text-[10px]">
+                              <div className="flex items-center gap-1.5">
+                                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
+                                 <span className="text-gray-500 font-medium truncate max-w-[80px]">{item.name}</span>
+                              </div>
+                              <span className="text-gray-900 font-bold">{formatCurrency(item.value)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-8 border-t-2 border-gray-900 bg-gray-50/30 p-6 rounded-b-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">Shareholder Equity</span>
+                    <span className="text-xl font-black text-gray-900 uppercase tracking-tighter">Total Net Worth</span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-3xl font-black text-primary tracking-tighter">
+                      {formatCurrency(assetTotal - liabilityTotal)}
+                    </span>
+                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full mt-1">
+                      +12.4% From Last Period
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : reportType === "purchases" ? (
+              <div className="space-y-8">
+                <ReportTableSection 
+                  title="Procurement Breakdown" 
+                  items={purchaseItems}
+                  total={purchaseTotal}
+                  onExport={() => handleExportTable("Purchases", purchaseItems, purchaseTotal)}
+                />
+                <div className="pt-8 border-t-2 border-gray-900 bg-gray-50/30 p-6 rounded-b-xl flex justify-between items-center">
+                   <div className="flex flex-col">
+                    <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">Acquisition Metrics</span>
+                    <span className="text-xl font-black text-gray-900 uppercase tracking-tighter">Total Purchases</span>
+                  </div>
+                  <span className="text-3xl font-black text-primary tracking-tighter">
+                    {formatCurrency(purchaseTotal)}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 border-b border-gray-100 pb-10 mb-10">
+                  <div> 
+                      title="Current Assets" 
+                      items={currentAssetItems}
+                      total={currentAssetItems.reduce((acc, curr) => acc + curr.amount, 0)}
+                      onExport={() => handleExportTable("Current Assets", currentAssetItems, currentAssetItems.reduce((acc, curr) => acc + curr.amount, 0))}
+                    />
+                    <ReportTable 
+                      title="Non-Current Assets" 
+                      items={fixedAssetItems}
+                      total={fixedAssetItems.reduce((acc, curr) => acc + curr.amount, 0)}
+                      onExport={() => handleExportTable("Non-Current Assets", fixedAssetItems, fixedAssetItems.reduce((acc, curr) => acc + curr.amount, 0))}
+                    />
+                    <div className="bg-primary/5 p-4 rounded-lg flex justify-between items-center border border-primary/10">
+                      <span className="text-xs font-bold text-primary uppercase tracking-widest">Total Assets</span>
+                      <span className="text-lg font-black text-primary">{formatCurrency(assetTotal)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-12">
+                    <ReportTable 
+                      title="Liabilities" 
+                      items={liabilityItems}
+                      total={liabilityTotal}
+                      onExport={() => handleExportTable("Liabilities", liabilityItems, liabilityTotal)}
+                    />
+
+                    <div className="pt-10 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-6">
+                        <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest">Expense Allocation</h4>
+                        <span className="text-[10px] font-bold text-gray-400">OPERATIONAL VIEW</span>
+                      </div>
+                      <ExpensePieChart data={expenseCategoryData} size="sm" showLegend /
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function ReportKPICard({ title, amount, unit = "", trend, isPositive }: { title: string, amount: number, unit?: string, trend: string, isPositive: boolean }) {
+  return (
+    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+      <div className="flex justify-between items-center mb-3">
+        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{title}</span>
+        <button className="text-gray-300 hover:text-gray-500"><Info size={14} /></button>
+      </div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-2xl font-black text-gray-900 tracking-tighter">
+          {unit === '%' ? amount : formatCurrency(amount)}{unit}
+        </span>
+        <span className={cn(
+          "text-[10px] font-bold px-1.5 py-0.5 rounded",
+          isPositive ? "text-green-700 bg-green-50" : "text-red-700 bg-red-50"
+        )}>
+          {trend}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ReportNavButton({ label, active, onClick }: { label: string, active: boolean, onClick: () => void }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={cn(
+        "w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all group relative",
+        active 
+          ? "bg-primary/5 text-primary" 
+          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+      )}
+    >
+      {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />}
+      {label}
+    </button>
+  );
+}
+
+function ReportTableSection({ title, items, total, onExport }: { title: string, items: { label: string, amount: number }[], total: number, onExport?: () => void }) {
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+        <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest">{title}</h4>
+        {onExport && (
+          <button  
+                  title="Procurement Breakdown" 
+                  items={purchaseItems}
+                  total={purchaseTotal}
+                  onExport={() => handleExportTable("Purchases", purchaseItems, purchaseTotal)}
+                />
+                <div className="pt-8 border-t-2 border-gray-900 bg-gray-50/30 p-6 rounded-b-xl flex justify-between items-center">
+       )}
+      </div>
+      <div className="space-y-4 px-2">
+        {items.map((item) => (
+          <div key={item.label} className="flex justify-between items-center text-sm">
+            <span className="text-gray-600 font-medium">{item.label}</span>
+            <span className="text-gray-900 font-bold tabular-nums">{formatCurrency(item.amount)}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg mt-2">
+        <span className="text-xsborder-b border-gray-100 pb-10 mb-10">
+                  <h4 className="text-sm font-bold text-gray-900 mb-6 uppercase tracking-widest">Expense Allocation</h4>
+                  <ExpensePieChart data={expenseCategoryData} size="md" showLegend />
+                </div>
+
+                <div className="space-y-4">
+                  <ReportTable 
+                    title="Operating Income" 
+                    items={[
+                      { label: "Sales Revenue", amount: 285400 },
+                      { label: "Consulting Fees", amount: 42600 },
+                      { label: "Other Income", amount: 1500 },
+                    ]}
+                    total={329500}
+                  />
+                  <ReportTable 
+                    title="Operating Expenses" 
+                    items={[
+                      { label: "Cost of Goods Sold", amount: 82400 },
+                      { label: "Salaries & Wages", amount: 45000 },
+                      { label: "Rent & Utilities", amount: 12500 },
+                      { label: "Marketing & Advertising", amount: 3600 },
+                      { label: "Software Subscriptions", amount: 5200 },
+                      { label: "Insurance", amount: 1800 },
+                    ]}
+                    total={150500}
+                  />
+                  <div className="pt-6 border-t-2 border-gray-900 flex justify-between items-center mt-8">
+                    <span className="text-lg font-black text-gray-900 uppercase tracking-tighter">Net Operating Income</span>
+                    <span className="text-2xl font-black text-primary tracking-tighter">
+                      {formatCurrency(179000)}
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.

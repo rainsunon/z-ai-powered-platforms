@@ -1,0 +1,12 @@
+{
+  "name": "NovaStone",
+  "description": "An enterprise-grade financial management platform with robust security, real-time analytics, and collaborative accounting features.",
+  "requestFramePermissions": [
+    "notifications"
+  ],
+  "majorCapabilities": [
+    "auth",
+    "financial-management",
+    "real-time-collaboration"
+  ]
+}

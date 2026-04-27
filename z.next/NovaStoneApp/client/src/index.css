@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Work+Sans:wght@400;500;600;700;900&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Screenshot Identity Theme (Default) */
+  --bg-app: #fcfcfc;
+  --txt-main: #1a1a1a;
+  --txt-variant: #64748b;
+  
+  --surface-lowest: #ffffff;
+  --surface-low: #f8fafc;
+  --surface-mid: #f1f5f9;
+  --surface-high: #e2e8f0;
+  
+  --outline: #94a3b8;
+  --outline-variant: #e2e8f0;
+
+  --primary: #0077c5;
+  --on-primary: #ffffff;
+  --primary-container: #005a9c;
+
+  /* Specific Sidebar Color from Screenshot */
+  --sidebar-bg: #003c2a;
+  --sidebar-txt: #ffffff;
+  --sidebar-active: #004d3a;
+  
+  --secondary: #22c55e;
+  --secondary-container: #dcfce7;
+
+  --error: #ef4444;
+  --error-container: #fee2e2;
+
+  --radius-factor: 0.5rem;
+}
+
+[data-theme='dark'] {
+  /* Sophisticated Dark Tokens */
+  --bg-app: #0a0a0a;
+  --txt-main: #e5e5e5;
+  --txt-variant: #737373;
+  
+  --surface-lowest: #0a0a0a;
+  --surface-low: #141414;
+  --surface-mid: #1a1a1a;
+  --surface-high: #262626;
+  
+  --outline: #404040;
+  --outline-variant: #262626;
+
+  --primary: #4f46e5;
+  --on-primary: #ffffff;
+  --primary-container: #4338ca;
+
+  /* Dark Sidebar */
+  --sidebar-bg: #0a0a0a;
+  --sidebar-txt: #a3a3a3;
+  --sidebar-active: #171717;
+  
+  --secondary: #10b981;
+  --secondary-container: #064e3b;
+
+  --error: #f43f5e;
+  --error-container: #4c0519;
+
+  --radius-factor: 1rem;
+}
+
+@theme {
+  --font-sans: "Inter", "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-surface-dim: var(--surface-low);
+  --color-surface-bright: var(--bg-app);
+  --color-surface-container-lowest: var(--surface-lowest);
+  --color-surface-container-low: var(--surface-low);
+  --color-surface-container: var(--surface-mid);
+  --color-surface-container-high: var(--surface-high);
+  --color-on-surface: var(--txt-main);
+  --color-on-surface-variant: var(--txt-variant);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+
+  --color-error: var(--error);
+  --color-error-container: var(--error-container);
+
+  --radius-2xl: var(--radius-factor);
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-surface-bright text-on-surface antialiased transition-colors duration-300;
+  }
+}
+
+.data-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.glass-header {
+  @apply bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant;
+}
+
+.label-system {
+  @apply text-[10px] uppercase tracking-widest text-on-surface-variant font-bold;
+}
+
+@media print {
+  aside, 
+  header,
+  .no-print,
+  button {
+    display: none !important;
+  }
+  
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .min-h-screen {
+    min-height: auto !important;
+  }
+  
+  .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+}

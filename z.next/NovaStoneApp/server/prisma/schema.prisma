@@ -1,0 +1,338 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ Authentication Models ============
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  name          String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // JSONB for flexible user preferences and settings
+  preferences   Json?     @default("{}")
+  metadata      Json?     @default("{}")
+  
+  sessions      Session[]
+  accounts      Account[]
+  customers     Customer[]
+  invoices      Invoice[]
+  sales         Sale[]
+  products      Product[]
+  estimates     Estimate[]
+  purchases     Purchase[]
+  transactions  Transaction[]
+  
+  @@index([email])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([token])
+  @@map("sessions")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Jwks {
+  id         String   @id @default(cuid())
+  publicKey  String
+  privateKey String
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime?
+
+  @@map("jwks")
+}
+
+// ============ Business Models ============
+
+model Customer {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  email       String?
+  phone       String?
+  balance     Float     @default(0)
+  overdue     Float     @default(0)
+  
+  // JSONB for flexible customer data
+  address     Json?     // { street, city, state, zip, country }
+  contacts    Json?     // Array of contact persons
+  paymentInfo Json?     // Saved cards, payment methods
+  customFields Json?    // Any additional custom fields
+  metadata    Json?     @default("{}")
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices    Invoice[]
+  sales       Sale[]
+  estimates   Estimate[]
+  
+  @@index([userId])
+  @@index([email])
+  @@map("customers")
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  price       Float
+  sellThis    Boolean   @default(true)
+  buyThis     Boolean   @default(false)
+  
+  // JSONB for flexible product data
+  pricing     Json?     // { cost, markup, discount_rules, tax_rates }
+  inventory   Json?     // { quantity, sku, barcode, warehouse }
+  categories  Json?     // Array of category tags
+  images      Json?     // Array of image URLs
+  variants    Json?     // Product variants (size, color, etc.)
+  customFields Json?    // Any additional custom fields
+  metadata    Json?     @default("{}")
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([name])
+  @@map("products")
+}
+
+model Invoice {
+  id            String   @id @default(cuid())
+  userId        String
+  customerId    String
+  invoiceNumber String   @unique
+  status        String   @default("unpaid") // unpaid, paid, overdue, draft
+  date          DateTime
+  dueDate       DateTime
+  total         Float
+  amountDue     Float
+  currency      String   @default("USD")
+  
+  // JSONB for flexible invoice data
+  lineItems     Json     // Array of { description, quantity, price, tax }
+  payments      Json?    // Array of payment records
+  taxDetails    Json?    // Tax breakdown
+  discounts     Json?    // Discount details
+  notes         Json?    // Internal and customer-facing notes
+  attachments   Json?    // Array of file URLs
+  reminders     Json?    // Reminder schedule and history
+  customFields  Json?    // Any additional custom fields
+  metadata      Json?    @default("{}")
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([customerId])
+  @@index([status])
+  @@index([invoiceNumber])
+  @@map("invoices")
+}
+
+model Sale {
+  id          String   @id @default(cuid())
+  userId      String
+  customerId  String
+  reference   String   @unique
+  category    String
+  status      String   @default("unpaid") // unpaid, paid, overdue
+  date        DateTime
+  dueDate     DateTime
+  amount      Float
+  currency    String   @default("USD")
+  
+  // JSONB for flexible sales data
+  lineItems   Json     // Array of { description, quantity, unitPrice }
+  paymentTerms Json?   // Payment terms and conditions
+  customerInfo Json?   // Snapshot of customer details
+  reminders   Json?    // Reminder configuration
+  customFields Json?   // Any additional custom fields
+  metadata    Json?    @default("{}")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([customerId])
+  @@index([status])
+  @@index([reference])
+  @@map("sales")
+}
+
+model Estimate {
+  id             String   @id @default(cuid())
+  userId         String
+  customerId     String
+  estimateNumber String   @unique
+  status         String   @default("draft") // draft, sent, accepted, rejected, expired
+  date           DateTime
+  expiryDate     DateTime?
+  total          Float
+  currency       String   @default("USD")
+  
+  // JSONB for flexible estimate data
+  lineItems      Json     // Array of { description, quantity, price }
+  terms          Json?    // Terms and conditions
+  notes          Json?    // Notes for customer
+  attachments    Json?    // Array of file URLs
+  customFields   Json?    // Any additional custom fields
+  metadata       Json?    @default("{}")
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customer       Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([customerId])
+  @@index([status])
+  @@index([estimateNumber])
+  @@map("estimates")
+}
+
+model Purchase {
+  id          String   @id @default(cuid())
+  userId      String
+  vendor      String
+  reference   String   @unique
+  category    String
+  status      String   @default("unpaid")
+  date        DateTime
+  dueDate     DateTime?
+  amount      Float
+  currency    String   @default("USD")
+  
+  // JSONB for flexible purchase data
+  lineItems   Json     // Array of { description, quantity, unitPrice }
+  vendorInfo  Json?    // Vendor details
+  paymentInfo Json?    // Payment details
+  attachments Json?    // Array of file URLs (receipts, bills)
+  customFields Json?   // Any additional custom fields
+  metadata    Json?    @default("{}")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([reference])
+  @@map("purchases")
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // income, expense, transfer
+  category    String
+  amount      Float
+  currency    String   @default("USD")
+  date        DateTime
+  description String?
+  
+  // JSONB for flexible transaction data
+  account     Json?    // Account details
+  tags        Json?    // Array of tags
+  attachments Json?    // Array of file URLs (receipts)
+  relatedTo   Json?    // Links to invoices, sales, purchases
+  customFields Json?   // Any additional custom fields
+  metadata    Json?    @default("{}")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([type])
+  @@index([category])
+  @@index([date])
+  @@map("transactions")
+}
+
+// ============ Settings and Configuration ============
+
+model Settings {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  
+  // JSONB for all settings
+  business    Json?    // Business info, logo, address
+  accounting  Json?    // Chart of accounts, fiscal year
+  taxes       Json?    // Tax rates and rules
+  payments    Json?    // Payment gateway settings
+  notifications Json?  // Email, SMS preferences
+  branding    Json?    // Theme, colors, templates
+  integrations Json?   // Third-party integrations
+  preferences Json?    // User preferences
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("settings")
+}
